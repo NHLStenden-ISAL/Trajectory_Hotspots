@@ -3,11 +3,11 @@ name: Build and Test VS C++ x64
 on: 
   push:
     branches:
-      - master
+      - main
 
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   run-ms-build-vstest:
