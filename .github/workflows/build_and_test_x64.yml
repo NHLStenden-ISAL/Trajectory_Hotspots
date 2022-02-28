@@ -52,13 +52,13 @@ jobs:
       - name: Run VSTest Debug
         id: run_vstest_debug
         working-directory: .\Test_Trajectory_Hotspots\x64\Debug\
-        run: vstest.console.exe /Platform:x64 .\Unit_test_test.dll
+        run: vstest.console.exe /Platform:x64 .\Test_Trajectory_Hotspots.dll
 
       #Run VSTest_Release
       - name: Run VSTest Release
         id: run_vstest_release
         working-directory: .\Test_Trajectory_Hotspots\x64\Release\
-        run: vstest.console.exe /Platform:x64 .\Unit_test_test.dll
+        run: vstest.console.exe /Platform:x64 .\Test_Trajectory_Hotspots.dll
 
       #Run VSTest_Release_with_fsanitize
       - name: Run VSTest Release with address sanitizing
