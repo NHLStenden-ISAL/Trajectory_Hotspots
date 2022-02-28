@@ -28,7 +28,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{8EA0F05D-2E89-4974-8337-F16A3A3AD53A}</ProjectGuid>
+    <ProjectGuid>{2DD6BD98-A70B-417B-9725-BD9B326CAD93}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestTrajectoryHotspots</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -246,7 +246,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Trajectory_Hotspots\Trajectory_Hotspots.vcxproj">
-      <Project>{4298ee22-c40a-48b2-a967-616fafd938d9}</Project>
+      <Project>{00bb50de-ca8b-4e11-8ddf-58801d28f075}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
