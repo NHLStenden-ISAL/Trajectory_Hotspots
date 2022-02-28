@@ -1,0 +1,67 @@
+name: Build and Test VS C++ x64
+
+on: 
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  run-ms-build-vstest:
+    runs-on: windows-latest
+    name: Run MSBuild and VSTest
+    steps:
+
+      #Checkout code
+      - name: Checkout code
+        id: checkout_code
+        uses: actions/checkout@v2
+
+      #Locate MSBuild.eze and add to PATH
+      - name: Add MSBuild to PATH
+        id: setup_msbuild
+        uses: microsoft/setup-msbuild@v1
+
+      #Run MSBuild Debug
+      - name: Run MSBuild Debug
+        id: run_msbuild_debug
+        working-directory: .\
+        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Debug
+
+      #Run MSBuild Release
+      - name: Run MSBuild Release
+        id: run_msbuild_release
+        working-directory: .\
+        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Release
+
+      #Run MSBuild Release_with_fsanitize
+      - name: Run MSBuild Release with address sanitizing
+        id: run_msbuild_release_fsanitize
+        working-directory: .\
+        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Release_with_fsanitize
+
+      #Locate vstext.console.exe and add to PATH
+      - name: Setup VSTest PATH
+        id: setup_vstest
+        uses: darenm/Setup-VSTest@v1
+
+      #Run VSTest_Debug
+      - name: Run VSTest Debug
+        id: run_vstest_debug
+        working-directory: .\Test_Trajectory_Hotspots\x64\Debug\
+        run: vstest.console.exe /Platform:x64 .\Unit_test_test.dll
+
+      #Run VSTest_Release
+      - name: Run VSTest Release
+        id: run_vstest_release
+        working-directory: .\Test_Trajectory_Hotspots\x64\Release\
+        run: vstest.console.exe /Platform:x64 .\Unit_test_test.dll
+
+      #Run VSTest_Release_with_fsanitize
+      - name: Run VSTest Release with address sanitizing
+        id: run_vstest_release_fsanitize
+        working-directory: .\Test_Trajectory_Hotspots\x64\Release_with_fsanitize\
+        run: vstest.console.exe /Platform:x64 .\Test_Trajectory_Hotspots.dll
