@@ -29,19 +29,19 @@ jobs:
       - name: Run MSBuild Debug
         id: run_msbuild_debug
         working-directory: .\
-        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Debug
+        run: msbuild.exe .\Trajectory_Hotspots\  /property:Configuration=Debug
 
       #Run MSBuild Release
       - name: Run MSBuild Release
         id: run_msbuild_release
         working-directory: .\
-        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Release
+        run: msbuild.exe .\Trajectory_Hotspots\  /property:Configuration=Release
 
       #Run MSBuild Release_with_fsanitize
       - name: Run MSBuild Release with address sanitizing
         id: run_msbuild_release_fsanitize
         working-directory: .\
-        run: msbuild.exe .\Test_Trajectory_Hotspots\  /property:Configuration=Release_with_fsanitize
+        run: msbuild.exe .\Trajectory_Hotspots\  /property:Configuration=Release_with_fsanitize
 
       #Locate vstext.console.exe and add to PATH
       - name: Setup VSTest PATH
