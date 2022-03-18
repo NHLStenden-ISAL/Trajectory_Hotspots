@@ -7,6 +7,10 @@
 #ifndef PCH_H
 #define PCH_H
 
-// add headers that you want to pre-compile here
+#include <stdint.h>
+#include <math.h>
+#include <limits>
+
+#include "utils.h"
 
 #endif //PCH_H
