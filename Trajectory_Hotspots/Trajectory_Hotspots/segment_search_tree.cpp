@@ -10,7 +10,6 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node() : segment(nullptr), left(nu
 //Build the tree bottom-up from a lsit of ordered segments
 Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& ordered_segments, const size_t start_index, const size_t end_index)
 {
-    //TODO: Add start and end time
     if (end_index == start_index)
     {
         //Leaf node
