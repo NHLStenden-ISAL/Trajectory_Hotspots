@@ -4,7 +4,7 @@
 
 //From: https://bitbashing.io/comparing-floats.html
 //Returns the units of least precision between two floats
-int32_t ulpsDistance(const float a, const float b)
+int32_t ulps_distance(const float a, const float b)
 {
     // Save work if the floats are equal.
     // Also handles +0 == -0
@@ -34,11 +34,11 @@ int32_t ulpsDistance(const float a, const float b)
 
 
 //Check for nearly equal float values
-bool nearlyEqual(float a, float b, float fixedEpsilon, int ulpsEpsilon)
+bool nearly_equal(const float a, const float b, const float fixedEpsilon, const int ulpsEpsilon)
 {
     // Handle the near-zero case.
     const float difference = fabs(a - b);
     if (difference <= fixedEpsilon) return true;
 
-    return ulpsDistance(a, b) <= ulpsEpsilon;
+    return ulps_distance(a, b) <= ulpsEpsilon;
 }

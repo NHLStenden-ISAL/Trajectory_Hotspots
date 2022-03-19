@@ -227,6 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_with_fsanitize|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="segment.cpp" />
     <ClCompile Include="segment_tree.cpp" />
     <ClCompile Include="trajectory_hotspots.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -235,6 +236,7 @@
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="segment.h" />
     <ClInclude Include="segment_tree.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="vec2.h" />

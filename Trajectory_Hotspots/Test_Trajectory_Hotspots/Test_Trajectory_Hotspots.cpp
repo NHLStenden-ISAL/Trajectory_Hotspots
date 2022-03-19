@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "CppUnitTest.h"
+//TODO: Fix these ugly cpp includes?
 #include "../Trajectory_Hotspots/Trajectory_Hotspots.cpp"
+#include "../Trajectory_Hotspots/vec2.cpp"
+#include "../Trajectory_Hotspots/utils.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -17,13 +20,13 @@ namespace TestTrajectoryHotspots
             Vec2 b(1.0f, 0.f);
 
             float length_a = a.length();
-            Assert::IsTrue(nearlyEqual(length_a, 1.0f));
+            Assert::IsTrue(nearly_equal(length_a, 1.0f));
 
             Vec2 c = a + b;
 
             float length_c = c.length();
 
-            Assert::IsTrue(nearlyEqual(length_c, 1.4142135623731f));
+            Assert::IsTrue(nearly_equal(length_c, 1.4142135623731f));
         }
 
         TEST_METHOD(vector_normalize)
@@ -33,11 +36,11 @@ namespace TestTrajectoryHotspots
             a.normalize();
 
             float a_length = a.length();
-            Assert::IsTrue(nearlyEqual(a_length, 1.0f));
+            Assert::IsTrue(nearly_equal(a_length, 1.0f));
 
 
-            Assert::IsTrue(nearlyEqual(a.x, 1.f / sqrtf(2.0f)));
-            Assert::IsTrue(nearlyEqual(a.y, 1.f / sqrtf(2.0f)));
+            Assert::IsTrue(nearly_equal(a.x, 1.f / sqrtf(2.0f)));
+            Assert::IsTrue(nearly_equal(a.y, 1.f / sqrtf(2.0f)));
         }
 
         TEST_METHOD(vector_dot)
@@ -46,35 +49,35 @@ namespace TestTrajectoryHotspots
             Vec2 b(-4.f, 3.f);
 
             float dotAB = a.dot(b);
-            Assert::IsTrue(nearlyEqual(dotAB, 1.0f));
+            Assert::IsTrue(nearly_equal(dotAB, 1.0f));
 
             Vec2 c(2.f, 3.f);
 
             float dotAC = a.dot(c);
             float dotCA = c.dot(a);
-            Assert::IsTrue(nearlyEqual(dotAC, 13.0f));
-            Assert::IsTrue(nearlyEqual(dotCA, 13.0f));
+            Assert::IsTrue(nearly_equal(dotAC, 13.0f));
+            Assert::IsTrue(nearly_equal(dotCA, 13.0f));
 
             
-            Assert::IsTrue(nearlyEqual(a.normalized().dot(c.normalized()), 1.0f));
+            Assert::IsTrue(nearly_equal(a.normalized().dot(c.normalized()), 1.0f));
 
             Vec2 neg_c = -c;
 
             float dot_negC_A = neg_c.dot(c);
-            Assert::IsTrue(nearlyEqual(dot_negC_A, -13.0f));
+            Assert::IsTrue(nearly_equal(dot_negC_A, -13.0f));
 
 
             Vec2 a_big(82723.f, 78343.f);
             Vec2 b_big(48943.f, 1880880.f);
             
-            Assert::IsTrue(nearlyEqual(a_big.dot(b_big), 151402493629.0f));
+            Assert::IsTrue(nearly_equal(a_big.dot(b_big), 151402493629.0f));
             std::cout << a_big.dot(b_big) << std::endl;
 
 
             Vec2 a_low(.0082723f, .0078343f);
             Vec2 b_low(.0048943f, .1880880f);
             
-            Assert::IsTrue(nearlyEqual(a_low.dot(b_low), 0.001514024936290000188088));
+            Assert::IsTrue(nearly_equal(a_low.dot(b_low), 0.001514024936290000188088f));
         }
 
         TEST_METHOD(vector_negative)
@@ -94,8 +97,8 @@ namespace TestTrajectoryHotspots
 
             Vec2 c = a - b;
 
-            Assert::IsTrue(nearlyEqual(c.x, -0.9996799f));
-            Assert::IsTrue(nearlyEqual(c.y, -1228.76790f));
+            Assert::IsTrue(nearly_equal(c.x, -0.9996799f));
+            Assert::IsTrue(nearly_equal(c.y, -1228.76790f));
         }
 
         TEST_METHOD(vector_add)
@@ -105,8 +108,8 @@ namespace TestTrajectoryHotspots
 
             Vec2 c = a + b;
 
-            Assert::IsTrue(nearlyEqual(c.x, 2381.4367f));
-            Assert::IsTrue(nearlyEqual(c.y, 832.23260f));
+            Assert::IsTrue(nearly_equal(c.x, 2381.4367f));
+            Assert::IsTrue(nearly_equal(c.y, 832.23260f));
         }
     };
 }

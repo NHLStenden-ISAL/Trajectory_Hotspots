@@ -11,6 +11,4 @@
 #include <math.h>
 #include <limits>
 
-#include "utils.h"
-
 #endif //PCH_H

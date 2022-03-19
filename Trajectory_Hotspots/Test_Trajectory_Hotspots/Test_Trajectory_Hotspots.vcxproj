@@ -240,11 +240,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_with_fsanitize|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test_trajectory_hotspots.cpp" />
-    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Trajectory_Hotspots\Trajectory_Hotspots.vcxproj">
