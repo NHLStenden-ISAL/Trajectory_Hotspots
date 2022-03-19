@@ -18,9 +18,6 @@
     <ClCompile Include="trajectory_hotspots.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="segment_tree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,11 +33,11 @@
     <ClCompile Include="segment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="segment_search_tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="segment_tree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="segment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="segment_search_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "aabb.h"
 #include "segment.h"
-#include "segment_tree.h"
+#include "segment_search_tree.h"
 
 Segment_Search_Tree_Node::Segment_Search_Tree_Node() : segment(nullptr), left(nullptr), right(nullptr), node_start_t(0.f), node_end_t(0.f)
 {
