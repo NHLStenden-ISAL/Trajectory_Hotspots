@@ -7,7 +7,7 @@ public:
 
     Vec2() = default;
 
-    Vec2(float x, float y) : x(x), y(y)
+    Vec2(const float x, const float y) : x(x), y(y)
     {
     }
 
