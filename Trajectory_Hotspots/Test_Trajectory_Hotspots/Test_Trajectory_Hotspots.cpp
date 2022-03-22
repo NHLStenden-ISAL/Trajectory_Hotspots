@@ -71,8 +71,6 @@ namespace TestTrajectoryHotspots
             Vec2 b_big(48943.f, 1880880.f);
 
             Assert::IsTrue(nearly_equal(a_big.dot(b_big), 151402493629.0f));
-            std::cout << a_big.dot(b_big) << std::endl;
-
 
             Vec2 a_low(.0082723f, .0078343f);
             Vec2 b_low(.0048943f, .1880880f);
