@@ -63,8 +63,6 @@ AABB Segment_Search_Tree_Node::Query(const float start_t, const float end_t) con
         //Range completely contained in right
         if (right->node_start_t <= start_t && end_t <= right->node_end_t)
         {
-            bounding_box.combine(right->bounding_box);
-
             return right->Query(start_t, end_t);
         }//Query range ends in right
         else if (right->node_start_t < end_t)
@@ -122,7 +120,7 @@ AABB Segment_Search_Tree_Node::Query_Left(const float start_t) const
     {
         //Calculate boundingbox from point at start_t to the endpoint of the segment
         float length_scalar = (node_end_t - start_t) / (node_end_t - node_start_t);
-        Vec2 point_on_segment = segment->end - (length_scalar * (segment->start - segment->end));
+        Vec2 point_on_segment = segment->end + (length_scalar * (segment->start - segment->end));
 
         Vec2 min(std::min(point_on_segment.x, segment->end.x), std::min(point_on_segment.y, segment->end.y));
         Vec2 max(std::max(point_on_segment.x, segment->end.x), std::max(point_on_segment.y, segment->end.y));
@@ -176,5 +174,5 @@ AABB Segment_Search_Tree_Node::Query_Right(const float end_t) const
 
 Segment_Search_Tree::Segment_Search_Tree(const std::vector<Segment>& ordered_segments)
 {
-    root = Segment_Search_Tree_Node(ordered_segments, 0, ordered_segments.size());
+    root = Segment_Search_Tree_Node(ordered_segments, 0, ordered_segments.size() - 1);
 }

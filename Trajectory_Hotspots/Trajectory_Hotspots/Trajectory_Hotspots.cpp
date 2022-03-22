@@ -4,6 +4,8 @@
 
 #include "vec2.h"
 
+//TODO: Very far away but scale segments calc by time?
+
 int main()
 {
     

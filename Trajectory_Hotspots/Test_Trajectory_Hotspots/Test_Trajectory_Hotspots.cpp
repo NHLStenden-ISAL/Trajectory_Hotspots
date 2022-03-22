@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-//TODO: Fix these ugly cpp includes?
-#include "../Trajectory_Hotspots/Trajectory_Hotspots.cpp"
-#include "../Trajectory_Hotspots/vec2.cpp"
-#include "../Trajectory_Hotspots/utils.cpp"
+
+#include "../Trajectory_Hotspots/pch.h"
+#include "../Trajectory_Hotspots/vec2.h"
+#include "../Trajectory_Hotspots/segment.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -58,7 +58,7 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(nearly_equal(dotAC, 13.0f));
             Assert::IsTrue(nearly_equal(dotCA, 13.0f));
 
-            
+
             Assert::IsTrue(nearly_equal(a.normalized().dot(c.normalized()), 1.0f));
 
             Vec2 neg_c = -c;
@@ -69,14 +69,14 @@ namespace TestTrajectoryHotspots
 
             Vec2 a_big(82723.f, 78343.f);
             Vec2 b_big(48943.f, 1880880.f);
-            
+
             Assert::IsTrue(nearly_equal(a_big.dot(b_big), 151402493629.0f));
             std::cout << a_big.dot(b_big) << std::endl;
 
 
             Vec2 a_low(.0082723f, .0078343f);
             Vec2 b_low(.0048943f, .1880880f);
-            
+
             Assert::IsTrue(nearly_equal(a_low.dot(b_low), 0.001514024936290000188088f));
         }
 
@@ -112,4 +112,6 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(nearly_equal(c.y, 832.23260f));
         }
     };
+
+
 }
