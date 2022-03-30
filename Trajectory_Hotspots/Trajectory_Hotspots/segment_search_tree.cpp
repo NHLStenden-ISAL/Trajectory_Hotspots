@@ -43,6 +43,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
 //Query tree, reutrns bounding box from start_t to end_t
 AABB Segment_Search_Tree_Node::Query(const float start_t, const float end_t) const
 {
+    //TODO: Pass bounding box as ref to avoid construction?
     AABB bounding_box(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
 
     if (left != nullptr)
