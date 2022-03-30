@@ -6,6 +6,12 @@ class AABB;
 class Segment
 {
 public:
+
+    Segment()
+    {
+
+    }
+
     Segment(const Vec2 start, const Vec2 end, const float start_t, const float end_t) :
         start(start), end(end), start_t(start_t), end_t(end_t)
     {
