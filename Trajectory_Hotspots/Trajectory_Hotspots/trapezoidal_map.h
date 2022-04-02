@@ -1,23 +1,6 @@
 #pragma once
 
-class Trapezoidal_Cell
-{
-public:
-
-    Trapezoidal_Cell();
-
-    Trapezoidal_Cell* top_left;
-    Trapezoidal_Cell* top_right;
-    Trapezoidal_Cell* bottom_left;
-    Trapezoidal_Cell* bottom_right;
-
-
-    Segment* left_segment;
-    Segment* right_segment;
-
-    Vec2* top_point;
-    Vec2* bottom_point;
-};
+class Trapezoidal_Leaf_Node;
 
 class Trapezoidal_Node
 {
@@ -25,7 +8,7 @@ public:
 
     Trapezoidal_Node() = default;
 
-    virtual Vec2 query(const Vec2& point, const bool direction) const = 0;
+    virtual const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const = 0;
 
 };
 
@@ -35,10 +18,23 @@ class Trapezoidal_Leaf_Node : public Trapezoidal_Node
 public:
 
     Trapezoidal_Leaf_Node();
-    Trapezoidal_Leaf_Node(Segment& left_border, Segment& right_border, Vec2& top_point, Vec2& bottom_point);
+    Trapezoidal_Leaf_Node(Segment& left_border, Segment& right_border, Vec2& bottom_point, Vec2& top_point);
+
+    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+
+public:
+
+    Trapezoidal_Leaf_Node* top_left;
+    Trapezoidal_Leaf_Node* top_right;
+    Trapezoidal_Leaf_Node* bottom_left;
+    Trapezoidal_Leaf_Node* bottom_right;
 
 
-    Trapezoidal_Cell trapezoidal_cell;
+    const Segment* left_segment;
+    const Segment* right_segment;
+
+    const Vec2* top_point;
+    const Vec2* bottom_point;
 };
 
 //Trapezoidal X nodes represent segments of the trapezoidal map
@@ -51,6 +47,15 @@ public:
     {
 
     }
+
+    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+
+public:
+
+    const Segment* segment;
+
+    Trapezoidal_Node* left;
+    Trapezoidal_Node* right;
 };
 
 //Trapezoidal Y nodes represent points of the trapezoidal map
@@ -63,6 +68,15 @@ public:
     {
 
     }
+
+    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+
+public:
+
+    const Vec2* point;
+
+    Trapezoidal_Node* below;
+    Trapezoidal_Node* above;
 };
 
 class Trapezoidal_Map
@@ -71,8 +85,14 @@ public:
     Trapezoidal_Map();
 
     Trapezoidal_Map(std::vector<Segment> trajectory_segments);
+private:
 
-    Vec2 query(const Vec2& point, const bool direction);
+    void add_segment(const Segment& segment);
+
+    //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+    std::vector<const Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment) const;
+
+public:
 
     Segment left_border;
     Segment right_border;
