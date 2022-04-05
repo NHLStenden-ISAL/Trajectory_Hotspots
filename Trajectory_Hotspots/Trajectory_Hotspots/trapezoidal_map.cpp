@@ -49,7 +49,7 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
 
 void Trapezoidal_Map::add_segment(const Segment& segment)
 {
-    //Order bottom to top
+    //Order endpoints bottom to top
     Segment query_segment;
     if (segment.start.y > segment.end.y)
     {
@@ -62,11 +62,15 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
         query_segment.end = segment.end;
     }
 
+    //Find all the trapezoids that contain a part of this segment
     std::vector<const Trapezoidal_Leaf_Node*> intersecting_trapezoids = follow_segment(query_segment);
+
+
 }
 
 std::vector<const Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segment& query_segment) const
 {
+    //TODO: Test if this goes correct with edge case for point on segment?
     assert(query_segment.start.y < query_segment.end.y);
 
     std::vector<const Trapezoidal_Leaf_Node*> intersecting_trapezoids;
@@ -78,9 +82,17 @@ std::vector<const Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const 
     //Follow along the segment to find all intersecting trapezoids
     while (query_segment.end.y > intersecting_trapezoids.back()->top_point->y)
     {
-        //TODO: check if intersecting_trapezoids.back()->top_point->y is left or right of query_segment
+        if (point_right_of_segment(query_segment, *intersecting_trapezoids.back()->top_point))
+        {
+            //Top point is right of segment, add top left neighbour
+            intersecting_trapezoids.push_back(intersecting_trapezoids.back()->top_left);
+        }
+        else
+        {
+            //Top point is left of segment, add top right neighbour
+            intersecting_trapezoids.push_back(intersecting_trapezoids.back()->top_right);
+        }
     }
-
 
     return intersecting_trapezoids;
 }
@@ -145,7 +157,7 @@ const Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment
 
 const Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& query_segment) const
 {
-    //Test if query point lies above or below the point
+    //Test if query point lies above or below the Y-nodes point
     if (query_segment.start.y >= point->y)
     {
         return above->query_start_point(query_segment);

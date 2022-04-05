@@ -47,3 +47,5 @@ public:
     float start_t;
     float end_t;
 };
+
+bool point_right_of_segment(const Segment& segment, const Vec2& point);
