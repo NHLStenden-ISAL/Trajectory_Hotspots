@@ -6,13 +6,13 @@ Trapezoidal_Map::Trapezoidal_Map()
     //TODO: Is there a better choice for this? Or do we want to always use infinity points for the bounding box?
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
-    left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y), 0.f, 0.f);
-    right_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y), 0.f, 0.f);
+    left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
+    right_border = Segment(Vec2(bounding_box.max.x, bounding_box.max.y), bounding_box.max);
 
     top_point = bounding_box.max;
     bottom_point = bounding_box.min;
 
-    std::unique_ptr<Trapezoidal_Node> root = std::make_unique<Trapezoidal_Leaf_Node>(left_border, right_border, top_point, bottom_point);
+    std::unique_ptr<Trapezoidal_Node> root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &top_point, &bottom_point);
 }
 
 Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
@@ -30,10 +30,13 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
     bounding_box.max += margin;
     bounding_box.max -= margin;
 
-    Segment left_segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
-    Segment right_segment(Vec2(bounding_box.max.x, bounding_box.min.x), bounding_box.max);
+    left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
+    right_border = Segment(Vec2(bounding_box.max.x, bounding_box.max.y), bounding_box.max);
 
-    root = std::make_unique<Trapezoidal_Leaf_Node>(left_segment, right_segment, bounding_box.min, bounding_box.max);
+    top_point = bounding_box.max;
+    bottom_point = bounding_box.min;
+
+    root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 
     //Compute random permutation and add segments in this order
     std::vector<size_t> random_permutation(trajectory_segments.size());
@@ -50,6 +53,7 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
 void Trapezoidal_Map::add_segment(const Segment& segment)
 {
     //Order endpoints bottom to top
+    //TODO: Move to member function of segment?
     const Vec2* queried_bottom_point;
     const Vec2* queried_top_point;
     if (segment.start.y > segment.end.y)
@@ -68,63 +72,107 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
 
     if (intersecting_trapezoids.size() == 1)
     {
-        Trapezoidal_Leaf_Node* current_trapezoid = intersecting_trapezoids.at(0);
         //Segment is fully contained in a single trapezoid
+        Trapezoidal_Leaf_Node* current_trapezoid = intersecting_trapezoids.at(0);
         //TODO: Split in function
-
-        //TODO: Add trapezoids, check if endpoints are equal to existing endpoint, dont add left and/or right trapezoids if true
-        //TODO: Vector for multiple bottom/top points, almost same code
-        std::unique_ptr<Trapezoidal_Y_Node> new_subtree;
-        new_subtree->point = queried_bottom_point;
-
-        std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
-            current_trapezoid->left_segment,    //Left border
-            &segment,                           //Right border
-            queried_bottom_point,               //Bottom point
-            queried_top_point);                 //Top point
-
-        std::shared_ptr<Trapezoidal_Leaf_Node> right_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
-            &segment,                           //Left border
-            current_trapezoid->right_segment,   //Right border
-            queried_bottom_point,               //Bottom point
-            queried_top_point);                 //Top point
-
-        std::shared_ptr<Trapezoidal_Leaf_Node> bottom_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
-            current_trapezoid->left_segment,    //Left border
-            current_trapezoid->right_segment,   //Right border
-            current_trapezoid->bottom_point,    //Bottom point
-            queried_bottom_point,               //Top point
-            current_trapezoid->bottom_left,     //BL neighbour
-            current_trapezoid->bottom_right,    //BR neighbour
-            left_trapezoid.get(),               //TL neighbour
-            right_trapezoid.get());             //TR neighbour
-
-        std::shared_ptr<Trapezoidal_Leaf_Node> top_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
-            current_trapezoid->left_segment,    //Left border
-            current_trapezoid->right_segment,   //Right border
-            queried_top_point,                  //Bottom point
-            current_trapezoid->top_point,       //Top point
-            left_trapezoid.get(),               //BL neighbour
-            right_trapezoid.get(),              //BR neighbour
-            current_trapezoid->top_left,        //TL neighbour
-            current_trapezoid->top_right);      //TR neighbour
-
-        left_trapezoid->set_neighbour_pointers(
-
-        );
-
-        right_trapezoid->set_neighbour_pointers();
-        //TODO: For the left trapezoid top and bottom are left and for the right trapezoid the opposite.
-        //TODO: Move to constructors
-
 
     }
     else
     {
         //TODO: Replace trapezoids along the edge, check if the segment on one side is the same. If true, merge into one trapezoid on that side.
+        //TODO: Add trapezoids, check if endpoints are equal to existing endpoint, dont add left and/or right trapezoids if true
+        //TODO: Vector for multiple bottom/top points, almost same code
+
     }
 
 
+}
+
+void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
+{
+    //Order endpoints bottom to top
+    //TODO: Move to member function of segment?
+    const Vec2* queried_bottom_point;
+    const Vec2* queried_top_point;
+    if (segment.start.y > segment.end.y)
+    {
+        queried_bottom_point = &segment.end;
+        queried_top_point = &segment.start;
+    }
+    else
+    {
+        queried_bottom_point = &segment.start;
+        queried_top_point = &segment.end;
+    }
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        &segment,                           //Right border
+        queried_bottom_point,               //Bottom point
+        queried_top_point);                 //Top point
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> right_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        &segment,                           //Left border
+        current_trapezoid->right_segment,   //Right border
+        queried_bottom_point,               //Bottom point
+        queried_top_point);                 //Top point
+
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> bottom_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        current_trapezoid->right_segment,   //Right border
+        current_trapezoid->bottom_point,    //Bottom point
+        queried_bottom_point,               //Top point
+        current_trapezoid->bottom_left,     //BL neighbour
+        current_trapezoid->bottom_right,    //BR neighbour
+        left_trapezoid.get(),               //TL neighbour
+        right_trapezoid.get());             //TR neighbour
+
+    left_trapezoid->bottom_left = bottom_trapezoid.get();
+    right_trapezoid->bottom_right = bottom_trapezoid.get();
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> top_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        current_trapezoid->right_segment,   //Right border
+        queried_top_point,                  //Bottom point
+        current_trapezoid->top_point,       //Top point
+        left_trapezoid.get(),               //BL neighbour
+        right_trapezoid.get(),              //BR neighbour
+        current_trapezoid->top_left,        //TL neighbour
+        current_trapezoid->top_right);      //TR neighbour
+
+    left_trapezoid->top_left = top_trapezoid.get();
+    right_trapezoid->top_right = top_trapezoid.get();
+
+    //Redirect pointers from bottom neighbour to new trapezoid
+    current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+
+    //Redirect pointers from top neighbour to new trapezoid
+    current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+
+    //TODO: Move to constructors?
+    std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>();
+    x_node->left = left_trapezoid;
+    x_node->right = right_trapezoid;
+    x_node->segment = &segment;
+
+    std::shared_ptr<Trapezoidal_Y_Node> top_y_node = std::make_shared<Trapezoidal_Y_Node>();
+    top_y_node->point = queried_bottom_point;
+    top_y_node->below = std::move(x_node);
+    top_y_node->above = top_trapezoid;
+
+    std::shared_ptr<Trapezoidal_Y_Node> bottom_y_node = std::make_shared<Trapezoidal_Y_Node>();
+    bottom_y_node->point = queried_bottom_point;
+    bottom_y_node->below = bottom_trapezoid;
+    bottom_y_node->above = std::move(top_y_node);
+
+    //Replace leaf node in the graph with the new subgraph
+    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    {
+        parent_node->replace_child(current_trapezoid, bottom_y_node);
+    }
 }
 
 
@@ -201,11 +249,13 @@ bottom_right(nullptr)
 
 }
 
-Trapezoidal_Leaf_Node::Trapezoidal_Leaf_Node(Segment& left_border, Segment& right_border, Vec2& bottom_point, Vec2& top_point) : Trapezoidal_Node(),
-left_segment(&left_border),
-right_segment(&right_border),
-bottom_point(&bottom_point),
-top_point(&top_point),
+
+Trapezoidal_Leaf_Node::Trapezoidal_Leaf_Node(const Segment* left_border, const Segment* right_border, const Vec2* bottom_point, const Vec2* top_point) : Trapezoidal_Node(),
+
+left_segment(left_border),
+right_segment(right_border),
+bottom_point(bottom_point),
+top_point(top_point),
 top_left(nullptr),
 top_right(nullptr),
 bottom_left(nullptr),
@@ -215,14 +265,14 @@ bottom_right(nullptr)
 }
 
 Trapezoidal_Leaf_Node::Trapezoidal_Leaf_Node(
-    Segment& left_border, Segment& right_border,
-    Vec2& bottom_point, Vec2& top_point,
+    const Segment* left_border, const Segment* right_border,
+    const Vec2* bottom_point, const Vec2* top_point,
     Trapezoidal_Leaf_Node* bottom_left, Trapezoidal_Leaf_Node* bottom_right,
     Trapezoidal_Leaf_Node* top_left, Trapezoidal_Leaf_Node* top_right) : Trapezoidal_Node(),
-    left_segment(&left_border),
-    right_segment(&right_border),
-    bottom_point(&bottom_point),
-    top_point(&top_point),
+    left_segment(left_border),
+    right_segment(right_border),
+    bottom_point(bottom_point),
+    top_point(top_point),
     bottom_left(bottom_left),
     bottom_right(bottom_right),
     top_left(top_left),
@@ -236,6 +286,36 @@ void Trapezoidal_Leaf_Node::set_neighbour_pointers(Trapezoidal_Leaf_Node* bottom
     this->bottom_right = bottom_right;
     this->top_left = top_left;
     this->top_right = top_right;
+}
+
+void Trapezoidal_Leaf_Node::replace_bottom_neighbour(Trapezoidal_Leaf_Node* old_bottom_neighbour, Trapezoidal_Leaf_Node* new_bottom_neighbour)
+{
+    if (bottom_left == old_bottom_neighbour)
+    {
+        bottom_left = new_bottom_neighbour;
+    }
+    else if (bottom_right == old_bottom_neighbour)
+    {
+        bottom_right = new_bottom_neighbour;
+    }
+
+    assert(false);
+    return;
+}
+
+void Trapezoidal_Leaf_Node::replace_top_neighbour(Trapezoidal_Leaf_Node* old_top_neighbour, Trapezoidal_Leaf_Node* new_top_neighbour)
+{
+    if (top_left == old_top_neighbour)
+    {
+        top_left = new_top_neighbour;
+    }
+    else if (top_right == old_top_neighbour)
+    {
+        top_right = new_top_neighbour;
+    }
+
+    assert(false);
+    return;
 }
 
 Trapezoidal_Leaf_Node* Trapezoidal_Leaf_Node::query_start_point(const Segment& query_segment)
@@ -270,6 +350,7 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
     }
 }
 
+
 Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& query_segment)
 {
     //Test if query point lies above or below the Y-nodes point
@@ -281,4 +362,38 @@ Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& quer
     {
         return below->query_start_point(query_segment);
     }
+}
+
+void Trapezoidal_X_Node::replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child)
+{
+    if (left.get() == old_child)
+    {
+        left = new_child;
+        return;
+    }
+    else if (right.get() == old_child)
+    {
+        right = new_child;
+        return;
+    }
+
+    assert(false);
+    return;
+}
+
+void Trapezoidal_Y_Node::replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child)
+{
+    if (below.get() == old_child)
+    {
+        below = new_child;
+        return;
+    }
+    else if (above.get() == old_child)
+    {
+        above = new_child;
+        return;
+    }
+
+    assert(false);
+    return;
 }
