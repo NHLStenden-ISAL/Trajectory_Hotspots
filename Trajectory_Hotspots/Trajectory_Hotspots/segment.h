@@ -35,6 +35,9 @@ public:
 
     }
 
+    bool operator==(const Segment& operand) const;
+    bool operator!=(const Segment& operand) const;
+
     float length() const;
     float squared_length() const;
 

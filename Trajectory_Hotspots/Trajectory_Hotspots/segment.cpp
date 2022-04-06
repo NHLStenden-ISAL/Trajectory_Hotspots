@@ -3,7 +3,6 @@
 #include "aabb.h"
 #include "segment.h"
 
-
 float Segment::length() const
 {
     Vec2 distance_vector = start - end;
@@ -30,4 +29,14 @@ bool point_right_of_segment(const Segment& segment, const Vec2& point)
     float direction = (point.x - segment.start.x) * (segment.end.y - segment.start.y) - (point.y - segment.start.y) * (segment.end.x - segment.start.x);
 
     return direction < 0 ? false : true;
+}
+
+bool Segment::operator==(const Segment& operand) const
+{
+    return (start == operand.start && end == operand.end) || (end == operand.start && start == operand.end);
+}
+
+bool Segment::operator!=(const Segment& operand) const
+{
+    return !(*this == operand);;
 }

@@ -8,7 +8,7 @@ public:
 
     Trapezoidal_Node() = default;
 
-    virtual const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const = 0;
+    virtual Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) = 0;
 
 };
 
@@ -19,10 +19,16 @@ public:
 
     Trapezoidal_Leaf_Node();
     Trapezoidal_Leaf_Node(Segment& left_border, Segment& right_border, Vec2& bottom_point, Vec2& top_point);
+    Trapezoidal_Leaf_Node(Segment& left_border, Segment& right_border, Vec2& bottom_point, Vec2& top_point, Trapezoidal_Leaf_Node* bottom_left, Trapezoidal_Leaf_Node* bottom_right, Trapezoidal_Leaf_Node* top_left, Trapezoidal_Leaf_Node* top_right);
 
-    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+
+    Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
+
+    void set_neighbour_pointers(Trapezoidal_Leaf_Node* bottom_left, Trapezoidal_Leaf_Node* bottom_right, Trapezoidal_Leaf_Node* top_left, Trapezoidal_Leaf_Node* top_right);
 
 public:
+
+    std::vector<Trapezoidal_Node*> parents;
 
     Trapezoidal_Leaf_Node* top_left;
     Trapezoidal_Leaf_Node* top_right;
@@ -48,14 +54,16 @@ public:
 
     }
 
-    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+    Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
 public:
 
     const Segment* segment;
 
-    Trapezoidal_Node* left;
-    Trapezoidal_Node* right;
+    Trapezoidal_Node* parent;
+
+    std::shared_ptr<Trapezoidal_Node> left;
+    std::shared_ptr<Trapezoidal_Node> right;
 };
 
 //Trapezoidal Y nodes represent points of the trapezoidal map
@@ -64,19 +72,26 @@ class Trapezoidal_Y_Node : public Trapezoidal_Node
 {
 public:
 
-    Trapezoidal_Y_Node() : Trapezoidal_Node()
+    Trapezoidal_Y_Node() : Trapezoidal_Node(), point(nullptr), parent(nullptr), below(nullptr), above(nullptr)
     {
 
     }
 
-    const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+    Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Node(), point(point), parent(nullptr), below(nullptr), above(nullptr)
+    {
+
+    }
+
+    Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
 public:
 
     const Vec2* point;
 
-    Trapezoidal_Node* below;
-    Trapezoidal_Node* above;
+    Trapezoidal_Node* parent;
+
+    std::shared_ptr<Trapezoidal_Node> below;
+    std::shared_ptr<Trapezoidal_Node> above;
 };
 
 class Trapezoidal_Map
@@ -90,7 +105,7 @@ private:
     void add_segment(const Segment& segment);
 
     //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
-    std::vector<const Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment) const;
+    std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 
 public:
 
