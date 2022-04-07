@@ -70,7 +70,7 @@ public:
 
     const Segment* segment;
 
-    Trapezoidal_Internal_Node* parent;
+    std::vector<Trapezoidal_Internal_Node*> parents;
 
     std::shared_ptr<Trapezoidal_Node> left;
     std::shared_ptr<Trapezoidal_Node> right;
@@ -82,12 +82,12 @@ class Trapezoidal_Y_Node : public Trapezoidal_Internal_Node
 {
 public:
 
-    Trapezoidal_Y_Node() : Trapezoidal_Internal_Node(), point(nullptr), parent(nullptr), below(nullptr), above(nullptr)
+    Trapezoidal_Y_Node() : Trapezoidal_Internal_Node(), point(nullptr), parents(), below(nullptr), above(nullptr)
     {
 
     }
 
-    Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Internal_Node(), point(point), parent(nullptr), below(nullptr), above(nullptr)
+    Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Internal_Node(), point(point), parents(), below(nullptr), above(nullptr)
     {
 
     }
@@ -98,6 +98,7 @@ public:
 
     const Vec2* point;
 
+    //Trapezoidal_Internal_Node* parent;
     std::vector<Trapezoidal_Internal_Node*> parents;
 
     std::shared_ptr<Trapezoidal_Node> below;
