@@ -41,6 +41,9 @@ public:
     float length() const;
     float squared_length() const;
 
+    const Vec2* get_bottom_point() const;
+    const Vec2* get_top_point() const;
+
     AABB get_AABB() const;
 
     Vec2 start;

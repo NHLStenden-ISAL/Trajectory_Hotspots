@@ -15,6 +15,32 @@ float Segment::squared_length() const
     return distance_vector.squared_length();
 }
 
+const Vec2* Segment::get_bottom_point() const
+{
+    if (start.y > end.y)
+    {
+        return &end;
+    }
+    else
+    {
+        return &start;
+    }
+
+}
+
+const Vec2* Segment::get_top_point() const
+{
+    if (start.y > end.y)
+    {
+        return &start;
+    }
+    else
+    {
+        return &end;
+    }
+
+}
+
 AABB Segment::get_AABB() const
 {
     return AABB(std::min(start.x, end.x), std::min(start.y, end.y), std::max(start.x, end.x), std::max(start.y, end.y));

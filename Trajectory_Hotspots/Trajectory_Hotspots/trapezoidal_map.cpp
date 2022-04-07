@@ -70,12 +70,32 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
     //Find all the trapezoids that contain a part of this segment
     std::vector<Trapezoidal_Leaf_Node*> intersecting_trapezoids = follow_segment(Segment(*queried_bottom_point, *queried_top_point));
 
+
     if (intersecting_trapezoids.size() == 1)
     {
         //Segment is fully contained in a single trapezoid
         Trapezoidal_Leaf_Node* current_trapezoid = intersecting_trapezoids.at(0);
-        //TODO: Split in function
 
+        //Check if any endpoints overlap the top and bottom points of the trapezoid
+        int overlap = 0;
+        if (*current_trapezoid->bottom_point == *queried_bottom_point) overlap &= 1;
+        if (*current_trapezoid->top_point == *queried_top_point) overlap &= 2;
+
+        switch (overlap)
+        {
+        case 0: //None
+            add_fully_embedded_segment(current_trapezoid, segment);
+            break;
+        case 1: //Bottom
+            add_fully_embedded_segment_with_bottom_endpoint_overlapping(current_trapezoid, segment);
+            break;
+        case 2: //Top
+            add_fully_embedded_segment_with_top_endpoint_overlapping(current_trapezoid, segment);
+            break;
+        case 3: //Both
+            add_fully_embedded_segment_with_both_endpoints_overlapping(current_trapezoid, segment);
+            break;
+        }
     }
     else
     {
@@ -92,18 +112,8 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
 {
     //Order endpoints bottom to top
     //TODO: Move to member function of segment?
-    const Vec2* queried_bottom_point;
-    const Vec2* queried_top_point;
-    if (segment.start.y > segment.end.y)
-    {
-        queried_bottom_point = &segment.end;
-        queried_top_point = &segment.start;
-    }
-    else
-    {
-        queried_bottom_point = &segment.start;
-        queried_top_point = &segment.end;
-    }
+    const Vec2* queried_bottom_point = segment.get_bottom_point();
+    const Vec2* queried_top_point = segment.get_top_point();
 
     std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
         current_trapezoid->left_segment,    //Left border
@@ -158,23 +168,158 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     x_node->right = right_trapezoid;
     x_node->segment = &segment;
 
+    left_trapezoid->parents.push_back(x_node.get());
+    right_trapezoid->parents.push_back(x_node.get());
+
     std::shared_ptr<Trapezoidal_Y_Node> top_y_node = std::make_shared<Trapezoidal_Y_Node>();
     top_y_node->point = queried_bottom_point;
     top_y_node->below = std::move(x_node);
     top_y_node->above = top_trapezoid;
+
+    x_node->parents.push_back(top_y_node.get());
+    top_trapezoid->parents.push_back(top_y_node.get());
 
     std::shared_ptr<Trapezoidal_Y_Node> bottom_y_node = std::make_shared<Trapezoidal_Y_Node>();
     bottom_y_node->point = queried_bottom_point;
     bottom_y_node->below = bottom_trapezoid;
     bottom_y_node->above = std::move(top_y_node);
 
+    bottom_trapezoid->parents.push_back(bottom_y_node.get());
+    top_y_node->parents.push_back(bottom_y_node.get());
+
     //Replace leaf node in the graph with the new subgraph
     for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
     {
         parent_node->replace_child(current_trapezoid, bottom_y_node);
+        bottom_y_node->parents.push_back(parent_node);
+
     }
 }
 
+void Trapezoidal_Map::add_fully_embedded_segment_with_both_endpoints_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
+{
+    std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        &segment,                           //Right border
+        current_trapezoid->bottom_point,    //Bottom point
+        current_trapezoid->top_point);      //Top point
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> right_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        &segment,                           //Left border
+        current_trapezoid->right_segment,   //Right border
+        current_trapezoid->bottom_point,    //Bottom point
+        current_trapezoid->top_point);      //Top point
+
+    //Check the orientation of the segment and determine if the trapezoids have a top neighbour
+    if (*segment.get_top_point() == *current_trapezoid->right_segment->get_top_point())
+    {
+        left_trapezoid->top_left = current_trapezoid->top_left;
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, left_trapezoid.get());
+    }
+    else if (*segment.get_top_point() == *current_trapezoid->left_segment->get_top_point())
+    {
+        right_trapezoid->top_right = current_trapezoid->top_right;
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+    else
+    {
+        //Top point does not overlap one of the sides so both trapezoids have a top neighbour
+        left_trapezoid->top_left = current_trapezoid->top_left;
+        right_trapezoid->top_right = current_trapezoid->top_right;
+
+        //Redirect pointers from top neighbour to new trapezoid
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, left_trapezoid.get());
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+
+    //Check the orientation of the segment and determine if the trapezoids have a bottom neighbour
+    if (*segment.get_bottom_point() == *current_trapezoid->right_segment->get_bottom_point())
+    {
+        left_trapezoid->bottom_left = current_trapezoid->bottom_left;
+        current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, left_trapezoid.get());
+
+    }
+    else if (*segment.get_bottom_point() == *current_trapezoid->left_segment->get_bottom_point())
+    {
+        right_trapezoid->bottom_right = current_trapezoid->bottom_right;
+        current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+    else
+    {
+        //bottom point does not overlap one of the sides so both trapezoids have a bottom neighbour
+        left_trapezoid->bottom_left = current_trapezoid->bottom_left;
+        right_trapezoid->bottom_right = current_trapezoid->bottom_right;
+
+        //Redirect pointers from bottom neighbour to new trapezoid
+        current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, left_trapezoid.get());
+        current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+
+    //Segment node with left and right leafs
+    std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>();
+    x_node->left = left_trapezoid;
+    x_node->right = right_trapezoid;
+    x_node->segment = &segment;
+
+    left_trapezoid->parents.push_back(x_node.get());
+    right_trapezoid->parents.push_back(x_node.get());
+
+    //Replace leaf node in the graph with the new subgraph
+    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    {
+        parent_node->replace_child(current_trapezoid, x_node);
+        x_node->parents.push_back(parent_node);
+    }
+}
+
+void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
+{
+    std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        &segment,                           //Right border
+        segment.get_bottom_point(),         //Bottom point
+        current_trapezoid->top_point);      //Top point
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> right_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        &segment,                           //Left border
+        current_trapezoid->right_segment,   //Right border
+        segment.get_bottom_point(),         //Bottom point
+        current_trapezoid->top_point);      //Top point
+
+    std::shared_ptr<Trapezoidal_Leaf_Node> bottom_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
+        current_trapezoid->left_segment,    //Left border
+        current_trapezoid->right_segment,   //Right border
+        current_trapezoid->bottom_point,    //Bottom point
+        segment.get_bottom_point()          //Top point
+        );
+
+    //Check the orientation of the segment and determine if the trapezoids have a top neighbour
+    if (*segment.get_top_point() == *current_trapezoid->right_segment->get_top_point())
+    {
+        left_trapezoid->top_left = current_trapezoid->top_left;
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, left_trapezoid.get());
+    }
+    else if (*segment.get_top_point() == *current_trapezoid->left_segment->get_top_point())
+    {
+        right_trapezoid->top_right = current_trapezoid->top_right;
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+    else
+    {
+        //Top point does not overlap one of the sides so both trapezoids have a top neighbour
+        left_trapezoid->top_left = current_trapezoid->top_left;
+        right_trapezoid->top_right = current_trapezoid->top_right;
+
+        //Redirect pointers from top neighbour to new trapezoid
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, left_trapezoid.get());
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, right_trapezoid.get());
+    }
+
+
+}
+
+void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
+{
 
 //Same end points:
 //{

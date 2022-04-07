@@ -98,7 +98,7 @@ public:
 
     const Vec2* point;
 
-    Trapezoidal_Internal_Node* parent;
+    std::vector<Trapezoidal_Internal_Node*> parents;
 
     std::shared_ptr<Trapezoidal_Node> below;
     std::shared_ptr<Trapezoidal_Node> above;
