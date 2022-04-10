@@ -354,8 +354,6 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(T
 
 void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
 {
-
-    //TODO: Subtree is top point(left segment(left, right), right top trapezoid)
     std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
         current_trapezoid->left_segment,    //Left border
         &segment,                           //Right border
@@ -423,37 +421,6 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlappin
         top_y_node->parents.push_back(parent_node);
     }
 }
-
-//Same end points:
-//{
-//    if (*queried_bottom_point != *intersecting_trapezoids.at(0)->bottom_point)
-//    {
-//        std::shared_ptr<Trapezoidal_Leaf_Node> bottom_trapezoid;
-//        bottom_trapezoid->left_segment = current_trapezoid->left_segment;
-//        bottom_trapezoid->right_segment = current_trapezoid->right_segment;
-//        bottom_trapezoid->bottom_point = current_trapezoid->bottom_point;
-//        bottom_trapezoid->top_point = queried_bottom_point;
-//
-//        bottom_trapezoid->top_left = left_trapezoid.get();
-//        bottom_trapezoid->top_right = right_trapezoid.get();
-//        bottom_trapezoid->bottom_left = current_trapezoid->bottom_left;
-//        bottom_trapezoid->bottom_right = current_trapezoid->bottom_right;
-//    }
-//
-//    if (*queried_top_point != *intersecting_trapezoids.at(0)->top_point)
-//    {
-//        std::shared_ptr<Trapezoidal_Leaf_Node> top_trapezoid;
-//        top_trapezoid->left_segment = current_trapezoid->left_segment;
-//        top_trapezoid->right_segment = current_trapezoid->right_segment;
-//        top_trapezoid->bottom_point = queried_top_point;
-//        top_trapezoid->top_point = current_trapezoid->top_point;
-//
-//        top_trapezoid->top_left = current_trapezoid->top_left;
-//        top_trapezoid->top_right = current_trapezoid->top_right;
-//        top_trapezoid->bottom_left = left_trapezoid.get();
-//        top_trapezoid->bottom_right = right_trapezoid.get();
-//    }
-//}
 
 std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segment& query_segment)
 {

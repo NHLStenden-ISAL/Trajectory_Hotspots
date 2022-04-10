@@ -7,7 +7,7 @@ class Segment
 {
 public:
 
-    Segment()
+    Segment() : start(Vec2(0.f, 0.f)), end(Vec2(0.f, 1.f)), start_t(0.f), end_t(1.f)
     {
 
     }

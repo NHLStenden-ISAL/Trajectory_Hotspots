@@ -59,9 +59,8 @@ class Trapezoidal_X_Node : public Trapezoidal_Internal_Node
 {
 public:
 
-    Trapezoidal_X_Node() : Trapezoidal_Internal_Node()
+    Trapezoidal_X_Node() : Trapezoidal_Internal_Node(), segment(nullptr), parents(), left(nullptr), right(nullptr)
     {
-
     }
 
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
