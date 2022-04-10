@@ -8,6 +8,7 @@ public:
 
     Trapezoidal_Node() = default;
 
+    virtual Trapezoidal_Leaf_Node* query_point(const Vec2& point) = 0;
     virtual Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) = 0;
 
 };
@@ -29,7 +30,7 @@ public:
     Trapezoidal_Leaf_Node(const Segment* left_border, const Segment* right_border, const Vec2* bottom_point, const Vec2* top_point);
     Trapezoidal_Leaf_Node(const Segment* left_border, const Segment* right_border, const Vec2* bottom_point, const Vec2* top_point, Trapezoidal_Leaf_Node* bottom_left, Trapezoidal_Leaf_Node* bottom_right, Trapezoidal_Leaf_Node* top_left, Trapezoidal_Leaf_Node* top_right);
 
-
+    Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
     void set_neighbour_pointers(Trapezoidal_Leaf_Node* bottom_left, Trapezoidal_Leaf_Node* bottom_right, Trapezoidal_Leaf_Node* top_left, Trapezoidal_Leaf_Node* top_right);
@@ -63,6 +64,7 @@ public:
     {
     }
 
+    Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
     void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child);
@@ -91,6 +93,7 @@ public:
 
     }
 
+    Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
     void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child);
@@ -114,6 +117,7 @@ private:
 
     void add_segment(const Segment& segment);
 
+    Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
     std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 

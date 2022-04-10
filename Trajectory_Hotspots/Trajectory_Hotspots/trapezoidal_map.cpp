@@ -464,7 +464,6 @@ bottom_right(nullptr)
 
 }
 
-
 Trapezoidal_Leaf_Node::Trapezoidal_Leaf_Node(const Segment* left_border, const Segment* right_border, const Vec2* bottom_point, const Vec2* top_point) : Trapezoidal_Node(),
 
 left_segment(left_border),
@@ -533,6 +532,44 @@ void Trapezoidal_Leaf_Node::replace_top_neighbour(Trapezoidal_Leaf_Node* old_top
     return;
 }
 
+Trapezoidal_Leaf_Node* Trapezoidal_Map::query_point(const Vec2& point)
+{
+    return root->query_point(point);
+}
+
+Trapezoidal_Leaf_Node* Trapezoidal_Leaf_Node::query_point(const Vec2& point)
+{
+    return this;
+}
+
+Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_point(const Vec2& point)
+{
+    //TODO: Point on segment
+    if (point_right_of_segment(*segment, point))
+    {
+        //Right of, or on segment
+        return right->query_point(point);
+    }
+    else
+    {
+        return left->query_point(point);
+    }
+}
+
+Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_point(const Vec2& point)
+{
+    //TODO: Point on point
+    if (point.y >= this->point->y)
+    {
+        //Above or on point
+        return above->query_point(point);
+    }
+    else
+    {
+        return below->query_point(point);
+    }
+}
+
 Trapezoidal_Leaf_Node* Trapezoidal_Leaf_Node::query_start_point(const Segment& query_segment)
 {
     //The query ended in this leaf node, return trapezoid
@@ -564,7 +601,6 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
         return left->query_start_point(query_segment);
     }
 }
-
 
 Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& query_segment)
 {
