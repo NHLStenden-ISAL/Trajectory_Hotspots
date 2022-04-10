@@ -194,8 +194,6 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     bottom_y_node->below = std::move(bottom_trapezoid);
     bottom_y_node->above = std::move(top_y_node);
 
-
-
     //Replace leaf node in the graph with the new subgraph
     for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
     {
@@ -301,8 +299,8 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(T
     std::shared_ptr<Trapezoidal_Leaf_Node> bottom_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
         current_trapezoid->left_segment,    //Left border
         current_trapezoid->right_segment,   //Right border
-        current_trapezoid->bottom_point,    //Bottom point
-        segment.get_bottom_point());        //Top point
+        segment.get_bottom_point(),         //Bottom point
+        current_trapezoid->bottom_point);   //Top point
 
     //Check the orientation of the segment and determine if the trapezoids have a top neighbour
     //Note: Both can't be true for our use case because at most two points can overlap
