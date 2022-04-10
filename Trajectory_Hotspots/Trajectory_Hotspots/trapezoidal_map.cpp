@@ -12,7 +12,7 @@ Trapezoidal_Map::Trapezoidal_Map()
     top_point = bounding_box.max;
     bottom_point = bounding_box.min;
 
-    std::unique_ptr<Trapezoidal_Node> root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &top_point, &bottom_point);
+    root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &top_point, &bottom_point);
 }
 
 Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
@@ -434,6 +434,8 @@ std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segmen
     intersecting_trapezoids.push_back(starting_trapezoid);
 
     //Follow along the segment to find all intersecting trapezoids
+    //TODO: Handle starting bounding box, flip -?
+    //TODO: query_segment.end? not top?
     while (query_segment.end.y > intersecting_trapezoids.back()->top_point->y)
     {
         if (point_right_of_segment(query_segment, *intersecting_trapezoids.back()->top_point))

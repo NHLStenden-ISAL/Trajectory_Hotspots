@@ -113,22 +113,21 @@ public:
     Trapezoidal_Map();
 
     Trapezoidal_Map(std::vector<Segment> trajectory_segments);
-private:
-
-    void add_segment(const Segment& segment);
 
     Trapezoidal_Leaf_Node* query_point(const Vec2& point);
-    //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
-    std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 
-public:
-
+    void add_segment(const Segment& segment);
     void add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_both_endpoints_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
 
+    //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+private:
 
+    std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
+
+public:
 
     Segment left_border;
     Segment right_border;
