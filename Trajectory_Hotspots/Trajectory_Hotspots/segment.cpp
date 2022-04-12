@@ -50,9 +50,11 @@ AABB Segment::get_AABB() const
 //If the point lies on the segment this function will return true (right)
 bool point_right_of_segment(const Segment& segment, const Vec2& point)
 {
-    assert(segment.start.y < segment.end.y);
+    //TODO: Force end always top so we can remove this check?
+    const Vec2* top = segment.get_top_point();
+    const Vec2* bottom = segment.get_bottom_point();
 
-    float direction = (point.x - segment.start.x) * (segment.end.y - segment.start.y) - (point.y - segment.start.y) * (segment.end.x - segment.start.x);
+    float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
 
     return direction < 0 ? false : true;
 }

@@ -129,11 +129,13 @@ private:
 
 public:
 
+    int segment_count;
+
     Segment left_border;
     Segment right_border;
 
     Vec2 top_point;
     Vec2 bottom_point;
 
-    std::unique_ptr<Trapezoidal_Node> root;
+    std::shared_ptr<Trapezoidal_Node> root;
 };

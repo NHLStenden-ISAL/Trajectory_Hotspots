@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "trapezoidal_map.h"
 
-Trapezoidal_Map::Trapezoidal_Map()
+Trapezoidal_Map::Trapezoidal_Map() : segment_count(0)
 {
     //TODO: Is there a better choice for this? Or do we want to always use infinity points for the bounding box?
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
@@ -9,15 +9,15 @@ Trapezoidal_Map::Trapezoidal_Map()
     left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
     right_border = Segment(Vec2(bounding_box.max.x, bounding_box.max.y), bounding_box.max);
 
-    top_point = bounding_box.max;
     bottom_point = bounding_box.min;
+    top_point = bounding_box.max;
 
-    root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &top_point, &bottom_point);
+    root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments)
+Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments) : segment_count(0)
 {
-    AABB bounding_box(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
+    AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
     //Determine the axis-alligned bounding box of the whole trajectory
     for (const Segment& segment : trajectory_segments)
@@ -78,8 +78,8 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
 
         //Check if any endpoints overlap the top and bottom points of the trapezoid
         int overlap = 0;
-        if (*current_trapezoid->bottom_point == *queried_bottom_point) overlap &= 1;
-        if (*current_trapezoid->top_point == *queried_top_point) overlap &= 2;
+        if (*current_trapezoid->bottom_point == *queried_bottom_point) overlap |= 1;
+        if (*current_trapezoid->top_point == *queried_top_point) overlap |= 2;
 
         switch (overlap)
         {
@@ -105,7 +105,7 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
 
     }
 
-
+    segment_count++;
 }
 
 void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
@@ -154,13 +154,25 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     left_trapezoid->top_left = top_trapezoid.get();
     right_trapezoid->top_right = top_trapezoid.get();
 
-    //Redirect pointers from bottom neighbour to new trapezoid
-    current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
-    current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    //Redirect pointers from bottom neighbours to new trapezoid
+    if (current_trapezoid->bottom_left != nullptr)
+    {
+        current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    }
+    if (current_trapezoid->bottom_right != nullptr)
+    {
+        current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    }
 
-    //Redirect pointers from top neighbour to new trapezoid
-    current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
-    current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    //Redirect pointers from top neighbours to new trapezoid
+    if (current_trapezoid->top_left != nullptr)
+    {
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    }
+    if (current_trapezoid->top_right != nullptr)
+    {
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    }
 
     //TODO: Move to constructors?
     std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>();
@@ -179,7 +191,7 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     x_node->parents.push_back(top_y_node.get());
     top_trapezoid->parents.push_back(top_y_node.get());
 
-    top_y_node->point = queried_bottom_point;
+    top_y_node->point = queried_top_point;
     top_y_node->below = std::move(x_node);
     top_y_node->above = std::move(top_trapezoid);
 
@@ -195,12 +207,19 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     bottom_y_node->above = std::move(top_y_node);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    if (!current_trapezoid->parents.empty())
     {
-        parent_node->replace_child(current_trapezoid, bottom_y_node);
-        bottom_y_node->parents.push_back(parent_node);
-
+        for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+        {
+            parent_node->replace_child(current_trapezoid, bottom_y_node);
+            bottom_y_node->parents.push_back(parent_node);
+        }
     }
+    else
+    {
+        root = bottom_y_node;
+    }
+
 }
 
 void Trapezoidal_Map::add_fully_embedded_segment_with_both_endpoints_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
@@ -272,13 +291,18 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_both_endpoints_overlapping
     x_node->right = std::move(right_trapezoid);
     x_node->segment = &segment;
 
-
-
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    if (!current_trapezoid->parents.empty())
     {
-        parent_node->replace_child(current_trapezoid, x_node);
-        x_node->parents.push_back(parent_node);
+        for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+        {
+            parent_node->replace_child(current_trapezoid, x_node);
+            x_node->parents.push_back(parent_node);
+        }
+    }
+    else
+    {
+        root = x_node;
     }
 }
 
@@ -345,10 +369,17 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(T
     bottom_y_node->above = std::move(x_node);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    if (!current_trapezoid->parents.empty())
     {
-        parent_node->replace_child(current_trapezoid, bottom_y_node);
-        bottom_y_node->parents.push_back(parent_node);
+        for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+        {
+            parent_node->replace_child(current_trapezoid, bottom_y_node);
+            bottom_y_node->parents.push_back(parent_node);
+        }
+    }
+    else
+    {
+        root = bottom_y_node;
     }
 }
 
@@ -410,15 +441,22 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlappin
     x_node->parents.push_back(top_y_node.get());
     top_trapezoid->parents.push_back(top_y_node.get());
 
-    top_y_node->point = segment.get_bottom_point();
+    top_y_node->point = segment.get_top_point();
     top_y_node->below = std::move(x_node);
     top_y_node->above = std::move(top_trapezoid);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count of the old node to 0
-    for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+    if (!current_trapezoid->parents.empty())
     {
-        parent_node->replace_child(current_trapezoid, top_y_node);
-        top_y_node->parents.push_back(parent_node);
+        for (Trapezoidal_Internal_Node* parent_node : current_trapezoid->parents)
+        {
+            parent_node->replace_child(current_trapezoid, top_y_node);
+            top_y_node->parents.push_back(parent_node);
+        }
+    }
+    else
+    {
+        root = top_y_node;
     }
 }
 
@@ -509,10 +547,12 @@ void Trapezoidal_Leaf_Node::replace_bottom_neighbour(Trapezoidal_Leaf_Node* old_
     if (bottom_left == old_bottom_neighbour)
     {
         bottom_left = new_bottom_neighbour;
+        return;
     }
     else if (bottom_right == old_bottom_neighbour)
     {
         bottom_right = new_bottom_neighbour;
+        return;
     }
 
     assert(false);
@@ -524,10 +564,12 @@ void Trapezoidal_Leaf_Node::replace_top_neighbour(Trapezoidal_Leaf_Node* old_top
     if (top_left == old_top_neighbour)
     {
         top_left = new_top_neighbour;
+        return;
     }
     else if (top_right == old_top_neighbour)
     {
         top_right = new_top_neighbour;
+        return;
     }
 
     assert(false);
