@@ -1,6 +1,7 @@
 #pragma once
 
 class Trapezoidal_Leaf_Node;
+class Trapezoidal_Internal_Node;
 
 class Trapezoidal_Node
 {
@@ -11,6 +12,7 @@ public:
     virtual Trapezoidal_Leaf_Node* query_point(const Vec2& point) = 0;
     virtual Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) = 0;
 
+    std::vector<Trapezoidal_Internal_Node*> parents;
 };
 
 class Trapezoidal_Internal_Node : public Trapezoidal_Node
@@ -19,6 +21,7 @@ public:
     Trapezoidal_Internal_Node() = default;
 
     virtual void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child) = 0;
+
 };
 
 //Trapezoidal leaf nodes point to a cell of the trapezoidal map
@@ -40,7 +43,6 @@ public:
 
 public:
 
-    std::vector<Trapezoidal_Internal_Node*> parents;
 
     Trapezoidal_Leaf_Node* bottom_left;
     Trapezoidal_Leaf_Node* bottom_right;
@@ -60,7 +62,7 @@ class Trapezoidal_X_Node : public Trapezoidal_Internal_Node
 {
 public:
 
-    Trapezoidal_X_Node() : Trapezoidal_Internal_Node(), segment(nullptr), parents(), left(nullptr), right(nullptr)
+    Trapezoidal_X_Node() : Trapezoidal_Internal_Node(), segment(nullptr), left(nullptr), right(nullptr)
     {
     }
 
@@ -71,7 +73,6 @@ public:
 
     const Segment* segment;
 
-    std::vector<Trapezoidal_Internal_Node*> parents;
 
     std::shared_ptr<Trapezoidal_Node> left;
     std::shared_ptr<Trapezoidal_Node> right;
@@ -83,12 +84,12 @@ class Trapezoidal_Y_Node : public Trapezoidal_Internal_Node
 {
 public:
 
-    Trapezoidal_Y_Node() : Trapezoidal_Internal_Node(), point(nullptr), parents(), below(nullptr), above(nullptr)
+    Trapezoidal_Y_Node() : Trapezoidal_Internal_Node(), point(nullptr), below(nullptr), above(nullptr)
     {
 
     }
 
-    Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Internal_Node(), point(point), parents(), below(nullptr), above(nullptr)
+    Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Internal_Node(), point(point), below(nullptr), above(nullptr)
     {
 
     }
@@ -101,7 +102,6 @@ public:
     const Vec2* point;
 
     //Trapezoidal_Internal_Node* parent;
-    std::vector<Trapezoidal_Internal_Node*> parents;
 
     std::shared_ptr<Trapezoidal_Node> below;
     std::shared_ptr<Trapezoidal_Node> above;
@@ -121,12 +121,15 @@ public:
     void add_fully_embedded_segment_with_both_endpoints_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
-
+    void add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*> overlapping_trapezoids, const Segment& segment);
     //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
+
 private:
 
     std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 
+    void replace_trapezoidal_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph);
+    
 public:
 
     int segment_count;
