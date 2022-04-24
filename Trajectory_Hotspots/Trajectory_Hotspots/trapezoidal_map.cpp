@@ -521,6 +521,14 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
     std::shared_ptr<Trapezoidal_Leaf_Node> prev_left_trapezoid = std::move(left_trapezoid);
     std::shared_ptr<Trapezoidal_Leaf_Node> prev_right_trapezoid = std::move(right_trapezoid);
 
+    //Save the top left and right of the previous trapezoid.
+    //When the top point of a middle trapezoid is determined (the bottom of the new trapezoid)
+    //set the top neighbour of the previously created trapezoid on the same side to the old neighbour
+    //We do it this way because it is uncertain on which said the top point is without doing extra (unnecessary) checks
+    //TODO: DOUBLE CHECK THIS
+    Trapezoidal_Leaf_Node* prev_top_left = nullptr;
+    Trapezoidal_Leaf_Node* prev_top_right = nullptr;
+
     //Handle middle trapezoids
     while (++current != end)
     {
@@ -550,6 +558,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             //Finish the previous right trapezoid by filling the last missing fields
             prev_right_trapezoid->top_point = current_trapezoid->bottom_point;
             prev_right_trapezoid->top_left = right_trapezoid.get();
+            prev_right_trapezoid->top_right = prev_top_right;
 
             prev_right_trapezoid = std::move(right_trapezoid);
         }
@@ -574,12 +583,16 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
 
             //Finish the previous left trapezoid by filling the last missing fields
             prev_left_trapezoid->top_point = current_trapezoid->bottom_point;
+            prev_left_trapezoid->top_left = prev_top_left;
             prev_left_trapezoid->top_right = left_trapezoid.get();
 
             prev_left_trapezoid = std::move(left_trapezoid);
         }
 
         std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>();
+
+        prev_top_left = current_trapezoid->top_left;
+        prev_top_right = current_trapezoid->top_right;
     }
 
     //Handle endpoint after its left and right?
