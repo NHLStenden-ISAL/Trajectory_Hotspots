@@ -128,7 +128,7 @@ private:
 
     std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 
-    void replace_trapezoidal_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph);
+    void replace_leaf_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph);
     
 public:
 

@@ -103,7 +103,7 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
         //TODO: Add trapezoids, check if endpoints are equal to existing endpoint, dont add left and/or right trapezoids if true
         //TODO: Vector for multiple bottom/top points, almost same code
 
-
+        add_overlapping_segment(intersecting_trapezoids, segment);
     }
 
     segment_count++;
@@ -208,7 +208,7 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
     bottom_y_node->above = std::move(top_y_node);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    replace_trapezoidal_node_with_subgraph(current_trapezoid, bottom_y_node);
+    replace_leaf_node_with_subgraph(current_trapezoid, bottom_y_node);
 }
 
 void Trapezoidal_Map::add_fully_embedded_segment_with_both_endpoints_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
@@ -281,7 +281,7 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_both_endpoints_overlapping
     x_node->segment = &segment;
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    replace_trapezoidal_node_with_subgraph(current_trapezoid, x_node);
+    replace_leaf_node_with_subgraph(current_trapezoid, x_node);
 }
 
 void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
@@ -355,7 +355,7 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(T
     bottom_y_node->above = std::move(x_node);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count to 0
-    replace_trapezoidal_node_with_subgraph(current_trapezoid, bottom_y_node);
+    replace_leaf_node_with_subgraph(current_trapezoid, bottom_y_node);
 }
 
 void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
@@ -421,7 +421,7 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlappin
     top_y_node->above = std::move(top_trapezoid);
 
     //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count of the old node to 0
-    replace_trapezoidal_node_with_subgraph(current_trapezoid, top_y_node);
+    replace_leaf_node_with_subgraph(current_trapezoid, top_y_node);
 }
 
 void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*> overlapping_trapezoids, const Segment& segment)
@@ -485,7 +485,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
         bottom_y_node->below = std::move(bottom_trapezoid);
         bottom_y_node->above = std::move(x_node);
 
-        replace_trapezoidal_node_with_subgraph(old_bottom_trapezoid, bottom_y_node);
+        replace_leaf_node_with_subgraph(old_bottom_trapezoid, bottom_y_node);
     }
     else
     {
@@ -515,7 +515,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
         x_node->right = right_trapezoid;
         x_node->segment = &segment;
 
-        replace_trapezoidal_node_with_subgraph(old_bottom_trapezoid, x_node);
+        replace_leaf_node_with_subgraph(old_bottom_trapezoid, x_node);
     }
 
     std::shared_ptr<Trapezoidal_Leaf_Node> prev_left_trapezoid = std::move(left_trapezoid);
@@ -545,7 +545,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             x_node->left = prev_left_trapezoid;
             x_node->right = right_trapezoid;
 
-            replace_trapezoidal_node_with_subgraph(current_trapezoid, x_node);
+            replace_leaf_node_with_subgraph(current_trapezoid, x_node);
 
             //Finish the previous right trapezoid by filling the last missing fields
             prev_right_trapezoid->top_point = current_trapezoid->bottom_point;
@@ -570,7 +570,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             x_node->left = left_trapezoid;
             x_node->right = prev_right_trapezoid;
 
-            replace_trapezoidal_node_with_subgraph(current_trapezoid, x_node);
+            replace_leaf_node_with_subgraph(current_trapezoid, x_node);
 
             //Finish the previous left trapezoid by filling the last missing fields
             prev_left_trapezoid->top_point = current_trapezoid->bottom_point;
@@ -619,7 +619,7 @@ std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segmen
 }
 
 //Replace leaf node in the graph with the new subgraph, this should reduce the shared_ptr count of the leaf node to 0
-void Trapezoidal_Map::replace_trapezoidal_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph)
+void Trapezoidal_Map::replace_leaf_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph)
 {
     if (!old_trapezoid->parents.empty())
     {
