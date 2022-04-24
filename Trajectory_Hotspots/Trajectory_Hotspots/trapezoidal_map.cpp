@@ -738,8 +738,8 @@ std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segmen
 
     //Follow along the segment to find all intersecting trapezoids
     //TODO: Handle starting bounding box, flip -?
-    //TODO: query_segment.end? not top?
-    while (query_segment.end.y > intersecting_trapezoids.back()->top_point->y)
+    const Vec2* top_point = query_segment.get_top_point();
+    while (top_point->y > intersecting_trapezoids.back()->top_point->y)
     {
         if (point_right_of_segment(query_segment, *intersecting_trapezoids.back()->top_point))
         {
