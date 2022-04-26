@@ -66,13 +66,16 @@ public:
     {
     }
 
+    Trapezoidal_X_Node(const Segment* segment, std::shared_ptr<Trapezoidal_Node> left, std::shared_ptr<Trapezoidal_Node> right) : segment(segment), left(left), right(right)
+    {
+    }
+
     Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
     void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child);
 
     const Segment* segment;
-
 
     std::shared_ptr<Trapezoidal_Node> left;
     std::shared_ptr<Trapezoidal_Node> right;
@@ -90,6 +93,11 @@ public:
     }
 
     Trapezoidal_Y_Node(const Vec2* point) : Trapezoidal_Internal_Node(), point(point), below(nullptr), above(nullptr)
+    {
+
+    }
+
+    Trapezoidal_Y_Node(const Vec2* point, std::shared_ptr<Trapezoidal_Node> below, std::shared_ptr<Trapezoidal_Node> above) : Trapezoidal_Internal_Node(), point(point), below(below), above(above)
     {
 
     }
@@ -129,7 +137,7 @@ private:
     std::vector<Trapezoidal_Leaf_Node*> follow_segment(const Segment& query_segment);
 
     void replace_leaf_node_with_subgraph(Trapezoidal_Leaf_Node* old_trapezoid, std::shared_ptr<Trapezoidal_Internal_Node> new_subgraph);
-    
+
 public:
 
     int segment_count;
