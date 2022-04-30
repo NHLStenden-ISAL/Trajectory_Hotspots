@@ -396,5 +396,112 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(query_result_left, query_result_bottom_left->top_left);
             Assert::AreEqual(query_result_right, query_result_bottom_right->top_right);
         }
+
+        TEST_METHOD(update_with_segment_overlapping_two_trapezoids)
+        {
+            Trapezoidal_Map trapezoidal_map;
+
+            Vec2 right_segment_top(236.223876199f, 102.783533699f);
+            Vec2 right_segment_bottom(230.249842158f, 52.7903014615f);
+            Vec2 left_segment_top(210.441202969f, 121.334481511f);
+            Vec2 left_segment_bottom(210.755625813f, 86.4335457980f);
+
+            Segment right_segment(right_segment_top, right_segment_bottom);
+            Segment left_segment(left_segment_top, left_segment_bottom);
+
+            trapezoidal_map.add_segment(right_segment);
+            trapezoidal_map.add_segment(left_segment);
+
+            //  |
+            //  |   /
+            //     /
+
+            Vec2 point_in_top(213.5523, 134.67516);
+            Vec2 point_left_of_left(194.7737, 107.30614);
+            Vec2 point_above_right(233.1300, 111.50208);
+            Vec2 point_between_left_and_right(225.3389, 96.31938);
+            Vec2 point_below_left(214.5512, 72.1469);
+            Vec2 point_right_of_right(248.5124, 77.14129);
+            Vec2 point_in_bottom(225.3389, 42.58063);
+
+            Trapezoidal_Leaf_Node* query_result_top = trapezoidal_map.query_point(point_in_top);//This is returning above_right?
+            Trapezoidal_Leaf_Node* query_result_left_of_left = trapezoidal_map.query_point(point_left_of_left);
+            Trapezoidal_Leaf_Node* query_result_above_right = trapezoidal_map.query_point(point_above_right);
+            Trapezoidal_Leaf_Node* query_result_between_left_and_right = trapezoidal_map.query_point(point_between_left_and_right);
+            Trapezoidal_Leaf_Node* query_result_below_left = trapezoidal_map.query_point(point_below_left);
+            Trapezoidal_Leaf_Node* query_result_right_of_right = trapezoidal_map.query_point(point_right_of_right);
+            Trapezoidal_Leaf_Node* query_result_bottom = trapezoidal_map.query_point(point_in_bottom);
+
+            Assert::IsNotNull(query_result_top);
+            Assert::IsNotNull(query_result_left_of_left);
+            Assert::IsNotNull(query_result_above_right);
+            Assert::IsNotNull(query_result_between_left_and_right);
+            Assert::IsNotNull(query_result_below_left);
+            Assert::IsNotNull(query_result_right_of_right);
+            Assert::IsNotNull(query_result_bottom);
+
+            Assert::AreEqual(query_result_left_of_left, query_result_top->bottom_left);
+            Assert::AreEqual(query_result_above_right, query_result_top->bottom_right);
+            Assert::IsNull(query_result_top->top_left);
+            Assert::IsNull(query_result_top->top_right);
+            Assert::AreEqual(trapezoidal_map.left_border, *query_result_top->left_segment);
+            Assert::AreEqual(trapezoidal_map.right_border, *query_result_top->right_segment);
+            Assert::AreEqual(*left_segment.get_top_point(), *query_result_top->bottom_point);
+            Assert::AreEqual(trapezoidal_map.top_point, *query_result_top->top_point);
+
+            Assert::AreEqual(query_result_below_left, query_result_left_of_left->bottom_left);
+            Assert::IsNull(query_result_left_of_left->bottom_right);
+            Assert::AreEqual(query_result_top, query_result_left_of_left->top_left);
+            Assert::IsNull(query_result_left_of_left->top_right);
+            Assert::AreEqual(trapezoidal_map.left_border, *query_result_left_of_left->left_segment);
+            Assert::AreEqual(left_segment, *query_result_left_of_left->right_segment);
+            Assert::AreEqual(*left_segment.get_bottom_point(), *query_result_left_of_left->bottom_point);
+            Assert::AreEqual(*left_segment.get_top_point(), *query_result_left_of_left->top_point);
+
+            Assert::AreEqual(query_result_between_left_and_right, query_result_above_right->bottom_left);
+            Assert::AreEqual(query_result_right_of_right, query_result_above_right->bottom_right);
+            Assert::IsNull(query_result_above_right->top_left);
+            Assert::AreEqual(query_result_top, query_result_above_right->top_right);
+            Assert::AreEqual(left_segment, *query_result_above_right->left_segment);
+            Assert::AreEqual(trapezoidal_map.right_border, *query_result_above_right->right_segment);
+            Assert::AreEqual(*right_segment.get_top_point(), *query_result_above_right->bottom_point);
+            Assert::AreEqual(*left_segment.get_top_point(), *query_result_above_right->top_point);
+
+            Assert::IsNull(query_result_between_left_and_right->bottom_left);
+            Assert::AreEqual(query_result_below_left, query_result_between_left_and_right->bottom_right);
+            Assert::AreEqual(query_result_above_right, query_result_between_left_and_right->top_left);
+            Assert::IsNull(query_result_between_left_and_right->top_right);
+            Assert::AreEqual(left_segment, *query_result_between_left_and_right->left_segment);
+            Assert::AreEqual(right_segment, *query_result_between_left_and_right->right_segment);
+            Assert::AreEqual(*left_segment.get_bottom_point(), *query_result_between_left_and_right->bottom_point);
+            Assert::AreEqual(*right_segment.get_top_point(), *query_result_between_left_and_right->top_point);
+
+            Assert::AreEqual(query_result_bottom, query_result_below_left->bottom_left);
+            Assert::IsNull(query_result_below_left->bottom_right);
+            Assert::AreEqual(query_result_left_of_left, query_result_below_left->top_left);
+            Assert::AreEqual(query_result_between_left_and_right, query_result_below_left->top_right);
+            Assert::AreEqual(trapezoidal_map.left_border, *query_result_below_left->left_segment);
+            Assert::AreEqual(right_segment, *query_result_below_left->right_segment);
+            Assert::AreEqual(*right_segment.get_bottom_point(), *query_result_below_left->bottom_point);
+            Assert::AreEqual(*left_segment.get_bottom_point(), *query_result_below_left->top_point);
+
+            Assert::IsNull(query_result_right_of_right->bottom_left);
+            Assert::AreEqual(query_result_bottom, query_result_right_of_right->bottom_right);
+            Assert::IsNull(query_result_right_of_right->top_left);
+            Assert::AreEqual(query_result_above_right, query_result_right_of_right->top_right);
+            Assert::AreEqual(right_segment, *query_result_right_of_right->left_segment);
+            Assert::AreEqual(trapezoidal_map.right_border, *query_result_right_of_right->right_segment);
+            Assert::AreEqual(*right_segment.get_bottom_point(), *query_result_right_of_right->bottom_point);
+            Assert::AreEqual(*right_segment.get_top_point(), *query_result_right_of_right->top_point);
+
+            Assert::IsNull(query_result_bottom->bottom_left);
+            Assert::IsNull(query_result_bottom->bottom_right);
+            Assert::AreEqual(query_result_below_left, query_result_bottom->top_left);
+            Assert::AreEqual(query_result_right_of_right, query_result_bottom->top_right);
+            Assert::AreEqual(trapezoidal_map.left_border, *query_result_bottom->left_segment);
+            Assert::AreEqual(trapezoidal_map.right_border, *query_result_bottom->right_segment);
+            Assert::AreEqual(trapezoidal_map.bottom_point, *query_result_bottom->bottom_point);
+            Assert::AreEqual(*right_segment.get_bottom_point(), *query_result_bottom->top_point);
+        }
     };
 }
