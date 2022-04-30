@@ -308,6 +308,16 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_top_endpoint_overlapping(T
         left_trapezoid.get(),               //Top left
         right_trapezoid.get());             //Top right
 
+    if (current_trapezoid->bottom_left != nullptr)
+    {
+        current_trapezoid->bottom_left->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    }
+
+    if (current_trapezoid->bottom_right != nullptr)
+    {
+        current_trapezoid->bottom_right->replace_top_neighbour(current_trapezoid, bottom_trapezoid.get());
+    }
+
     //TODO: Recheck bottom and top for all cases
     left_trapezoid->bottom_left = bottom_trapezoid.get();
     right_trapezoid->bottom_right = bottom_trapezoid.get();
@@ -376,7 +386,24 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlappin
         current_trapezoid->left_segment,    //Left border
         current_trapezoid->right_segment,   //Right border
         segment.get_top_point(),            //Bottom point
-        current_trapezoid->top_point);      //Top point
+        current_trapezoid->top_point,       //Top point
+        left_trapezoid.get(),               //Bottom left
+        right_trapezoid.get(),              //Bottom right
+        current_trapezoid->top_left,        //Top left
+        current_trapezoid->top_right);      //Top right
+
+    left_trapezoid->top_left = top_trapezoid.get();
+    right_trapezoid->top_right = top_trapezoid.get();
+
+    if (current_trapezoid->top_left != nullptr)
+    {
+        current_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    }
+
+    if (current_trapezoid->top_right != nullptr)
+    {
+        current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
+    }
 
     //Check the orientation of the segment and determine if the trapezoids have a bottom neighbour
     //Note: Both can't be true for our use case because at most two points can overlap
