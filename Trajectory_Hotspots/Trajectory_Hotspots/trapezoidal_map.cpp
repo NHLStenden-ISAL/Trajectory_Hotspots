@@ -518,7 +518,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             bottom_trapezoid,
             x_node);
 
-        //TODO: Move this to the contructor of the x_node? Then we can std::move to the constructor as well?
+        //TODO: Move this to the contructor of the x_node?
         x_node->parents.push_back(bottom_y_node.get());
         bottom_trapezoid->parents.push_back(bottom_y_node.get());
 
@@ -755,7 +755,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             old_top_trapezoid->bottom_point,  //Bottom point
             segment.get_top_point(),          //Top point
             prev_right_trapezoid.get(),       //Bottom left
-            nullptr,                          //Bottom right
+            old_top_trapezoid->bottom_right,  //Bottom right
             nullptr,                          //Top left
             top_right);                       //Top right
 
@@ -764,6 +764,11 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
         if (top_trapezoid == nullptr && top_right != nullptr)
         {
             top_right->replace_bottom_neighbour(old_top_trapezoid, right_trapezoid.get());
+        }
+
+        if (right_trapezoid->bottom_right != nullptr)
+        {
+            right_trapezoid->bottom_right->replace_top_neighbour(old_top_trapezoid, right_trapezoid.get());
         }
 
         //Finish the previous right trapezoid by filling the last missing fields
@@ -791,7 +796,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             &segment,                        //Right border
             old_top_trapezoid->bottom_point, //Bottom point
             segment.get_top_point(),         //Top point
-            nullptr,                         //Bottom left
+            old_top_trapezoid->bottom_left,  //Bottom left
             prev_left_trapezoid.get(),       //Bottom right
             top_left,                        //Top left 
             nullptr);                        //Top right
@@ -802,6 +807,10 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
             top_left->replace_bottom_neighbour(old_top_trapezoid, left_trapezoid.get());
         }
 
+        if (left_trapezoid->bottom_left != nullptr)
+        {
+            left_trapezoid->bottom_left->replace_top_neighbour(old_top_trapezoid, left_trapezoid.get());
+        }
 
         //Finish the previous left trapezoid by filling the last missing fields
         prev_left_trapezoid->top_point = old_top_trapezoid->bottom_point;
@@ -840,9 +849,9 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
         top_x_node->parents.push_back(top_y_node.get());
         top_trapezoid->parents.push_back(top_y_node.get());
 
-        top_y_node->point = segment.get_bottom_point();
-        top_y_node->below = std::move(top_trapezoid);
-        top_y_node->above = std::move(top_x_node);
+        top_y_node->point = segment.get_top_point();
+        top_y_node->below = std::move(top_x_node);
+        top_y_node->above = std::move(top_trapezoid);
 
         new_subgraphs.push_back(top_y_node);
         //replace_leaf_node_with_subgraph(old_bottom_trapezoid, top_y_node);
