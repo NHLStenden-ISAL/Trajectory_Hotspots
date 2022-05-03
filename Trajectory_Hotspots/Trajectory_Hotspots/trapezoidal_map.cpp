@@ -412,8 +412,6 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
 
     std::vector<std::shared_ptr<Trapezoidal_Internal_Node>> new_subgraphs;
 
-    //TODO: Refactor bottom trapezoid same as top trapezoids..
-
     std::shared_ptr<Trapezoidal_Leaf_Node> left_trapezoid;
     std::shared_ptr<Trapezoidal_Leaf_Node> right_trapezoid;
 
