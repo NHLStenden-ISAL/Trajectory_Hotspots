@@ -622,7 +622,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
                 prev_right_trapezoid.get(),          //Bottom left
                 current_trapezoid->bottom_right,     //Bottom right
                 nullptr,                             //Top left, will be filled with the next right trapezoid
-                current_trapezoid->top_right);       //Top right, if not nullptr it will also be the top right neighbour of this trapezoid
+                nullptr);                            //Top right, will be filled if the next point is on the same side
 
             //Replace incoming pointers
             if (right_trapezoid->bottom_right != nullptr)
@@ -668,7 +668,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
                 nullptr,                             //Top point, will be filled when this trapezoid ends
                 current_trapezoid->bottom_left,      //Bottom left
                 prev_left_trapezoid.get(),           //Bottom right
-                current_trapezoid->top_left,         //Top left, if not nullptr it will also be the top left neighbour of this trapezoid
+                nullptr,                             //Top left, will be filled if the next point is on the same sides
                 nullptr);                            //Top right, will be filled with the next left trapezoid
 
             //Replace incoming pointers
