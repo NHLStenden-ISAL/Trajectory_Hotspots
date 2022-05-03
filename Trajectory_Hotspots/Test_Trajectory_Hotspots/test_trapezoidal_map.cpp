@@ -535,23 +535,24 @@ namespace TestTrajectoryHotspots
             //seed 9999 = 6,5,3,0,2,4,7,1
             Trapezoidal_Map trapezoidal_map(segments, 9999);
 
-            Vec2 point_left1(9.3993354f, 17.4046591f);
-            Vec2 point_left2(8.602549f, 22.0014889f);
+            Vec2 point_left3(9.3993354f, 17.4046591f);
+            Vec2 point_left4(8.602549f, 22.0014889f);
 
-            Trapezoidal_Leaf_Node* query_result_left1 = trapezoidal_map.query_point(point_left1);
-            Trapezoidal_Leaf_Node* query_result_left2 = trapezoidal_map.query_point(point_left2);
+            Trapezoidal_Leaf_Node* query_result_left3 = trapezoidal_map.query_point(point_left3);
+            Trapezoidal_Leaf_Node* query_result_left4 = trapezoidal_map.query_point(point_left4);
 
-            Assert::AreEqual(query_result_left1, query_result_left2);
+            Assert::AreEqual(query_result_left3, query_result_left4);
 
             Vec2 point_right1(14.6397562935346f, 17.2513922958021f);
             Vec2 point_right2(14.7010478200373f, 13.941649864651f);
-            Trapezoidal_Leaf_Node* query_result_right1 = trapezoidal_map.query_point(point_left1);
-            Trapezoidal_Leaf_Node* query_result_right2 = trapezoidal_map.query_point(point_left2);
+            Trapezoidal_Leaf_Node* query_result_right1 = trapezoidal_map.query_point(point_right1);
+            Trapezoidal_Leaf_Node* query_result_right2 = trapezoidal_map.query_point(point_right2);
 
             Assert::AreEqual(query_result_right1, query_result_right2);
 
-            Vec2 point_bottom_right1(16.8552329077f, 10.2009093546193f);
-            Vec2 point_bottom_right2(16.6543384465475f, 8.7611657163598f);
+            Vec2 point_bottom_right1(16.6543384465475f, 8.7611657163598f);
+            Vec2 point_bottom_right2(16.8552329077f, 10.2009093546193f);
+
             Trapezoidal_Leaf_Node* query_result_bottom_right1 = trapezoidal_map.query_point(point_bottom_right1);
             Trapezoidal_Leaf_Node* query_result_bottom_right2 = trapezoidal_map.query_point(point_bottom_right2);
 
@@ -564,8 +565,63 @@ namespace TestTrajectoryHotspots
             Assert::IsNull(query_result_between_0_2->top_right);
             Assert::IsNull(query_result_between_0_2->bottom_left);
 
+            Vec2 point_between_4_5(17.17672f, 17.97505f);
+            Vec2 point_in_right_3(16.f, 20.f);
+
+            Trapezoidal_Leaf_Node* query_result_between_4_5 = trapezoidal_map.query_point(point_between_4_5);
+            Trapezoidal_Leaf_Node* query_result_right_3 = trapezoidal_map.query_point(point_in_right_3);
+
+            Assert::AreEqual(query_result_right_3->bottom_right, query_result_between_4_5);
+            Assert::AreEqual(query_result_right_3->bottom_left, query_result_right2);
+
+            Assert::IsNull(query_result_between_4_5->bottom_left);
+            Assert::IsNull(query_result_between_4_5->bottom_right);
+            Assert::IsNull(query_result_between_4_5->top_left);
+            Assert::AreEqual(query_result_right_3, query_result_between_4_5->top_right);
+
+            Vec2 point_in_bottomleft(11.3394f, 8.840f);
+            Vec2 point_in_left_1(11.1454797f, 10.337f);
+            Vec2 point_in_left_2(10.89f, 13.966f);
+
+            Trapezoidal_Leaf_Node* query_result_bottomleft = trapezoidal_map.query_point(point_in_bottomleft);
+            Trapezoidal_Leaf_Node* query_result_left_1 = trapezoidal_map.query_point(point_in_left_1);
+            Trapezoidal_Leaf_Node* query_result_left_2 = trapezoidal_map.query_point(point_in_left_2);
 
 
+            Assert::AreEqual(query_result_left_1, query_result_left_2);
+
+            Assert::AreEqual(query_result_bottomleft, query_result_left_1->bottom_right);
+
+            Assert::AreEqual(query_result_left_1, query_result_bottomleft->top_right);
+            Assert::IsNull(query_result_bottomleft->top_left);
+            Assert::IsNull(query_result_bottomleft->bottom_left);
+            Assert::IsNull(query_result_bottomleft->bottom_right);
+
+            Vec2 point_left_of_0(4.7156966773694f, 14.0466823528248f);
+            Vec2 point_left_of_6(2.888396f, 23.7755f);
+            Vec2 point_right_of_7(28.32464f, 24.3020f);
+
+            Trapezoidal_Leaf_Node* query_result_left_of_0 = trapezoidal_map.query_point(point_left_of_0);
+            Trapezoidal_Leaf_Node* query_result_left_of_6 = trapezoidal_map.query_point(point_left_of_6);
+            Trapezoidal_Leaf_Node* query_result_right_of_7 = trapezoidal_map.query_point(point_right_of_7);
+
+            Assert::AreEqual(query_result_left_of_6, query_result_left4->top_left);
+            Assert::AreEqual(query_result_left_of_0, query_result_left3->bottom_left);
+            Assert::AreEqual(query_result_between_0_2->bottom_right, query_result_left_of_0->bottom_left);
+
+
+            Vec2 right_4(17.7484326595587f, 21.9502308689088f);
+            Vec2 right_5(20.6006216641344f, 22.4612518933329f);
+            Vec2 right_of_5(21.16f, 17.569f);
+
+            Trapezoidal_Leaf_Node* query_result_right_4 = trapezoidal_map.query_point(right_4);
+            Trapezoidal_Leaf_Node* query_result_right_5 = trapezoidal_map.query_point(right_5);
+            Trapezoidal_Leaf_Node* query_result_right_of_5 = trapezoidal_map.query_point(right_of_5);
+
+
+            Assert::AreEqual(query_result_right_4, query_result_right_5);
+            Assert::AreEqual(query_result_right_of_5, query_result_right_4->bottom_right);
+            Assert::AreEqual(query_result_right_of_7, query_result_right_5->top_right);
 
         }
     };
