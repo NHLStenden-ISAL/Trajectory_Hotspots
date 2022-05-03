@@ -18,22 +18,11 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, cons
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
-    //Determine the axis-alligned bounding box of the whole trajectory
-    for (const Segment& segment : trajectory_segments)
-    {
-        bounding_box.combine(segment.get_AABB());
-    }
-
-    static constexpr Vec2 margin(1.f, 1.f);
-
-    bounding_box.max += margin;
-    bounding_box.max -= margin;
-
     left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
     right_border = Segment(Vec2(bounding_box.max.x, bounding_box.max.y), bounding_box.max);
 
-    top_point = bounding_box.max;
     bottom_point = bounding_box.min;
+    top_point = bounding_box.max;
 
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 
@@ -50,7 +39,6 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, cons
     {
         std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ std::random_device{}() });
     }
-
 
     for (size_t i : random_permutation)
     {
@@ -179,7 +167,6 @@ void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_
         current_trapezoid->top_right->replace_bottom_neighbour(current_trapezoid, top_trapezoid.get());
     }
 
-    //TODO: Move to constructors?
     std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>(
         &segment,
         std::move(left_trapezoid),
@@ -473,14 +460,12 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
         //Construct subgraph with the y_node of the bottom point as the root node
         std::shared_ptr<Trapezoidal_X_Node> x_node = std::make_shared<Trapezoidal_X_Node>(&segment, left_trapezoid, right_trapezoid);
 
-
         std::shared_ptr<Trapezoidal_Y_Node> bottom_y_node = std::make_shared<Trapezoidal_Y_Node>(
             segment.get_bottom_point(),
             bottom_trapezoid,
             x_node);
 
         new_subgraphs.push_back(bottom_y_node);
-        //replace_leaf_node_with_subgraph(old_bottom_trapezoid, bottom_y_node);
     }
     else
     {
@@ -534,7 +519,6 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
             right_trapezoid);
 
         new_subgraphs.push_back(x_node);
-        //replace_leaf_node_with_subgraph(old_bottom_trapezoid, x_node);
     }
 
     std::shared_ptr<Trapezoidal_Leaf_Node> prev_left_trapezoid = left_trapezoid;

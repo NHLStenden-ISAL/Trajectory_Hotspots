@@ -112,8 +112,6 @@ public:
 
     const Vec2* point;
 
-    //Trapezoidal_Internal_Node* parent;
-
     std::shared_ptr<Trapezoidal_Node> below;
     std::shared_ptr<Trapezoidal_Node> above;
 };
@@ -133,7 +131,6 @@ public:
     void add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_overlapping_segment(const std::vector<Trapezoidal_Leaf_Node*>& overlapping_trapezoids, const Segment& segment);
-    //const Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) const;
 
 private:
 
