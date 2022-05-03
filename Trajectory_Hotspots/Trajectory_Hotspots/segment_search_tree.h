@@ -1,6 +1,5 @@
 #pragma once
 
-//TODO: Needs testing
 class Segment_Search_Tree_Node
 {
 public:
