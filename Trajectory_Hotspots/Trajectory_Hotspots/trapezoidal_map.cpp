@@ -15,7 +15,7 @@ Trapezoidal_Map::Trapezoidal_Map() : segment_count(0)
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments) : segment_count(0)
+Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, const unsigned int seed) : segment_count(0)
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
@@ -42,7 +42,16 @@ Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment> trajectory_segments) : seg
     std::vector<size_t> random_permutation(trajectory_segments.size());
 
     std::iota(random_permutation.begin(), random_permutation.end(), 0);
-    std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ std::random_device{}() });
+
+    if (seed != 0)
+    {
+        std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ seed });
+    }
+    else
+    {
+        std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ std::random_device{}() });
+    }
+
 
     for (size_t i : random_permutation)
     {
@@ -451,7 +460,7 @@ void Trapezoidal_Map::add_fully_embedded_segment_with_bottom_endpoint_overlappin
     replace_leaf_node_with_subgraph(current_trapezoid, top_y_node);
 }
 
-void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*> overlapping_trapezoids, const Segment& segment)
+void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*>& overlapping_trapezoids, const Segment& segment)
 {
     //TODO: This pointer can probably be const, same for function argument..
     std::vector<Trapezoidal_Leaf_Node*>::iterator current = overlapping_trapezoids.begin();
@@ -647,7 +656,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
 
             new_subgraphs.push_back(x_node);
             //replace_leaf_node_with_subgraph(current_trapezoid, x_node);
-            prev_right_trapezoid = std::move(right_trapezoid);
+            prev_right_trapezoid = right_trapezoid;
         }
         else
         {
@@ -673,17 +682,17 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
                 left_trapezoid->top_left->replace_bottom_neighbour(current_trapezoid, left_trapezoid.get());
             }
 
-            //Finish the previous left trapezoid by filling the last missing fields
-            prev_left_trapezoid->top_point = current_trapezoid->bottom_point;
-            prev_left_trapezoid->top_left = prev_top_left;
-            prev_left_trapezoid->top_right = left_trapezoid.get();
-
             if (prev_top_left != nullptr)
             {
                 //If the previous trapezoid had a top left, its top point is the current bottom point
                 //Which means the old neighbour is the previously handled trapezoid
                 prev_top_left->replace_bottom_neighbour(*std::prev(current), prev_left_trapezoid.get());
             }
+
+            //Finish the previous left trapezoid by filling the last missing fields
+            prev_left_trapezoid->top_point = current_trapezoid->bottom_point;
+            prev_left_trapezoid->top_left = prev_top_left;
+            prev_left_trapezoid->top_right = left_trapezoid.get();
 
             //Finish the x_node and replace the leaf node with the new subgraph
             x_node->left = left_trapezoid;
@@ -694,8 +703,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
 
             new_subgraphs.push_back(x_node);
             //replace_leaf_node_with_subgraph(current_trapezoid, x_node);
-
-            prev_left_trapezoid = std::move(left_trapezoid);
+            prev_left_trapezoid = left_trapezoid;
         }
 
         prev_top_left = current_trapezoid->top_left;
@@ -715,7 +723,7 @@ void Trapezoidal_Map::add_overlapping_segment(std::vector<Trapezoidal_Leaf_Node*
     Trapezoidal_Leaf_Node* top_right = nullptr;
 
     //Check if top points overlap, skip top_trapezoid if true
-    if (*old_top_trapezoid->bottom_point != *segment.get_top_point())
+    if (*old_top_trapezoid->top_point != *segment.get_top_point())
     {
         top_trapezoid = std::make_shared<Trapezoidal_Leaf_Node>(
             old_top_trapezoid->left_segment,  //Left border
