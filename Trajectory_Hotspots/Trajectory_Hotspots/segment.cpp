@@ -21,6 +21,10 @@ const Vec2* Segment::get_bottom_point() const
     {
         return &end;
     }
+    else if (start.y == end.y && start.x > end.x)
+    {
+        return &end;
+    }
     else
     {
         return &start;
@@ -31,6 +35,10 @@ const Vec2* Segment::get_bottom_point() const
 const Vec2* Segment::get_top_point() const
 {
     if (start.y > end.y)
+    {
+        return &start;
+    }
+    else if (start.y == end.y && start.x > end.x)
     {
         return &start;
     }
@@ -68,3 +76,5 @@ bool Segment::operator!=(const Segment& operand) const
 {
     return !(*this == operand);;
 }
+
+

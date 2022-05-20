@@ -128,6 +128,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_with_fsanitize|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="segment.cpp" />
+    <ClCompile Include="segment_intersection.cpp" />
     <ClCompile Include="segment_search_tree.cpp" />
     <ClCompile Include="trajectory.cpp" />
     <ClCompile Include="trajectory_hotspots.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="aabb.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="segment.h" />
+    <ClInclude Include="segment_intersection.h" />
     <ClInclude Include="segment_search_tree.h" />
     <ClInclude Include="trajectory.h" />
     <ClInclude Include="trapezoidal_map.h" />
