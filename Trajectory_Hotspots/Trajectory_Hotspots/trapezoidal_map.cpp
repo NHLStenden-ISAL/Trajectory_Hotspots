@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "trapezoidal_map.h"
 
-Trapezoidal_Map::Trapezoidal_Map() : segment_count(0)
+Trapezoidal_Map::Trapezoidal_Map()
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
@@ -14,7 +14,7 @@ Trapezoidal_Map::Trapezoidal_Map() : segment_count(0)
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, const unsigned int seed) : segment_count(0)
+Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, const unsigned int seed)
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 

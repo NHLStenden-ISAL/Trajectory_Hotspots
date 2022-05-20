@@ -140,7 +140,7 @@ private:
 
 public:
 
-    int segment_count;
+    int segment_count = 0;
 
     Segment left_border;
     Segment right_border;
