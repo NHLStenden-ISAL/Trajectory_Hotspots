@@ -8,6 +8,7 @@
 #include <vector>
 #include <random>
 #include <numeric>
+#include <map>
 
 #include <cassert>
 

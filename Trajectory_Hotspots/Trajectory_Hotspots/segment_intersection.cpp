@@ -1,12 +1,16 @@
 #include "pch.h"
 #include "segment_intersection.h"
 
+#include <functional>
+
 std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments)
 {
     std::vector<const Vec2*> top_points;
     std::vector<const Vec2*> bottom_points;
 
-    std::map;
+    std::map<Vec2, std::function<void>> event_queue;
+
+
 
     for (const Segment& segment : segments)
     {
