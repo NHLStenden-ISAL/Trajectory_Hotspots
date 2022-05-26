@@ -36,6 +36,10 @@ public:
     bool operator==(const Vec2& operand) const;
     bool operator!=(const Vec2& operand) const;
 
+    bool operator<(const Vec2& operand) const;
+    bool operator>(const Vec2& operand) const;
+
+
     float x;
     float y;
 

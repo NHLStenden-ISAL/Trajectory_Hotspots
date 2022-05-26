@@ -3,6 +3,8 @@
 class Vec2;
 class AABB;
 
+//TODO: Wrapper class for trajectory? Make segment member
+
 class Segment
 {
 public:

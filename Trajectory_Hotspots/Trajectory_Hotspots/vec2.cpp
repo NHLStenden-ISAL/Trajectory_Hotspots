@@ -46,5 +46,26 @@ Vec2 Vec2::operator/=(const float& scalar) const { return Vec2(x / scalar, y / s
 bool Vec2::operator==(const Vec2& operand) const { return nearly_equal(x, operand.x) && nearly_equal(y, operand.y); }
 bool Vec2::operator!=(const Vec2& operand) const { return !(*this == operand); }
 
+//Returns true if y is lower than y of operand, if y is equal, returns true if x is lower than operand x.
+bool Vec2::operator<(const Vec2& operand) const
+{
+    if (nearly_equal(y, operand.y))
+    {
+        if (nearly_equal(x, operand.x))
+        {
+            return false;
+        }
+
+        return x < operand.x;
+    }
+
+    return y < operand.y;
+}
+
+bool Vec2::operator>(const Vec2& operand) const
+{
+    return !(*this == operand) && !(*this < operand);
+}
+
 Vec2 operator*(const float& scalar, const Vec2& vec) { return Vec2(vec.x * scalar, vec.y * scalar); }
 Vec2 operator/(const float& scalar, const Vec2& vec) { return Vec2(vec.x / scalar, vec.y / scalar); }

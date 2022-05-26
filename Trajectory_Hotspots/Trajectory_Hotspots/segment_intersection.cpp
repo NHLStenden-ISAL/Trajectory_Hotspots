@@ -5,19 +5,39 @@
 
 std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments)
 {
-    std::vector<const Vec2*> top_points;
-    std::vector<const Vec2*> bottom_points;
-
-    std::map<Vec2, std::function<void>> event_queue;
+    //std::vector<const Vec2*> top_points;
+    //std::vector<const Vec2*> bottom_points;
 
 
+    //Event queue sorted on point, values are the event type and index in the segment list
+    typedef std::pair<Intersection_Event_Type, int> event_pair;
+    std::multimap<const Vec2, event_pair, std::less<Vec2>> event_queue;
 
-    for (const Segment& segment : segments)
+    for (int i = 0; i < segments.size(); i++)
     {
-        top_points.push_back(segment.get_top_point());
-        bottom_points.push_back(segment.get_bottom_point());
+        //TODO: There is a copy here, reference instead?
+        event_queue.emplace(*segments.at(i).get_top_point(), event_pair(Intersection_Event_Type::TOP, i));
+        event_queue.emplace(*segments.at(i).get_bottom_point(), event_pair(Intersection_Event_Type::BOTTOM, i));
     }
 
+    std::multimap<
+
+    while (!event_queue.empty())
+    {
+        auto event = event_queue.begin();
+
+        switch (event->second.first)
+        {
+        case Intersection_Event_Type::TOP:
+            break;
+        case Intersection_Event_Type::BOTTOM:
+            break;
+        case Intersection_Event_Type::INTERSECTION:
+            break;
+        default:
+            break;
+        }
+    }
     //Create event_class
     //Add ordering function (y<y, x<x)
     //Add top and bottom events, add reference to segment
