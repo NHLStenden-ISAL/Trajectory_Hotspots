@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Segment_Intersection_Sweep_Line">
+      <UniqueIdentifier>{ad123ab7-7f75-4d03-86d9-e9a6737b7b3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="trajectory_hotspots.cpp">
@@ -42,11 +45,11 @@
     <ClCompile Include="trapezoidal_map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="segment_intersection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sweep_line_status_structure.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Segment_Intersection_Sweep_Line</Filter>
+    </ClCompile>
+    <ClCompile Include="segment_intersection.cpp">
+      <Filter>Segment_Intersection_Sweep_Line</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,11 +77,11 @@
     <ClInclude Include="trapezoidal_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="segment_intersection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sweep_line_status_structure.h">
-      <Filter>Header Files</Filter>
+      <Filter>Segment_Intersection_Sweep_Line</Filter>
+    </ClInclude>
+    <ClInclude Include="segment_intersection.h">
+      <Filter>Segment_Intersection_Sweep_Line</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,6 +6,7 @@ namespace Segment_Intersection_Sweep_Line
     class Sweep_Line_Status_structure
     {
     public:
+
         class Node
         {
         public:
@@ -25,27 +26,29 @@ namespace Segment_Intersection_Sweep_Line
         Sweep_Line_Status_structure(float line_position) : line_position(line_position) {};
 
         void insert(Segment* new_segment);
+        void remove(Segment* segment_to_remove);
+        bool contains(Segment* search_segment);
+
+        void set_line_position(const float new_position) { line_position = new_position; };
+
+        std::unique_ptr<Node> root;
+
+    private:
+
+        float line_position;
+
         std::unique_ptr<Node> insert(std::unique_ptr<Node>&& node, Segment* new_segment);
         std::unique_ptr<Node> add_to_subtree(std::unique_ptr<Node>&& root, Segment* new_segment);
 
-        void remove(Segment* segment_to_remove);
         std::unique_ptr<Node> remove(std::unique_ptr<Node>&& node, Segment* segment_to_remove);
         std::unique_ptr<Node> remove_from_parent(std::unique_ptr<Node>&& parent, Segment* segment_to_remove);
-
-        void rebalance();
 
         std::unique_ptr<Node> rotate_left(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_left_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_right_left(std::unique_ptr<Node>&& old_root);
 
-        bool contains(Segment* search_segment);
 
-        std::unique_ptr<Node> root;
-        float line_position;
-
-    private:
-        bool right_of_segment();
     };
 
     /// <summary>
