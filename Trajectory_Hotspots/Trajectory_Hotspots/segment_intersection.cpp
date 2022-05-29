@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "segment_intersection.h"
+#include "sweep_line_status_structure.h"
 
 #include <functional>
+
+using namespace Segment_Intersection_Sweep_Line;
 
 std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments)
 {
@@ -20,7 +23,8 @@ std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segment
         event_queue.emplace(*segments.at(i).get_bottom_point(), event_pair(Intersection_Event_Type::BOTTOM, i));
     }
 
-    std::multimap<
+    //Initialize status structure with the highest event point
+    Sweep_Line_Status_structure status_structure(event_queue.begin()->first.y);
 
     while (!event_queue.empty())
     {

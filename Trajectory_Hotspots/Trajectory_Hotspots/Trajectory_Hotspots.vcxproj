@@ -130,6 +130,7 @@
     <ClCompile Include="segment.cpp" />
     <ClCompile Include="segment_intersection.cpp" />
     <ClCompile Include="segment_search_tree.cpp" />
+    <ClCompile Include="sweep_line_status_structure.cpp" />
     <ClCompile Include="trajectory.cpp" />
     <ClCompile Include="trajectory_hotspots.cpp" />
     <ClCompile Include="trapezoidal_map.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="segment.h" />
     <ClInclude Include="segment_intersection.h" />
     <ClInclude Include="segment_search_tree.h" />
+    <ClInclude Include="sweep_line_status_structure.h" />
     <ClInclude Include="trajectory.h" />
     <ClInclude Include="trapezoidal_map.h" />
     <ClInclude Include="utils.h" />

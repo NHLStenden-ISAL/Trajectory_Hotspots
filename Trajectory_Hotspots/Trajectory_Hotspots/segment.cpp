@@ -15,6 +15,24 @@ float Segment::squared_length() const
     return distance_vector.squared_length();
 }
 
+float Segment::y_intersect(float y) const
+{
+    float y_diff = end.y - start.y;
+
+    //Horizontal segment, either no or infinite intersections
+    if (y_diff == 0.f)
+    {
+        return std::numeric_limits<float>::infinity();
+    }
+    else
+    {
+        float segment_to_y = y - start.y;
+        float intersection_x = start.x + (segment_to_y / y_diff * (end.x - start.x));
+
+        return intersection_x;
+    }
+}
+
 const Vec2* Segment::get_bottom_point() const
 {
     if (start.y > end.y)
@@ -47,6 +65,11 @@ const Vec2* Segment::get_top_point() const
         return &end;
     }
 
+}
+
+Vec2 Segment::to_vector() const
+{
+    return Vec2(end - start);
 }
 
 AABB Segment::get_AABB() const

@@ -43,8 +43,12 @@ public:
     float length() const;
     float squared_length() const;
 
+    float y_intersect(float y) const;
+
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;
+
+    Vec2 to_vector() const;
 
     AABB get_AABB() const;
 
@@ -57,4 +61,3 @@ public:
 };
 
 bool point_right_of_segment(const Segment& segment, const Vec2& point);
-
