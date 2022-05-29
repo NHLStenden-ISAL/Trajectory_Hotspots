@@ -9,9 +9,9 @@ namespace Segment_Intersection_Sweep_Line
         class Node
         {
         public:
-            Node(Segment* data) : data(data) {};
+            Node(Segment* segment) : segment(segment) {};
 
-            Segment* data;
+            Segment* segment;
             int height = 0;
 
             std::unique_ptr<Node> left;
@@ -52,7 +52,7 @@ namespace Segment_Intersection_Sweep_Line
     /// Inserts a new node into the tree, rebalancing when needed.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="data"></param>
+    /// <param name="segment"></param>
     inline void Sweep_Line_Status_structure::insert(Segment* new_segment)
     {
         if (root != nullptr)
@@ -71,13 +71,13 @@ namespace Segment_Intersection_Sweep_Line
 
         float current_x_position = new_segment->y_intersect(line_position);
 
-        if (current_x_position <= new_root->data->y_intersect(line_position))
+        if (current_x_position <= new_root->segment->y_intersect(line_position))
         {
             new_root->left = add_to_subtree(std::move(new_root->left), new_segment);
 
             if (new_root->height_difference() == 2)
             {
-                if (current_x_position <= new_root->left->data->y_intersect(line_position))
+                if (current_x_position <= new_root->left->segment->y_intersect(line_position))
                 {
                     new_root = rotate_right(std::move(new_root));
                 }
@@ -92,7 +92,7 @@ namespace Segment_Intersection_Sweep_Line
             new_root->right = add_to_subtree(std::move(new_root->right), new_segment);
             if (new_root->height_difference() == -2)
             {
-                if (current_x_position > new_root->right->data->y_intersect(line_position))
+                if (current_x_position > new_root->right->segment->y_intersect(line_position))
                 {
                     new_root = rotate_left(std::move(new_root));
                 }
@@ -137,7 +137,7 @@ namespace Segment_Intersection_Sweep_Line
 
         float current_x_position = segment_to_remove->y_intersect(line_position);
 
-        if (*segment_to_remove == *new_root->data)
+        if (*segment_to_remove == *new_root->segment)
         {
             if (new_root->left == nullptr)
             {
@@ -152,10 +152,10 @@ namespace Segment_Intersection_Sweep_Line
                 child = std::move(child->right);
             }
 
-            //Hoist the data from the left child to the new root node and remove it from left (balancing in the process)
-            Segment* child_data = child->data;
-            new_root->left = remove_from_parent(std::move(new_root->left), child_data);
-            new_root->data = child_data;
+            //Hoist the segment from the left child to the new root node and remove it from left (balancing in the process)
+            Segment* child_segment = child->segment;
+            new_root->left = remove_from_parent(std::move(new_root->left), child_segment);
+            new_root->segment = child_segment;
 
             //Balance tree if necessary
             if (new_root->height_difference() == -2)
@@ -170,7 +170,7 @@ namespace Segment_Intersection_Sweep_Line
                 }
             }
         }
-        else if (current_x_position < new_root->data->y_intersect(line_position))
+        else if (current_x_position < new_root->segment->y_intersect(line_position))
         {
             new_root->left = remove_from_parent(std::move(new_root->left), segment_to_remove);
 
@@ -228,11 +228,11 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (current_x_position < node->data->y_intersect(line_position))
+            if (current_x_position < node->segment->y_intersect(line_position))
             {
                 node = node->left.get();
             }
-            else if (current_x_position > node->data->y_intersect(line_position))
+            else if (current_x_position > node->segment->y_intersect(line_position))
             {
                 node = node->right.get();
             }
