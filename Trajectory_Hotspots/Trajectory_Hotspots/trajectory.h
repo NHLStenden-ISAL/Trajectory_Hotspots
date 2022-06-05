@@ -1,6 +1,7 @@
 #pragma once
 
 //TODO: Pre-build trees for fast queries?
+//TODO: Move tree into this class to make AABB query easier
 class Trajectory
 {
 public:
