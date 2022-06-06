@@ -13,3 +13,4 @@
 
 #include "utils.h"
 #include "aabb.h"
+#include "segment.h"

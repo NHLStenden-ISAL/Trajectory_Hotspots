@@ -302,7 +302,7 @@ namespace TestTrajectoryHotspots
             Vec2 A(5.43706f, 11.5284f);
             Vec2 B(8.5516f, 9.47866f);
             Vec2 C(5.14424f, 2.4776f);
-            Vec2 D(2.6952, 3.86184);
+            Vec2 D(2.6952f, 3.86184f);
 
             Vec2 E(12.86404f, 12.64644f);
             Vec2 F(9.80274f, 1.1466f);
@@ -334,12 +334,12 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual(5, trapezoidal_map.segment_count);
 
-            Vec2 point_in_top_left(5.72988, 10.43698);
-            Vec2 point_in_top_right(9.13724, 10.67656);
+            Vec2 point_in_top_left(5.72988f, 10.43698f);
+            Vec2 point_in_top_right(9.13724f, 10.67656f);
             Vec2 point_in_left(4.79818f, 7.16272f);
             Vec2 point_in_right(7.43356f, 6.71018f);
-            Vec2 point_in_bottom_left(3.04126, 3.11648);
-            Vec2 point_in_bottom_right(5.80974, 3.35606);
+            Vec2 point_in_bottom_left(3.04126f, 3.11648f);
+            Vec2 point_in_bottom_right(5.80974f, 3.35606f);
 
             Trapezoidal_Leaf_Node* query_result_top_left = trapezoidal_map.query_point(point_in_top_left);
             Trapezoidal_Leaf_Node* query_result_top_right = trapezoidal_map.query_point(point_in_top_right);
@@ -416,13 +416,13 @@ namespace TestTrajectoryHotspots
             //  |   /
             //     /
 
-            Vec2 point_in_top(213.5523, 134.67516);
-            Vec2 point_left_of_left(194.7737, 107.30614);
-            Vec2 point_above_right(233.1300, 111.50208);
-            Vec2 point_between_left_and_right(225.3389, 96.31938);
-            Vec2 point_below_left(214.5512, 72.1469);
-            Vec2 point_right_of_right(248.5124, 77.14129);
-            Vec2 point_in_bottom(225.3389, 42.58063);
+            Vec2 point_in_top(213.5523f, 134.67516f);
+            Vec2 point_left_of_left(194.7737f, 107.30614f);
+            Vec2 point_above_right(233.1300f, 111.50208f);
+            Vec2 point_between_left_and_right(225.3389f, 96.31938f);
+            Vec2 point_below_left(214.5512f, 72.1469f);
+            Vec2 point_right_of_right(248.5124f, 77.14129f);
+            Vec2 point_in_bottom(225.3389f, 42.58063f);
 
             Trapezoidal_Leaf_Node* query_result_top = trapezoidal_map.query_point(point_in_top);//This is returning above_right?
             Trapezoidal_Leaf_Node* query_result_left_of_left = trapezoidal_map.query_point(point_left_of_left);
