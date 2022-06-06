@@ -19,8 +19,8 @@ public:
     {
     }
 
-    AABB(const float min_x, const float min_y, const float max_x, const float max_y) : 
-        min(min_x, min_y), 
+    AABB(const float min_x, const float min_y, const float max_x, const float max_y) :
+        min(min_x, min_y),
         max(max_x, max_y)
     {
     }
@@ -56,4 +56,9 @@ public:
 
     Vec2 min;
     Vec2 max;
+
+    float width() const
+    {
+        return max.x - min.x;
+    }
 };

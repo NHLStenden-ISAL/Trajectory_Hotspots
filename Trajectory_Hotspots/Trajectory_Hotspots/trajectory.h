@@ -17,5 +17,7 @@ public:
 
 private:
 
+    float trajectory_end = 0.f;
+
     std::vector<Segment> trajectory_segments;
 };

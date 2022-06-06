@@ -73,9 +73,9 @@ namespace TestTrajectoryHotspots
 
             Segment_Search_Tree ss_tree(ordered_segments);
 
-            AABB queried_bb = ss_tree.Query(2.2f, 15.f);
+            AABB queried_bb = ss_tree.query(2.2f, 15.f);
 
-            AABB queried_bb2 = ss_tree.Query(16.7157536f, 37.3452644f);
+            AABB queried_bb2 = ss_tree.query(16.7157536f, 37.3452644f);
 
         }
 

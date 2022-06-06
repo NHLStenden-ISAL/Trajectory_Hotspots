@@ -6,17 +6,17 @@ public:
 
     Segment_Search_Tree_Node();
 
-    //Build the tree bottom-up from a lsit of ordered segments
+    //Build the tree bottom-up from a list of ordered segments
     Segment_Search_Tree_Node(const std::vector<Segment>& ordered_segments, const size_t start_index, const size_t end_index);
 
     //Query tree, reutrns bounding box from start_t to end_t
-    AABB Query(const float start_t, const float end_t) const;
+    AABB query(const float start_t, const float end_t) const;
 
     //Query tree, returns bounding box from start_t to the last point contained in the (sub)tree
-    AABB Query_Left(const float start_t) const;
+    AABB query_left(const float start_t) const;
 
     //Query tree, returns bounding box from the first point in the (sub)tree to end_t
-    AABB Query_Right(const float end_t) const;
+    AABB query_right(const float end_t) const;
 
     std::unique_ptr<Segment_Search_Tree_Node> left;
     std::unique_ptr<Segment_Search_Tree_Node> right;
@@ -35,9 +35,9 @@ public:
 
     Segment_Search_Tree(const std::vector<Segment>& ordered_segments);
 
-    AABB Query(const float start_t, const float end_t) const
+    AABB query(const float start_t, const float end_t) const
     {
-        return root.Query(start_t, end_t);
+        return root.query(start_t, end_t);
     }
 
     Segment_Search_Tree_Node root;
