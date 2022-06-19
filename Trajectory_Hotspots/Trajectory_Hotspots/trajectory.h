@@ -20,4 +20,11 @@ private:
     float trajectory_end = 0.f;
 
     std::vector<Segment> trajectory_segments;
+
+    //Helper functions for fixed_length_contiguous
+    bool check_breakpoint_III_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const;
+    bool check_breakpoint_III_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const;
+    bool check_breakpoint_IV_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const;
+    bool check_breakpoint_IV_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const;
+
 };
