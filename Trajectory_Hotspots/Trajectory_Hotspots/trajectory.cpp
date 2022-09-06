@@ -24,6 +24,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(float radius) const
 
 AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
 {
+    //TODO:Check if length is enough for an UV to exist..
     Segment_Search_Tree tree(trajectory_segments);
 
     AABB hotspot;
@@ -100,7 +101,8 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
             //Obtain the bounding box of the subtrajectory between u and v
             AABB uv_bounding_box = tree.query(start, end);
 
-            //TODO: Check if forward/backward time is on the end/start segment
+            //TODO: Check if forward/backward time is on the end/start segment, the trajectory has to start/end in the same start/end segments else UV condition breaks!
+            //TODO: Pass start_t& and end_t& to check_breakpoint III and IV instead of tree and current_hoptspot?
 
             //Check if any of the four sides of the AABB intersects either the start or end segment, if so, check for new hotspot
             AABB current_hotspot;
