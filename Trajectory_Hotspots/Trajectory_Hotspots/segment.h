@@ -57,6 +57,11 @@ public:
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;
 
+    //Determines if two segments share a y-axis
+    bool x_overlap(const Segment& segment) const;
+    //Determines if two segments share a x-axis
+    bool y_overlap(const Segment& segment) const;
+
     AABB get_AABB() const;
 
     Vec2 start;

@@ -41,6 +41,32 @@ const Vec2* Segment::get_top_point() const
 
 }
 
+//Check if segments share a y-axis
+bool Segment::x_overlap(const Segment& other_segment) const
+{
+    //sort the endpoints
+    const Vec2& left_vert = (start.x <= end.x ? start : end);
+    const Vec2& right_vert = (start.x > end.x ? start : end);
+
+    const Vec2& other_left_vert = (other_segment.start.x <= other_segment.end.x ? other_segment.start : other_segment.end);
+    const Vec2& other_right_vert = (other_segment.start.x > other_segment.end.x ? other_segment.start : other_segment.end);
+
+    return !(right_vert.x < other_left_vert.x || left_vert.x > other_right_vert.x);
+}
+
+//Check if segments share a x-axis
+bool Segment::y_overlap(const Segment& other_segment) const
+{
+    //sort the endpoints
+    const Vec2& lower_vert = (start.y <= end.y ? start : end);
+    const Vec2& upper_vert = (start.y > end.y ? start : end);
+
+    const Vec2& other_lower_vert = (other_segment.start.y <= other_segment.end.y ? other_segment.start : other_segment.end);
+    const Vec2& other_upper_vert = (other_segment.start.y > other_segment.end.y ? other_segment.start : other_segment.end);
+
+    return !(upper_vert.y < other_lower_vert.y || lower_vert.y > other_upper_vert.y);
+}
+
 AABB Segment::get_AABB() const
 {
     return AABB(std::min(start.x, end.x), std::min(start.y, end.y), std::max(start.x, end.x), std::max(start.y, end.y));

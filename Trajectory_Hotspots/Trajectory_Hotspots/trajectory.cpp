@@ -3,7 +3,13 @@
 
 Trajectory::Trajectory(std::vector<Segment>& ordered_segments) : trajectory_segments(ordered_segments)
 {
+    trajectory_start = ordered_segments.begin()->start_t;
     trajectory_end = ordered_segments.end()->end_t;
+
+    for (Segment& i : ordered_segments)
+    {
+        trajectory_length += i.length();
+    }
 }
 
 //Returns a hotspot with a fixed radius at a position that maximizes the trajectory inside it
@@ -25,6 +31,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(float radius) const
 AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
 {
     //TODO:Check if length is enough for an UV to exist..
+    //TODO: This works for now with using time because time == length, but we might want to change the tree to also store the lengths..
     Segment_Search_Tree tree(trajectory_segments);
 
     AABB hotspot;
@@ -56,7 +63,7 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
         float end = r_iterator->end_t;
         float start = end - length;
 
-        if (start < 0)
+        if (start < trajectory_start)
         {
             //When we exceed the trajectories bounds we can stop
             break;
@@ -102,19 +109,32 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
             AABB uv_bounding_box = tree.query(start, end);
 
             //TODO: Check if forward/backward time is on the end/start segment, the trajectory has to start/end in the same start/end segments else UV condition breaks!
-            //TODO: Pass start_t& and end_t& to check_breakpoint III and IV instead of tree and current_hoptspot?
+            //TODO: Pass start_t& and end_t& to flc_breakpoint III and IV instead of tree and current_hoptspot?
 
             //Check if any of the four sides of the AABB intersects either the start or end segment, if so, check for new hotspot
             AABB current_hotspot;
-            if (check_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
 
-            if (check_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
-            if (check_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() > hotspot.width()) { hotspot = current_hotspot; } }
+
+            //Breakpoint V
+            //Only check if the segments share a x/y axis
+            //TODO: What if a segment lies perpendicular to the other segment? Add condition in overlap? Probably fine because of the L restraint, still check the math..
+            if (trajectory_segment.x_overlap(end_segment))
+            {
+
+            }
+
+            if (trajectory_segment.y_overlap(end_segment))
+            {
+
+            }
         }
     }
 
@@ -127,7 +147,7 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
     return hotspot;
 }
 
-bool Trajectory::check_breakpoint_III_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const
+bool Trajectory::flc_breakpoint_III_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const
 {
     float intersection_y;
     if (trajectory_segment.x_intersects(line_x, intersection_y))
@@ -143,7 +163,7 @@ bool Trajectory::check_breakpoint_III_x(const Segment_Search_Tree& tree, const f
     return false;
 }
 
-bool Trajectory::check_breakpoint_III_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const
+bool Trajectory::flc_breakpoint_III_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const
 {
     float intersection_x;
     if (trajectory_segment.y_intersects(line_y, intersection_x))
@@ -159,7 +179,7 @@ bool Trajectory::check_breakpoint_III_y(const Segment_Search_Tree& tree, const f
     return false;
 }
 
-bool Trajectory::check_breakpoint_IV_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const
+bool Trajectory::flc_breakpoint_IV_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const
 {
     float intersection_y;
     if (trajectory_segment.x_intersects(line_x, intersection_y))
@@ -175,7 +195,7 @@ bool Trajectory::check_breakpoint_IV_x(const Segment_Search_Tree& tree, const fl
     return false;
 }
 
-bool Trajectory::check_breakpoint_IV_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const
+bool Trajectory::flc_breakpoint_IV_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const
 {
     float intersection_x;
     if (trajectory_segment.y_intersects(line_y, intersection_x))
@@ -190,3 +210,28 @@ bool Trajectory::check_breakpoint_IV_y(const Segment_Search_Tree& tree, const fl
 
     return false;
 }
+bool Trajectory::flc_breakpoint_V(const float length, const Segment& start_segment, const Segment& end_segment, Vec2& p, Vec2& q, bool x) const
+{
+    //TODO: This works for now with using time because time == length, but we might want to change the tree to also store the lengths..
+    float edge_distance = (end_segment.start_t - start_segment.end_t) * trajectory_length;
+    float remaining_length = length - edge_distance;
+    Vec2 start_vector = start_segment.start - start_segment.end;
+    Vec2 end_vector = end_segment.end - end_segment.start;
+
+    float start_length = start_vector.length();
+    float end_length = end_vector.length();
+
+    float determinant_x = start_vector.x * end_vector.length() - -end_vector.x * start_vector.length();
+    float determinant_y = start_vector.y * end_vector.length() - -end_vector.y * start_vector.length();
+
+    if (determinant_x != 0)
+    {
+
+    }
+
+    if (determinant_y != 0)
+    {
+
+    }
+}
+
