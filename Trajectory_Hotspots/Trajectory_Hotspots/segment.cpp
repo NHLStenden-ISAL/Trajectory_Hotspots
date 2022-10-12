@@ -161,6 +161,13 @@ float Segment::get_time_at_y(const float y) const
     return y_fraction * (end_t - start_t);
 }
 
+float Segment::get_time_at_point(const Vec2& point) const
+{
+    Vec2 start_to_point = point - start;
+    float time_fraction = start_to_point.length() / length();
+    return time_fraction * (end_t - start_t);
+}
+
 //Determine if a point lies to the left (false) or right (true) of a segment, oriented from start to end
 //If the point lies on the segment this function will return true (right)
 bool point_right_of_segment(const Segment& segment, const Vec2& point)

@@ -28,5 +28,7 @@ private:
     bool flc_breakpoint_III_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const;
     bool flc_breakpoint_IV_x(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_x, AABB& potential_hotspot) const;
     bool flc_breakpoint_IV_y(const Segment_Search_Tree& tree, const float length, const Segment& trajectory_segment, const float line_y, AABB& potential_hotspot) const;
-    bool flc_breakpoint_V(const float length, const Segment& start_segment, const Segment& start_segment, const Segment& end_segment, vec2& p, vec2& q, bool x) const
+    //bool flc_breakpoint_V(const Segment_Search_Tree& tree, const float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;
+    bool flc_breakpoint_V_x(const Segment_Search_Tree& tree, const float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;
+    bool flc_breakpoint_V_y(const Segment_Search_Tree& tree, const float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;
 };
