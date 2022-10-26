@@ -5,7 +5,6 @@
 #include <functional>
 
 using namespace Segment_Intersection_Sweep_Line;
-
 std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments)
 {
     //std::vector<const Vec2*> top_points;
@@ -29,14 +28,18 @@ std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segment
     while (!event_queue.empty())
     {
         auto event = event_queue.begin();
+        event_queue.erase(event);
 
         switch (event->second.first)
         {
         case Intersection_Event_Type::TOP:
+            top(status_structure, segments.at(event->second.second));
             break;
         case Intersection_Event_Type::BOTTOM:
+            bottom(status_structure, segments.at(event->second.second));
             break;
         case Intersection_Event_Type::INTERSECTION:
+            
             break;
         default:
             break;
@@ -55,4 +58,34 @@ std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segment
     //If event == BOTTOM, Remove from tree
 
     return std::vector<Vec2>();
+}
+
+//TODO Should this be a class instead of a function?
+void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_structure, const Segment& segment)
+{
+    const Segment* left;
+    const Segment* right;
+    status_structure.insert(&segment,left,right);
+    // returns node (with neighbours pointers) or null???
+    // if( && ==!null)
+    // insert segment
+    //status_structure.checkneighbours(&segment);
+    //check for intersection new neighbour
+    // intersect(get neighbours)
+    // insert intersection point to event queue
+}
+
+void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status_structure, const Segment& segment)
+{
+    status_structure.remove(&segment);
+    //check for intersection new neighbour
+    // intersect(get neighbours)
+    // insert intersection point to event
+}
+
+void intersection() 
+{
+    //swap Si(links) Sj(rechts) in status structure
+    //check intersection between Si-1 Sj and Si+1 Sj
+    //add new intersection event in queue
 }

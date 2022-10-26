@@ -5,13 +5,26 @@
 #include "../Trajectory_Hotspots/vec2.h"
 #include "../Trajectory_Hotspots/segment.h"
 #include "../Trajectory_Hotspots/sweep_line_status_structure.h"
+#include "../Trajectory_Hotspots/segment_intersection.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace Segment_Intersection_Sweep_Line;
 
+namespace Microsoft
+{
+    namespace VisualStudio
+    {
+        namespace CppUnitTestFramework
+        {
+            template<> static std::wstring ToString<Segment>(const class Segment& t) { return L"Segment"; }
+            template<> static std::wstring ToString<Segment>(const class Segment* t) { return L"Segment"; }
+        }
+    }
+}
 namespace TestTrajectoryHotspots
 {
+    
     TEST_CLASS(TestSweepLineStatusStructure)
     {
     public:
@@ -39,7 +52,9 @@ namespace TestTrajectoryHotspots
             for (size_t i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
-                status_structure.insert(&test_segments.at(i));
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i),left_node,right_node);
 
                 Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
             }
@@ -68,7 +83,9 @@ namespace TestTrajectoryHotspots
             for (size_t i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
-                status_structure.insert(&test_segments.at(i));
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i),left_node,right_node);
             }
 
             for (size_t i = 0; i < test_segments.size(); i++)
@@ -82,6 +99,25 @@ namespace TestTrajectoryHotspots
 
         TEST_METHOD(contains)
         {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 8), Vec2(7, 3));
+            test_segments.emplace_back(Vec2(3, 2), Vec2(6, 9));
+            
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i),left_node,right_node);
+            }
+            std::vector<Segment> contain_segment;
+            contain_segment.emplace_back(Vec2(3, 8),Vec2(7, 3));
+            std::vector<Segment> notcontain_segment;
+            notcontain_segment.emplace_back(Vec2(1, 8), Vec2(7, 3));
+            Assert::IsTrue(status_structure.contains(&contain_segment.at(0)));
+            Assert::IsFalse(status_structure.contains(&notcontain_segment.at(0)));
 
         }
 
@@ -89,5 +125,265 @@ namespace TestTrajectoryHotspots
         {
 
         }
+        //TODO: Crashes if index get increased.
+        TEST_METHOD(get_left_neighbour_crash_case)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+            
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node = nullptr;
+                const Segment* right_node= nullptr;
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+                    
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+
+            test_segments.emplace_back(Vec2(12, 2), Vec2(10, 5));
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            status_structure.insert(&test_segments.at(2), left_node, right_node);
+            status_structure.set_line_position(test_segments.at(2).get_top_point()->y);
+            
+            std::vector<Segment> test;  
+            test.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            const Segment* test12 = &test.at(0);
+            const Segment* test13 = nullptr;
+            Assert::AreEqual(test12,left_node);
+            
+        }
+        TEST_METHOD(get_left_neighbour)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            const Segment* first_element = &test_segments.at(0);
+            Assert::AreEqual(first_element, left_node);
+
+        }
+        TEST_METHOD(get_right_neighbour_is_empty)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            const Segment* first_element = nullptr;
+            Assert::AreEqual(first_element, left_node);
+
+        }
+        
+
+        TEST_METHOD(get_left_neighbour_case_1)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3.2, 5.28), Vec2(4.43, 8.73)); //g
+            test_segments.emplace_back(Vec2(9.2, 4.35), Vec2(8.01, 8.22)); //h
+            test_segments.emplace_back(Vec2(12, 4.44), Vec2(11.29, 8.39)); //i
+            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6)); //j
+            test_segments.emplace_back(Vec2(6, 6), Vec2(6, 2)); //f
+
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            const Segment* left_element = &test_segments.at(0);
+            Assert::AreEqual(left_element, left_node);
+       
+        }
+        TEST_METHOD(get_left_and_right_neighbour_case_1)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3.2, 5.28), Vec2(4.43, 8.73)); //g
+            test_segments.emplace_back(Vec2(9.2, 4.35), Vec2(8.01, 8.22)); //h
+            test_segments.emplace_back(Vec2(12, 4.44), Vec2(11.29, 8.39)); //i
+            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6)); //j
+            test_segments.emplace_back(Vec2(6, 6), Vec2(6, 2)); //f
+
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            const Segment* left_element = &test_segments.at(0);
+            Assert::AreEqual(left_element, left_node);
+            const Segment* right_element = &test_segments.at(1);
+            Assert::AreEqual(right_element, right_node);
+
+        }
+        TEST_METHOD(get_left_and_right_neighbour_case_2)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(5, 5), Vec2(6, 10)); //f
+            test_segments.emplace_back(Vec2(7, 3), Vec2(7, 8)); //h
+            test_segments.emplace_back(Vec2(3.04, 3.13), Vec2(12, 10)); //i
+            test_segments.emplace_back(Vec2(12, 10), Vec2(14, 5)); //j
+            test_segments.emplace_back(Vec2(9, 8), Vec2(10, 3)); //g
+
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            const Segment* left_node = nullptr;
+            const Segment* right_node = nullptr;
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            const Segment* left_element = &test_segments.at(1);
+            Assert::AreEqual(left_element, left_node);
+            const Segment* right_element = &test_segments.at(3);
+            Assert::AreEqual(right_element, right_node);
+
+        }
+        //make a tree with root having only one left node
+        TEST_METHOD(remove_root_one_left_node)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.remove(&test_segments.at(i));
+                Assert::IsFalse(status_structure.contains(&test_segments.at(i)));
+            }
+            Assert::IsNull(status_structure.root.get());
+        }
+        // make a tree with root having one left node and one right node
+        TEST_METHOD(remove_with_one_left_one_right)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            test_segments.emplace_back(Vec2(12, 2), Vec2(10, 5));
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.remove(&test_segments.at(i));
+                Assert::IsFalse(status_structure.contains(&test_segments.at(i)));
+            }
+            Assert::IsNull(status_structure.root.get());
+        }
+        //make a tree with root adding to left node of root
+        TEST_METHOD(remove_with_one_left_and_one_left)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
+            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6));
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.remove(&test_segments.at(i));
+                Assert::IsFalse(status_structure.contains(&test_segments.at(i)));
+            }
+            Assert::IsNull(status_structure.root.get());
+        }
+        TEST_METHOD(remove_large_tree)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6)); //f
+            test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6)); //g
+            test_segments.emplace_back(Vec2(12, 2), Vec2(10, 5)); //h
+            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6)); //i
+            test_segments.emplace_back(Vec2(4.64f, 1.05f), Vec2(1.38f, 2.63f)); //j
+            test_segments.emplace_back(Vec2(7.34f, 0.49f), Vec2(9.62f, 2.95f)); //k
+            test_segments.emplace_back(Vec2(6.3f, 7.81f), Vec2(10.92f, 7.45f)); //n
+            test_segments.emplace_back(Vec2(1.38f, 7.55f), Vec2(5.4f, 4.39f)); //m
+            test_segments.emplace_back(Vec2(9.42f, 5.55f), Vec2(8.0f, 9.0f));  // l
+            test_segments.emplace_back(Vec2(6.46f, 5.13f), Vec2(4.44f, 9.23f)); //p
+            test_segments.emplace_back(Vec2(6.42f, 3.87f), Vec2(5.5f, 2.49f)); //q
+
+            Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
+                const Segment* left_node;
+                const Segment* right_node;
+                status_structure.insert(&test_segments.at(i), left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(&test_segments.at(i)));
+            }
+            for (size_t i = 0; i < test_segments.size(); i++)
+            {
+                status_structure.remove(&test_segments.at(i));
+                Assert::IsFalse(status_structure.contains(&test_segments.at(i)));
+            }
+            Assert::IsNull(status_structure.root.get());
+        }
+
     };
 }
