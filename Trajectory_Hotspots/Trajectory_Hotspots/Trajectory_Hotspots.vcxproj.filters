@@ -16,6 +16,9 @@
     <Filter Include="Segment_Intersection_Sweep_Line">
       <UniqueIdentifier>{ad123ab7-7f75-4d03-86d9-e9a6737b7b3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DCEL">
+      <UniqueIdentifier>{77bf2e18-2c70-49b4-8b0b-0e890fb65dbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="trajectory_hotspots.cpp">
@@ -51,6 +54,15 @@
     <ClCompile Include="segment_intersection.cpp">
       <Filter>Segment_Intersection_Sweep_Line</Filter>
     </ClCompile>
+    <ClCompile Include="Face.cpp">
+      <Filter>DCEL</Filter>
+    </ClCompile>
+    <ClCompile Include="HalfEdge.cpp">
+      <Filter>DCEL</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>DCEL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -82,6 +94,15 @@
     </ClInclude>
     <ClInclude Include="segment_intersection.h">
       <Filter>Segment_Intersection_Sweep_Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Face.h">
+      <Filter>DCEL</Filter>
+    </ClInclude>
+    <ClInclude Include="HalfEdge.h">
+      <Filter>DCEL</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>DCEL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
