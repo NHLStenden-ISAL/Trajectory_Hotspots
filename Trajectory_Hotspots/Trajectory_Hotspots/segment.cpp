@@ -48,7 +48,7 @@ const Vec2* Segment::get_bottom_point() const
         return &start;
     }
 
-}
+ }
 
 const Vec2* Segment::get_top_point() const
 {
@@ -66,6 +66,7 @@ const Vec2* Segment::get_top_point() const
     }
 
 }
+
 
 Vec2 Segment::to_vector() const
 {
@@ -101,3 +102,40 @@ bool Segment::operator!=(const Segment& operand) const
 }
 
 
+// p1.top = A
+// p1.bot = B
+// p2.top = C
+// p2.bot = D
+// a= (x(A)-x(C))*(y(C)-y(D))-(y(A)-y(C))*(x(C)-x(D))
+// b= (x(A)-x(B))*(y(C)-y(D))-(y(A)-y(B))*(x(C)-x(D))
+// c= (x(A)-x(C))*(y(A)-y(B))-(y(A)-y(C))*(x(A)-x(B))
+// d= (x(A)-x(B))*(y(C)-y(D))-(y(A)-y(B))*(x(C)-x(D))
+// i= (x(A)+t*(x(B)-x(A)), y(A)+t*(y(B)-y(A))) intersection
+bool Segment::intersection_two_segments(const Segment* p1, const Segment* p2, const Vec2*& intersection)
+{
+    const float Ax = p1->get_top_point()->x;
+    const float Ay = p1->get_top_point()->y;
+    const float Bx = p1->get_bottom_point()->x;
+    const float By = p1->get_bottom_point()->y;
+
+    const float Cx = p2->get_top_point()->x;
+    const float Cy = p2->get_top_point()->y;
+
+    const float Dx = p2->get_bottom_point()->x;
+    const float Dy = p2->get_bottom_point()->y;
+
+    const float a = ((Ax - Cx) * (Cy - Dy)) - ((Ay - Cy) * (Cx - Dx));
+    const float b = ((Ax - Bx) * (Cy - Dy)) - ((Ay - By) * (Cx - Dx));
+    const float c = ((Ax - Cx) * (Ay - By)) - ((Ay - Cy) * (Ax - Bx));
+    // d is same as b
+    const float d = ((Ax - Bx) * (Cy - Dy)) - ((Ay - By) * (Cx - Dx));
+
+    const float t = a / b;
+    const float u = c / d;
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+    {
+        Vec2 intersection = Vec2((Ax + t * (Bx - Ax)), (Ay + t * (By - Ay)));
+        return true;
+    }
+    return false;
+}

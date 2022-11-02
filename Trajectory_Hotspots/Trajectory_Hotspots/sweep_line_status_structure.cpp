@@ -8,13 +8,12 @@ namespace Segment_Intersection_Sweep_Line
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="segment"></param>
-    void Sweep_Line_Status_structure::insert(const Segment* new_segment, const Segment*& left_node, const Segment*& right_node)
+    void Sweep_Line_Status_structure::insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node)
     {
         if (root != nullptr)
         {
             const Node* node = nullptr;
-
-            root = insert(std::move(root), new_segment, node);
+                        root = insert(std::move(root),segments, new_segment, node);
 
             if (node != nullptr)
             {
@@ -31,19 +30,19 @@ namespace Segment_Intersection_Sweep_Line
         }
     }
 
-    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::insert(std::unique_ptr<Node>&& node, const Segment* new_segment, const Node*& added_node)
+    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::insert(std::unique_ptr<Node>&& node, const std::vector<Segment>& segments, const int new_segment, const Node*& added_node)
     {
         std::unique_ptr<Node> new_root = std::move(node);
         //TODO: maybe put in a function returns which is smaller
-        float current_x_position = new_segment->y_intersect(line_position);
+        float current_x_position = segments.at(new_segment).y_intersect(line_position);
 
-        if (current_x_position <= new_root->segment->y_intersect(line_position))
+        if (current_x_position <= segments.at(new_root->segment).y_intersect(line_position))
         {
-            new_root->left = add_to_subtree(std::move(new_root->left), new_segment, added_node, new_root.get());
+            new_root->left = add_to_subtree(std::move(new_root->left), segments, new_segment, added_node, new_root.get());
 
             if (new_root->height_difference() == 2)
             {
-                if (current_x_position <= new_root->left->segment->y_intersect(line_position))
+                if (current_x_position <= segments.at(new_root->left->segment).y_intersect(line_position))
                 {
                     new_root = rotate_right(std::move(new_root));
                 }
@@ -55,11 +54,11 @@ namespace Segment_Intersection_Sweep_Line
         }
         else
         {
-            new_root->right = add_to_subtree(std::move(new_root->right), new_segment, added_node, new_root.get());
+            new_root->right = add_to_subtree(std::move(new_root->right), segments, new_segment, added_node, new_root.get());
 
             if (new_root->height_difference() == -2)
             {
-                if (current_x_position > new_root->right->segment->y_intersect(line_position))
+                if (current_x_position > segments.at(new_root->right->segment).y_intersect(line_position))
                 {
                     new_root = rotate_left(std::move(new_root));
                 }
@@ -74,7 +73,7 @@ namespace Segment_Intersection_Sweep_Line
         return new_root;
     }
 
-    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::add_to_subtree(std::unique_ptr<Node>&& root, const Segment* new_segment, const Node*& added_node, const Node* parent)
+    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::add_to_subtree(std::unique_ptr<Node>&& root, const std::vector<Segment>& segments, const int new_segment, const Node*& added_node, const Node* parent)
     {
         if (root == nullptr)
         {
@@ -86,15 +85,15 @@ namespace Segment_Intersection_Sweep_Line
         }
         else
         {
-            return insert(std::move(root), new_segment, added_node);
+            return insert(std::move(root), segments, new_segment, added_node);
         }
     }
 
-    void Sweep_Line_Status_structure::remove(const Segment* segment_to_remove)
+    void Sweep_Line_Status_structure::remove(const std::vector<Segment>& segments, const int segment_to_remove)
     {
         if (root != nullptr)
         {
-            root = remove(std::move(root), segment_to_remove);
+            root = remove(std::move(root),segments, segment_to_remove);
         }
         else
         {
@@ -102,13 +101,13 @@ namespace Segment_Intersection_Sweep_Line
         }
     }
 
-    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::remove(std::unique_ptr<Node>&& node, const Segment* segment_to_remove)
+    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::remove(std::unique_ptr<Node>&& node, const std::vector<Segment>& segments, const int segment_to_remove)
     {
         std::unique_ptr<Node> new_root = std::move(node);
 
-        float current_x_position = segment_to_remove->y_intersect(line_position);
+        float current_x_position = segments.at(segment_to_remove).y_intersect(line_position);
 
-        if (*segment_to_remove == *new_root->segment)
+        if (&segments.at(segment_to_remove) == &segments.at(new_root->segment))
         {
             if (new_root->left == nullptr)
             {
@@ -128,8 +127,8 @@ namespace Segment_Intersection_Sweep_Line
             }
 
             //Hoist the segment from the left child to the new root node and remove it from left (balancing in the process)
-            const Segment* child_segment = child->segment;
-            new_root->left = remove_from_parent(std::move(new_root->left), child_segment);
+            const int child_segment = child->segment;
+            new_root->left = remove_from_parent(std::move(new_root->left), segments, child_segment);
             new_root->segment = child_segment;
 
             //Balance tree if necessary
@@ -145,9 +144,9 @@ namespace Segment_Intersection_Sweep_Line
                 }
             }
         }
-        else if (current_x_position < new_root->segment->y_intersect(line_position))
+        else if (current_x_position < segments.at(new_root->segment).y_intersect(line_position))
         {
-            new_root->left = remove_from_parent(std::move(new_root->left), segment_to_remove);
+            new_root->left = remove_from_parent(std::move(new_root->left), segments, segment_to_remove);
 
             if (new_root->height_difference() == -2)
             {
@@ -163,7 +162,7 @@ namespace Segment_Intersection_Sweep_Line
         }
         else
         {
-            new_root->right = remove_from_parent(std::move(new_root->right), segment_to_remove);
+            new_root->right = remove_from_parent(std::move(new_root->right), segments,segment_to_remove);
 
             if (new_root->height_difference() == 2)
             {
@@ -183,11 +182,11 @@ namespace Segment_Intersection_Sweep_Line
         return new_root;
     }
 
-    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::remove_from_parent(std::unique_ptr<Node>&& parent, const Segment* segment_to_remove)
+    std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::remove_from_parent(std::unique_ptr<Node>&& parent, const std::vector<Segment>& segments, const int segment_to_remove)
     {
         if (parent != nullptr)
         {
-            return remove(std::move(parent), segment_to_remove);
+            return remove(std::move(parent), segments, segment_to_remove);
         }
         else
         {
@@ -195,19 +194,19 @@ namespace Segment_Intersection_Sweep_Line
         }
     }
 
-    bool Sweep_Line_Status_structure::contains(const Segment* search_segment)
+    bool Sweep_Line_Status_structure::contains(const std::vector<Segment>& segments, const int search_segment)
     {
         Node* node = root.get();
 
-        float current_x_position = search_segment->y_intersect(line_position);
+        float current_x_position = segments.at(search_segment).y_intersect(line_position);
 
         while (node != nullptr)
         {
-            if (current_x_position < node->segment->y_intersect(line_position))
+            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
             {
                 node = node->left.get();
             }
-            else if (current_x_position > node->segment->y_intersect(line_position))
+            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
             {
                 node = node->right.get();
             }
@@ -364,7 +363,7 @@ namespace Segment_Intersection_Sweep_Line
         return left_height - right_height;
     }
     // Get Left neighbour of the Segment and not the node!
-    const Segment* Sweep_Line_Status_structure::Node::get_left_neighbour(const float line_position) const
+    const int Sweep_Line_Status_structure::Node::get_left_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
         // voor linker neighbour grootste getal in de linker kant van root
         // voor de rechter neighbour kleinste getal in de rechter kan van root
@@ -381,9 +380,9 @@ namespace Segment_Intersection_Sweep_Line
                 current_right = current_right->right.get();
                 if (current_right == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
-            }
+            } 
             return current_right->segment;
         }
         // Check if right pointer of left node is empty or not
@@ -395,21 +394,21 @@ namespace Segment_Intersection_Sweep_Line
                 current_right = current_right->right.get();
                 if (current_right == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
             }
             return current_right->segment;
         }
         if (parent != nullptr)
         {
-            float current_x_position = segment->y_intersect(line_position);
+            float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position < current_parent->segment->y_intersect(line_position))
+            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
             }
             return current_parent->segment;
@@ -417,10 +416,10 @@ namespace Segment_Intersection_Sweep_Line
 
 
 
-        return nullptr;
+        return -1;
     }
 
-    const Segment* Sweep_Line_Status_structure::Node::get_right_neighbour(const float line_position) const
+    const int Sweep_Line_Status_structure::Node::get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
         if (right != nullptr)
         {
@@ -430,7 +429,7 @@ namespace Segment_Intersection_Sweep_Line
                 current_right = current_right->right.get();
                 if (current_right == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
             }
             return current_right->segment;
@@ -444,21 +443,21 @@ namespace Segment_Intersection_Sweep_Line
                 current_right = current_right->right.get();
                 if (current_right == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
             }
             return current_right->segment;
         }
         if (parent != nullptr)
         {
-            float current_x_position = segment->y_intersect(line_position);
+            float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position > current_parent->segment->y_intersect(line_position))
+            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
                 {
-                    return nullptr;
+                    return -1;
                 }
             }
             return current_parent->segment;
@@ -466,6 +465,6 @@ namespace Segment_Intersection_Sweep_Line
 
 
 
-        return nullptr;
+        return -1;
     }
 }
