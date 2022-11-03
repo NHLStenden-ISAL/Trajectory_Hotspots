@@ -34,7 +34,11 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
     //TODO: This works for now with using time because time == length, but we might want to change the tree to also store the lengths..
     Segment_Search_Tree tree(trajectory_segments);
 
-    AABB smallest_hotspot;
+    AABB smallest_hotspot(
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::lowest());
 
     //Breakpoint type I, start at vertices of the trajectory
     for (auto& trajectory_segment : trajectory_segments)
@@ -112,7 +116,13 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
 
             //Breakpoint IV, Check if any of the four sides of the AABB of the subtrajectory between u and v intersects either the start or end segment, if so, check for new hotspot
             AABB current_hotspot;
-            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.min.x, current_hotspot))
+            {
+                if (current_hotspot.width() < smallest_hotspot.width())
+                {
+                    smallest_hotspot = current_hotspot;
+                }
+            }
             if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
             if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
             if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
