@@ -111,7 +111,7 @@ bool Segment::operator!=(const Segment& operand) const
 // c= (x(A)-x(C))*(y(A)-y(B))-(y(A)-y(C))*(x(A)-x(B))
 // d= (x(A)-x(B))*(y(C)-y(D))-(y(A)-y(B))*(x(C)-x(D))
 // i= (x(A)+t*(x(B)-x(A)), y(A)+t*(y(B)-y(A))) intersection
-bool Segment::intersection_two_segments(const Segment* p1, const Segment* p2, const Vec2*& intersection)
+bool Segment::intersection_two_segments(const Segment* p1, const Segment* p2, Vec2& intersection)
 {
     const float Ax = p1->get_top_point()->x;
     const float Ay = p1->get_top_point()->y;
@@ -134,7 +134,7 @@ bool Segment::intersection_two_segments(const Segment* p1, const Segment* p2, co
     const float u = c / d;
     if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
     {
-        Vec2 intersection = Vec2((Ax + t * (Bx - Ax)), (Ay + t * (By - Ay)));
+        intersection = Vec2((Ax +( t * (Bx - Ax))), (Ay + (t * (By - Ay))));
         return true;
     }
     return false;

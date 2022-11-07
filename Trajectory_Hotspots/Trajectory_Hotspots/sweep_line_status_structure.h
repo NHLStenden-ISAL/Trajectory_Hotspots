@@ -24,19 +24,22 @@ namespace Segment_Intersection_Sweep_Line
             int height_difference();
             const int get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const;
             const int get_left_neighbour(const std::vector<Segment>& segments, const float line_position) const;
+            //get right / left node
         };
 
         Sweep_Line_Status_structure(float line_position) : line_position(line_position) {};
 
         void insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node);
         void remove(const std::vector<Segment>& segments, const int segment_to_remove);
-        bool contains(const std::vector<Segment>& segments, const int search_segment);
+        bool contains(const std::vector<Segment>& segments, const Segment* search_segment);
         
         void set_line_position(const float new_position) { line_position = new_position; };
+        void swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment);
 
         std::unique_ptr<Node> root;
 
     private:
+        //TODO: Segment* vector here
 
         float line_position;
         
@@ -50,6 +53,9 @@ namespace Segment_Intersection_Sweep_Line
         std::unique_ptr<Node> rotate_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_left_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_right_left(std::unique_ptr<Node>&& old_root);
+
+        Node* find_node(const std::vector<Segment>& segments, int segment_index);
+        //get node
 
 
     };

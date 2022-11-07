@@ -53,7 +53,7 @@ public:
     AABB get_AABB() const;
 
 
-    static bool intersection_two_segments(const Segment* p1, const Segment* p2, const Vec2*& intersection);
+    static bool intersection_two_segments(const Segment* p1, const Segment* p2, Vec2& intersection);
 
     Vec2 start;
     Vec2 end;
