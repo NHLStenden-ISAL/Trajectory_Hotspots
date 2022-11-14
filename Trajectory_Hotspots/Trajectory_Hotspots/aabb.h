@@ -33,6 +33,7 @@ public:
     }
 
     //Combine this AABB with another by keeping the extremes in all four directions
+    //TODO: Ensure this stays a square
     void combine(const AABB& other)
     {
         min.x = std::min(min.x, other.min.x);
@@ -43,6 +44,7 @@ public:
     }
 
     //Combine two AABBs with each other by keeping the extremes in all four directions
+    //TODO: Ensure this stays a square
     static AABB combine(const AABB& a, const AABB& b)
     {
         float min_x = std::min(a.min.x, b.min.x);
@@ -59,6 +61,13 @@ public:
 
     float width() const
     {
+        float width = max.x - min.x;
+
+        if (isinf(width))
+        {
+            return std::numeric_limits<float>::infinity();
+        }
+
         return max.x - min.x;
     }
 };
