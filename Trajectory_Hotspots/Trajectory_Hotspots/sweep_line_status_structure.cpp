@@ -392,6 +392,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             if (left->right != nullptr)
             {
+				//TODO: check this while loop and also for get_right_neighbour
                 const Node* current_right = left->right.get();
                 while (current_right->left != nullptr)
                 {
@@ -479,6 +480,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             if (right->left != nullptr)
             {
+                //TODO: check this while loop and also for get_left_neighbour
                 const Node* current_right = right->left.get();
                 while (current_right->right != nullptr)
                 {

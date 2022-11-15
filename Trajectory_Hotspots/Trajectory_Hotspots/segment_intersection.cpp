@@ -4,9 +4,11 @@
 
 #include <functional>
 
-//typedef std::map<const Vec2, Event, std::greater<Vec2>> map;
 
 using namespace Segment_Intersection_Sweep_Line;
+
+using map = std::map<const Vec2, Event, std::greater<Vec2>>;
+
 std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(const std::vector<Segment>& segments)
 {
     //std::vector<const Vec2*> top_points;
@@ -16,8 +18,8 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
     //Event queue sorted on point, values are the event type and index in the segment list
     
     //all multimap needs to be map typedef?
-    std::map<const Vec2, Event, std::greater<Vec2>> event_queue;
-
+    //std::map<const Vec2, Event, std::greater<Vec2>> event_queue;
+    map event_queue;
     for (int i = 0; i < segments.size(); i++)
     {
         //TODO: There is a copy here, reference instead?
@@ -70,7 +72,7 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 }
 
 //TODO Should this be a class instead of a function?
-void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, const int new_segment, Vec2 event_point)
+void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue, const int new_segment, Vec2 event_point)
 {
     status_structure.set_line_position(event_point.y);
     int left_segment = -1;
@@ -104,7 +106,7 @@ void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_st
     // insert intersection point to event queue
 }
 
-void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, const int segment, Vec2 event_point)
+void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue, const int segment, Vec2 event_point)
 {
     status_structure.set_line_position(event_point.y);
 	int left_segment = -1;
@@ -130,7 +132,7 @@ void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status
 }
 
 
-void Segment_Intersection_Sweep_Line::intersection(Sweep_Line_Status_structure& status_structure,  const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, int p1, int p2, Vec2 event_point)
+void Segment_Intersection_Sweep_Line::intersection(Sweep_Line_Status_structure& status_structure,  const std::vector<Segment>& segments, map& event_queue, int p1, int p2, Vec2 event_point)
 {
     Vec2 intersection;
     int left_segment = -1;

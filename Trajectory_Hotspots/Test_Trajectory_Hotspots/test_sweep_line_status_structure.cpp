@@ -391,11 +391,10 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
-            
+            int left_segment = -1;
+            int right_segment = -1;
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                int left_segment = -1;
-                int right_segment = -1;
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
