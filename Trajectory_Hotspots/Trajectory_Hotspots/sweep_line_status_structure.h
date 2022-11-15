@@ -16,8 +16,8 @@ namespace Segment_Intersection_Sweep_Line
 
             int segment; //index
             int height = 0;
-            std::unique_ptr<Node> left;
-            std::unique_ptr<Node> right;
+            std::unique_ptr<Node> left = nullptr;
+            std::unique_ptr<Node> right = nullptr;
             const Node* parent = nullptr;
 
             void calculate_height();
@@ -30,7 +30,7 @@ namespace Segment_Intersection_Sweep_Line
         Sweep_Line_Status_structure(float line_position) : line_position(line_position) {};
 
         void insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node);
-        void remove(const std::vector<Segment>& segments, const int segment_to_remove);
+        void remove(const std::vector<Segment>& segments, const int segment_to_remove, int& left_node, int& right_node);
         bool contains(const std::vector<Segment>& segments, const Segment* search_segment);
         
         void set_line_position(const float new_position) { line_position = new_position; };

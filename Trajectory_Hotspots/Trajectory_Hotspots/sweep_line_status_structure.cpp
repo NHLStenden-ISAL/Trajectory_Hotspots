@@ -88,11 +88,14 @@ namespace Segment_Intersection_Sweep_Line
             return insert(std::move(root), segments, new_segment, added_node);
         }
     }
-
-    void Sweep_Line_Status_structure::remove(const std::vector<Segment>& segments, const int segment_to_remove)
+  
+    void Sweep_Line_Status_structure::remove(const std::vector<Segment>& segments, const int segment_to_remove, int& left_node, int& right_node)
     {
         if (root != nullptr)
         {
+			left_node = root.get()->get_left_neighbour(segments,line_position);
+            right_node = root.get()->get_right_neighbour(segments, line_position);
+			
             root = remove(std::move(root),segments, segment_to_remove);
         }
         else
@@ -387,16 +390,20 @@ namespace Segment_Intersection_Sweep_Line
         // Check if right pointer of left node is empty or not
         if (left != nullptr)
         {
-            const Node* current_right = left->right.get();
-            while (current_right->left != nullptr)
+            if (left->right != nullptr)
             {
-                current_right = current_right->right.get();
-                if (current_right == nullptr)
+                const Node* current_right = left->right.get();
+                while (current_right->left != nullptr)
                 {
-                    return -1;
+                    current_right = current_right->right.get();
+                    if (current_right == nullptr)
+                    {
+                        return -1;
+                    }
                 }
+                return current_right->segment;
             }
-            return current_right->segment;
+            
         }
         if (parent != nullptr)
         {
@@ -420,7 +427,9 @@ namespace Segment_Intersection_Sweep_Line
 
     const int Sweep_Line_Status_structure::Node::get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
-        if (right != nullptr)
+		//TODO: Check (old) commented code with new code and see if it really does what its supposed to do
+        /*
+        * if (right != nullptr)
         {
             const Node* current_right = right.get();
             while (current_right->right != nullptr)
@@ -436,16 +445,51 @@ namespace Segment_Intersection_Sweep_Line
         // Check if right pointer of left node is empty or not
         if (left != nullptr)
         {
-            const Node* current_right = left->right.get();
+            if (left->right != nullptr)
+            {
+                const Node* current_right = left->right.get();
+                while (current_right->left != nullptr)
+                {
+                    current_right = current_right->right.get();
+                    if (current_right == nullptr)
+                    {
+                        return -1;
+                    }
+                }
+                return current_right->segment;
+            }
+        }
+        */
+		
+        if (left != nullptr)
+        {
+            const Node* current_right = left.get();
             while (current_right->left != nullptr)
             {
-                current_right = current_right->right.get();
+                current_right = current_right->left.get();
                 if (current_right == nullptr)
                 {
                     return -1;
                 }
             }
             return current_right->segment;
+        }
+        // Check if right pointer of left node is empty or not
+        if (right != nullptr)
+        {
+            if (right->left != nullptr)
+            {
+                const Node* current_right = right->left.get();
+                while (current_right->right != nullptr)
+                {
+                    current_right = current_right->left.get();
+                    if (current_right == nullptr)
+                    {
+                        return -1;
+                    }
+                }
+                return current_right->segment;
+            }
         }
         if (parent != nullptr)
         {
@@ -469,7 +513,7 @@ namespace Segment_Intersection_Sweep_Line
 
     void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
     {
-        //TODO: test this with left/right neighbour
+        //TODO: test this with left/right neighbour function
         Node* node1 = find_node(segments, segment_index_1);
         Node* node2 = find_node(segments, segment_index_2);
         node1->segment = segment_index_2;

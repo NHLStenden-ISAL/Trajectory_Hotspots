@@ -4,6 +4,8 @@
 
 #include <functional>
 
+//typedef std::map<const Vec2, Event, std::greater<Vec2>> map;
+
 using namespace Segment_Intersection_Sweep_Line;
 std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(const std::vector<Segment>& segments)
 {
@@ -13,7 +15,8 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 
     //Event queue sorted on point, values are the event type and index in the segment list
     
-    std::multimap<const Vec2, Event, std::greater<Vec2>> event_queue;
+    //all multimap needs to be map typedef?
+    std::map<const Vec2, Event, std::greater<Vec2>> event_queue;
 
     for (int i = 0; i < segments.size(); i++)
     {
@@ -39,7 +42,9 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
             bottom(status_structure, segments, event_queue, event->second.segment_index, event_queue.begin()->first);
             break;
         case Intersection_Event_Type::INTERSECTION:
-            result.emplace_back(intersection(status_structure, event_queue, segments, event->second.segment_index, event->second.other_segment_index, event_queue.begin()->first));
+            result.emplace_back(event->first);
+            intersection(status_structure, segments, event_queue, event->second.segment_index, event->second.other_segment_index, event_queue.begin()->first);
+			
             break;
         default:
             break;
@@ -52,6 +57,8 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
     //Add top and bottom events, add reference to segment
     //Add events to sorted queue, take into account same points..
     //Handle events, add intersection event to queue, switch order of segment, do intersect test.
+	
+	
 
 
 
@@ -63,7 +70,7 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 }
 
 //TODO Should this be a class instead of a function?
-void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::multimap<const Vec2, Event, std::greater<Vec2>>& event_queue, const int new_segment, Vec2 event_point)
+void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, const int new_segment, Vec2 event_point)
 {
     status_structure.set_line_position(event_point.y);
     int left_segment = -1;
@@ -97,16 +104,33 @@ void Segment_Intersection_Sweep_Line::top(Sweep_Line_Status_structure& status_st
     // insert intersection point to event queue
 }
 
-void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::multimap < const Vec2, Event, std::greater<Vec2>>& event_queue, const int segment, Vec2 event_point)
+void Segment_Intersection_Sweep_Line::bottom(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, const int segment, Vec2 event_point)
 {
     status_structure.set_line_position(event_point.y);
-    status_structure.remove(segments, segment);
+	int left_segment = -1;
+	int right_segment = -1;
+    status_structure.remove(segments, segment, left_segment, right_segment);
+    
+
+    Vec2 intersection;
+    if (left_segment != -1)
+    {
+        if (right_segment != -1)
+        {
+            if (Segment::intersection_two_segments(&segments.at(left_segment), &segments.at(right_segment), intersection))
+            {
+                event_queue.emplace(intersection, Event(Intersection_Event_Type::INTERSECTION, left_segment, right_segment));
+                //add intersection // check neighbour?
+            }
+        }
+    }
     //check for intersection new neighbour
     // intersect(get neighbours)
     // insert intersection point to event
 }
 
-Vec2 Segment_Intersection_Sweep_Line::intersection(Sweep_Line_Status_structure& status_structure, std::multimap<const Vec2, Event, std::greater<Vec2>>& event_queue, const std::vector<Segment>& segments , int p1, int p2, Vec2 event_point)
+
+void Segment_Intersection_Sweep_Line::intersection(Sweep_Line_Status_structure& status_structure,  const std::vector<Segment>& segments, std::map<const Vec2, Event, std::greater<Vec2>>& event_queue, int p1, int p2, Vec2 event_point)
 {
     Vec2 intersection;
     int left_segment = -1;
@@ -137,10 +161,11 @@ Vec2 Segment_Intersection_Sweep_Line::intersection(Sweep_Line_Status_structure& 
         }
     }
 
-    
-    return intersection;
+
     //swap Si(links) Sj(rechts) in status structure
     //check intersection between Si-1 Sj and Si+1 Sj
     //add new intersection event in queue
 }
+
+
 

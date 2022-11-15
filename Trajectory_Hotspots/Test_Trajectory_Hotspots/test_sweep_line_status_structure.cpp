@@ -87,10 +87,11 @@ namespace TestTrajectoryHotspots
                 int right_node;
                 status_structure.insert(test_segments, i,left_node,right_node);
             }
-
+            int left_segment = -1;
+            int right_segment = -1;
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.remove(test_segments, i);
+                status_structure.remove(test_segments, i,left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
 
@@ -304,9 +305,11 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(status_structure.contains(test_segments , &test_segments.at(i)));
             }
+            int left_segment = -1;
+            int right_segment = -1;
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.remove(test_segments ,i);
+                status_structure.remove(test_segments ,i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments , &test_segments.at(i)));
             }
             Assert::IsNull(status_structure.root.get());
@@ -328,9 +331,11 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
+            int left_segment = -1;
+            int right_segment = -1;
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.remove(test_segments, i);
+                status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments , &test_segments.at(i)));
             }
             Assert::IsNull(status_structure.root.get());
@@ -352,9 +357,11 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
+            int left_segment = -1;
+            int right_segment = -1;
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.remove(test_segments, i);
+                status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
             Assert::IsNull(status_structure.root.get());
@@ -384,9 +391,12 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
+            
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.remove(test_segments, i);
+                int left_segment = -1;
+                int right_segment = -1;
+                status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
             Assert::IsNull(status_structure.root.get());
