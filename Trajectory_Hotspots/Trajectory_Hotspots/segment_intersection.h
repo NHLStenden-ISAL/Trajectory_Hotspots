@@ -24,13 +24,18 @@ namespace Segment_Intersection_Sweep_Line
         int segment_index;
         int other_segment_index;
 
-       
+
     };
 
-    using map = std::map<const Vec2, Event, std::greater<Vec2>>;
-   
+    //Event queue sorted on point, values are a segment list where the event point is the top point of the segment
+    Sweep_Line_Status_structure status_structure;
+    std::map<const Vec2, std::vector<int>> event_queue;
+
     void top(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue, const int segment, Vec2 event_point);
     void bottom(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue, const int segment, Vec2 event_point);
-    void intersection(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue,  int p1, int p2, Vec2 event_point);
+    void intersection(Sweep_Line_Status_structure& status_structure, const std::vector<Segment>& segments, map& event_queue, int p1, int p2, Vec2 event_point);
+
     std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments);
+
+    void Handle_Event(const Vec2& event_point, const std::vector<int>& top_segments);
 }
