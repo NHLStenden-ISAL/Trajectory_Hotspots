@@ -222,6 +222,31 @@ namespace Segment_Intersection_Sweep_Line
 
         return false;
     }
+    //TODO: returns true if another segment intersect at the same point.
+    Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::get_node(const std::vector<Segment>& segments, const Vec2& event_point)
+    {
+        Node* node = root.get();
+        //TODO: Is this correct?
+        float current_x_position = event_point.x;
+
+        while (node != nullptr)
+        {
+            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
+            {
+                node = node->left.get();
+            }
+            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
+            {
+                node = node->right.get();
+            }
+            else
+            {
+                return node;
+            }
+        }
+
+        return nullptr;
+    }
 
     std::unique_ptr<typename Sweep_Line_Status_structure::Node> Sweep_Line_Status_structure::rotate_left(std::unique_ptr<Node>&& old_root)
     {
@@ -441,6 +466,81 @@ namespace Segment_Intersection_Sweep_Line
         return -1;
     }
 
+    const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_left_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
+    {
+        // voor linker neighbour grootste getal in de linker kant van root
+        // voor de rechter neighbour kleinste getal in de rechter kan van root
+        // als groot
+
+        // Check if right pointer of left node is empty or not
+        if (left != nullptr)
+        {
+            const Node* current_right = left.get();
+            while (current_right->right != nullptr)
+            {
+                const Node* current_right = left->right.get();
+                while (current_right->left != nullptr)
+                {
+                    current_right = current_right->right.get();
+                    if (current_right == nullptr)
+                    {
+                        return nullptr;
+                    }
+                }
+                return current_right;
+            }
+
+        }
+        if (parent != nullptr)
+        {
+            float current_x_position = segments.at(segment).y_intersect(line_position);
+            const Node* current_parent = parent;
+            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
+            {
+                current_parent = current_parent->parent;
+                if (current_parent == nullptr)
+                {
+                    return nullptr;
+                }
+            }
+            return current_parent;
+        }
+
+
+		
+        return nullptr;
+    }
+	
+    const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_right_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
+    {
+        if (right != nullptr)
+        {
+            const Node* current_right = right.get();
+
+            while (current_right->left != nullptr)
+            {
+                current_right = current_right->left.get();
+            }
+            return current_right;
+        }
+        if (parent != nullptr)
+        {
+            float current_x_position = segments.at(segment).y_intersect(line_position);
+            const Node* current_parent = parent;
+            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
+            {
+                current_parent = current_parent->parent;
+                if (current_parent == nullptr)
+                {
+                    return nullptr;
+                }
+            }
+            return current_parent;
+        }
+
+        return nullptr;
+    }
+	
     void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
     {
         //TODO: test this with left/right neighbour function
@@ -480,4 +580,57 @@ namespace Segment_Intersection_Sweep_Line
 
         return nullptr;
     }
+
+    void Sweep_Line_Status_structure::get_all_nodes_on(const std::vector<Segment> segments, const Vec2& event_point, std::vector<int>& intersections, std::vector<int>& bottom_segments)
+    {
+        const Node* event_node = get_node(segments, event_point);
+        if (event_node != nullptr)
+        {
+            const Node* left_node = event_node->get_left_neighbour_node(segments, line_position);
+            const Node* right_node = event_node->get_right_neighbour_node(segments, line_position);
+
+            float intersection = event_point.x;
+
+            while (left_node != nullptr)
+            {
+                float new_intersection = segments.at(left_node->segment).y_intersect(line_position);
+                if (nearly_equal(intersection, new_intersection))
+                {
+                    if (*segments.at(left_node->segment).get_bottom_point() == event_point)
+                    {
+                        bottom_segments.push_back(left_node->segment);
+                    }
+                    else
+                    {
+                        intersections.push_back(left_node->segment);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+                left_node = left_node->get_left_neighbour_node(segments, line_position);
+            }
+            while (right_node != nullptr)
+            {
+                float new_intersection = segments.at(right_node->segment).y_intersect(line_position);
+                if (nearly_equal(intersection, new_intersection))
+                {
+                    if (*segments.at(right_node->segment).get_top_point() == event_point)
+                    {
+                        bottom_segments.push_back(right_node->segment);
+                    }
+                    else
+                    {
+                        intersections.push_back(right_node->segment);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+                right_node = right_node->get_right_neighbour_node(segments, line_position);
+            }
+        }
+    }	
 }
