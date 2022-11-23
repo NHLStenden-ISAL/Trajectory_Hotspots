@@ -123,7 +123,7 @@
   <ItemGroup>
     <ClCompile Include="aabb.cpp" />
     <ClCompile Include="dcel.cpp" />
-    <ClCompile Include="HalfEdge.cpp" />
+    <ClCompile Include="halfedge.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -132,20 +132,20 @@
     <ClCompile Include="segment.cpp" />
     <ClCompile Include="segment_intersection.cpp" />
     <ClCompile Include="segment_search_tree.cpp" />
-    <ClCompile Include="Face.cpp" />
+    <ClCompile Include="face.cpp" />
     <ClCompile Include="sweep_line_status_structure.cpp" />
     <ClCompile Include="trajectory.cpp" />
     <ClCompile Include="trajectory_hotspots.cpp" />
     <ClCompile Include="trapezoidal_map.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="vec2.cpp" />
-    <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="dcel.h" />
-    <ClInclude Include="Face.h" />
-    <ClInclude Include="HalfEdge.h" />
+    <ClInclude Include="face.h" />
+    <ClInclude Include="halfedge.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="segment_intersection.h" />
@@ -155,7 +155,7 @@
     <ClInclude Include="trapezoidal_map.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="vec2.h" />
-    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

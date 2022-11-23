@@ -54,13 +54,13 @@
     <ClCompile Include="segment_intersection.cpp">
       <Filter>Segment_Intersection_Sweep_Line</Filter>
     </ClCompile>
-    <ClCompile Include="Face.cpp">
+    <ClCompile Include="face.cpp">
       <Filter>DCEL</Filter>
     </ClCompile>
-    <ClCompile Include="HalfEdge.cpp">
+    <ClCompile Include="halfedge.cpp">
       <Filter>DCEL</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
+    <ClCompile Include="vertex.cpp">
       <Filter>DCEL</Filter>
     </ClCompile>
     <ClCompile Include="dcel.cpp">
@@ -98,13 +98,13 @@
     <ClInclude Include="segment_intersection.h">
       <Filter>Segment_Intersection_Sweep_Line</Filter>
     </ClInclude>
-    <ClInclude Include="Face.h">
+    <ClInclude Include="face.h">
       <Filter>DCEL</Filter>
     </ClInclude>
-    <ClInclude Include="HalfEdge.h">
+    <ClInclude Include="halfedge.h">
       <Filter>DCEL</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.h">
+    <ClInclude Include="vertex.h">
       <Filter>DCEL</Filter>
     </ClInclude>
     <ClInclude Include="dcel.h">
