@@ -9,7 +9,7 @@ public:
     //Build the tree bottom-up from a lsit of ordered segments
     Segment_Search_Tree_Node(const std::vector<Segment>& ordered_segments, const size_t start_index, const size_t end_index);
 
-    //Query tree, reutrns bounding box from start_t to end_t
+    //Query tree, returns bounding box from start_t to end_t
     AABB Query(const float start_t, const float end_t) const;
 
     //Query tree, returns bounding box from start_t to the last point contained in the (sub)tree
@@ -27,6 +27,7 @@ public:
     const Segment* segment;
 
     AABB bounding_box;
+
 };
 
 class Segment_Search_Tree

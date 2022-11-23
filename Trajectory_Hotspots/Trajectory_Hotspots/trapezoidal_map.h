@@ -43,7 +43,7 @@ public:
 
 public:
 
-
+	
     Trapezoidal_Leaf_Node* bottom_left;
     Trapezoidal_Leaf_Node* bottom_right;
     Trapezoidal_Leaf_Node* top_left;
