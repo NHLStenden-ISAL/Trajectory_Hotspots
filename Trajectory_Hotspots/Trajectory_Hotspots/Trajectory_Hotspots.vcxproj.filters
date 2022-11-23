@@ -63,6 +63,9 @@
     <ClCompile Include="Vertex.cpp">
       <Filter>DCEL</Filter>
     </ClCompile>
+    <ClCompile Include="dcel.cpp">
+      <Filter>DCEL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -102,6 +105,9 @@
       <Filter>DCEL</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
+      <Filter>DCEL</Filter>
+    </ClInclude>
+    <ClInclude Include="dcel.h">
       <Filter>DCEL</Filter>
     </ClInclude>
   </ItemGroup>
