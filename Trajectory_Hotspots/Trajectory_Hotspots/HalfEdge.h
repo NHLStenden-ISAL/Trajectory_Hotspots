@@ -1,10 +1,5 @@
 #pragma once
 
-#include "Vertex.h"
-#include "Face.h"
-#include "dcel.h"
-#include "pch.h"
-
 class HalfEdge {
 
 public:
@@ -15,18 +10,22 @@ public:
 	}
 
 	//Loops through all the half edges around a vertex
-	std::vector<HalfEdge*> through_vertex_halfedges(Vertex v);
+	std::vector<HalfEdge*> through_vertex_halfedges(Vertex* v);
 
 	//Splits edges on an intersection
-	std::vector<HalfEdge*> split_edges(HalfEdge edge1, HalfEdge edge2);
+	std::vector<HalfEdge*> split_edges(HalfEdge* edge1, HalfEdge* edge2, Vertex* intersection);
 
-	HalfEdge splice_edges();
-
-	//Insert an intersecting edge
-	HalfEdge insert_edge();
+	std::vector<float*> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
+	
+	HalfEdge* splice_edges(HalfEdge* edge1, HalfEdge* edge2, HalfEdge* edge11, HalfEdge* edge22);
 
 	//Gets the first clockwise half edge with origin V
-	HalfEdge get_cw_halfedge(HalfEdge* halfedge);
+	HalfEdge* get_cw_halfedge(HalfEdge* halfedge, Vertex* v);
+	
+	//Insert an intersecting edge
+	HalfEdge* insert_edge(HalfEdge* halfedge, Dcel dcel);
+
+	
 
 	Vertex* origin;
 	HalfEdge* twin;

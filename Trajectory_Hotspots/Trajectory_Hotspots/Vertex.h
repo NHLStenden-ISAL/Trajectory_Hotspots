@@ -1,8 +1,5 @@
 #pragma once
 
-#include "pch.h"
-#include "HalfEdge.h"
-
 class Vertex {
 
 public:
@@ -17,8 +14,9 @@ public:
 
 	Vertex create_vertex(Vec2 position);
 
-	std::vector<HalfEdge*> incidentEdge;  
 	Vec2 position;
+	std::vector<HalfEdge*> incidentEdge;  
+	
     
 
 };

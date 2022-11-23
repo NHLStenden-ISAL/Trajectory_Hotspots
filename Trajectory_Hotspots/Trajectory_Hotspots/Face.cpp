@@ -1,11 +1,14 @@
+#include "pch.h"
 #include "Face.h"
 
-Face get_neighbors(Face face) 
+#include "HalfEdge.h"
+
+Face Face::get_neighbors(Face face) 
 {
 
 }
 
-Face delta_function() 
+Face Face::delta_function() 
 {
 
 }

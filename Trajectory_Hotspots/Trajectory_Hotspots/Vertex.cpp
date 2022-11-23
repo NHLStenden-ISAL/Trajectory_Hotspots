@@ -1,6 +1,15 @@
-#include "Vertex.h"
+#include "pch.h"
+#include "vertex.h"
 
-Vertex get_point(Face face)
+#include "halfEdge.h"
+#include "face.h"
+
+Vertex Vertex::get_point(Face face)
 {
 
+}
+
+Vertex Vertex::create_vertex(Vec2 position) 
+{
+	
 }

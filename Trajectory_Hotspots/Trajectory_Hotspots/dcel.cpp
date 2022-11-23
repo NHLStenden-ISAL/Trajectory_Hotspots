@@ -1,6 +1,11 @@
+#include "pch.h"
 #include "dcel.h"
 
-dcel map_overlay(dcel dcel1, dcel dcel2)
+#include "face.h"
+#include "halfedge.h"
+#include "vertex.h"
+
+Dcel Dcel::map_overlay(Dcel dcel1, Dcel dcel2)
 {
 	
 }

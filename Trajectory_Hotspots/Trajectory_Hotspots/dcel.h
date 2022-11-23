@@ -1,21 +1,15 @@
 #pragma once
 
-#include "pch.h"
-#include "HalfEdge.h"
-#include "Vertex.h"
-#include "Face.h"
-
-
-class dcel 
+class Dcel 
 {
 public:
 
-	dcel(std::vector<std::unique_ptr<HalfEdge>> halfedges, std::vector<std::unique_ptr<Face>> faces, std::vector<std::unique_ptr<Vertex>> vertices) : halfedges(halfedges), faces(faces), vertices(vertices)
+	Dcel(std::vector<std::unique_ptr<HalfEdge>> halfedges, std::vector<std::unique_ptr<Face>> faces, std::vector<std::unique_ptr<Vertex>> vertices) : halfedges(halfedges), faces(faces), vertices(vertices)
 	{
 
 	}
 
-	dcel map_overlay(dcel dcel1, dcel dcel2);
+	Dcel map_overlay(Dcel dcel1, Dcel dcel2);
 	
 	std::vector<std::unique_ptr<HalfEdge>> halfedges;
 	std::vector<std::unique_ptr<Face>> faces;

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "pch.h"
-#include "HalfEdge.h"
-
 class Face {
 
 public:
