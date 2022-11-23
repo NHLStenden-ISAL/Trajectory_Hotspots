@@ -6,6 +6,9 @@ namespace Segment_Intersection_Sweep_Line
     class Sweep_Line_Status_structure
     {
     public:
+		Sweep_Line_Status_structure() : line_position(0.0f)
+		{
+		};
 
         class Node
         {
@@ -38,7 +41,7 @@ namespace Segment_Intersection_Sweep_Line
         void set_line_position(const float new_position) { line_position = new_position; };
         void swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment);
 		
-        void get_all_nodes_on(const std::vector<Segment> segments, const Vec2& event_point, std::vector<int>& intersections , std::vector<int>& bottom_segments);
+        void get_all_nodes_on(const std::vector<Segment> segments, const Vec2& event_point, std::vector<int>& intersections , std::vector<int>& bottom_segments, int& most_left_segment, int& most_right_segment);
         Node* get_node(const std::vector<Segment>& segments, const Vec2& event_point);
 
 

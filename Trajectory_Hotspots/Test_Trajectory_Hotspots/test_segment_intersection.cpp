@@ -10,19 +10,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace Segment_Intersection_Sweep_Line;
 
-namespace Microsoft
-{
-	namespace VisualStudio
-	{
-		namespace CppUnitTestFramework
-		{
-			template<> static std::wstring ToString<Segment>(const class Segment& t) { return L"Segment"; }
-			template<> static std::wstring ToString<Segment>(const class Segment* t) { return L"Segment"; }
-			template<> static std::wstring ToString<std::vector<Vec2>>(const class std::vector<Vec2>& t) { return L"Vec2"; }
-			template<> static std::wstring ToString<std::vector<Vec2>>(const class std::vector<Vec2>* t) { return L"Vec2"; }
-		}
-	}
-}
+
 namespace TestTrajectoryHotspots
 {
 	TEST_CLASS(TestSegmentintersection)

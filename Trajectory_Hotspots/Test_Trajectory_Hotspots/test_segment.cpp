@@ -6,21 +6,9 @@
 #include "../Trajectory_Hotspots/segment.h"
 #include "../Trajectory_Hotspots/sweep_line_status_structure.h"
 #include "../Trajectory_Hotspots/segment_intersection.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace Microsoft
-{
-	namespace VisualStudio
-	{
-		namespace CppUnitTestFramework
-		{
-			template<> static std::wstring ToString<Segment>(const class Segment& t) { return L"Segment"; }
-			template<> static std::wstring ToString<Segment>(const class Segment* t) { return L"Segment"; }
-			template<> static std::wstring ToString<Vec2>(const class Vec2& t) { return L"Vec2"; }
-			template<> static std::wstring ToString<Vec2>(const class Vec2* t) { return L"Vec2"; }
-		}
-	}
-}
 namespace TestTrajectoryHotspots
 {
 	TEST_CLASS(TestSegment)

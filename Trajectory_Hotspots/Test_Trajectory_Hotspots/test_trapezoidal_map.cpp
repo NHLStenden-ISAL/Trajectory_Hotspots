@@ -15,12 +15,6 @@ namespace Microsoft
     {
         namespace CppUnitTestFramework
         {
-            template<> static std::wstring ToString<Segment>(const class Segment& t) { return L"Segment"; }
-            template<> static std::wstring ToString<Segment>(const class Segment* t) { return L"Segment"; }
-            template<> static std::wstring ToString<Segment>(class Segment* t) { return L"Segment"; }
-            template<> static std::wstring ToString<Vec2>(const class Vec2& t) { return L"Vec2"; }
-            template<> static std::wstring ToString<Vec2>(const class Vec2* t) { return L"Vec2"; }
-            template<> static std::wstring ToString<Vec2>(class Vec2* t) { return L"Vec2"; }
             template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(class Trapezoidal_Leaf_Node* t) { return L"Trapezoidal_Leaf_Node"; }
             template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(const class Trapezoidal_Leaf_Node* t) { return L"Trapezoidal_Leaf_Node"; }
             template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(const class Trapezoidal_Leaf_Node& t) { return L"Trapezoidal_Leaf_Node"; }

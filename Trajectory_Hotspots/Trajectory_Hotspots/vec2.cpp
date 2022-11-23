@@ -16,6 +16,12 @@ float Vec2::length() const
     return sqrtf(x * x + y * y);
 }
 
+float Vec2::cross(const Vec2& other) const
+{
+	return x * other.y - y * other.x;
+}
+
+
 void Vec2::normalize()
 {
     //Multiply by reciprocal to prevent two divides

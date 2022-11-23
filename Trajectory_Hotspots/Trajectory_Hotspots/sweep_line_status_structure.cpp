@@ -35,8 +35,17 @@ namespace Segment_Intersection_Sweep_Line
         std::unique_ptr<Node> new_root = std::move(node);
         //TODO: maybe put in a function returns which is smaller
         float current_x_position = segments.at(new_segment).y_intersect(line_position);
+        float node_x_position = segments.at(new_root->segment).y_intersect(line_position);
 
-        if (current_x_position <= segments.at(new_root->segment).y_intersect(line_position))
+            //A  = new_root-segment
+            //B  = new_segment
+            // CROSS A x B
+            // if cross is negative, then the new segment is on the left
+
+        Vec2 new_root_segment = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
+        Vec2 new_segment_vec = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
+
+        if (current_x_position < node_x_position || new_root_segment.cross(new_segment_vec) < 0)
         {
             new_root->left = add_to_subtree(std::move(new_root->left), segments, new_segment, added_node, new_root.get());
 
@@ -581,7 +590,13 @@ namespace Segment_Intersection_Sweep_Line
         return nullptr;
     }
 
-    void Sweep_Line_Status_structure::get_all_nodes_on(const std::vector<Segment> segments, const Vec2& event_point, std::vector<int>& intersections, std::vector<int>& bottom_segments)
+    void Sweep_Line_Status_structure::get_all_nodes_on(
+        const std::vector<Segment> segments, 
+        const Vec2& event_point, 
+        std::vector<int>& intersections, 
+        std::vector<int>& bottom_segments, 
+        int& most_left_segment, 
+        int& most_right_segment)
     {
         const Node* event_node = get_node(segments, event_point);
         if (event_node != nullptr)
@@ -611,6 +626,10 @@ namespace Segment_Intersection_Sweep_Line
                 }
                 left_node = left_node->get_left_neighbour_node(segments, line_position);
             }
+            //last in intersections is most right after intersection
+            //left_node is last non intersection
+            most_right_segment = intersections.back();
+
             while (right_node != nullptr)
             {
                 float new_intersection = segments.at(right_node->segment).y_intersect(line_position);
@@ -631,6 +650,11 @@ namespace Segment_Intersection_Sweep_Line
                 }
                 right_node = right_node->get_right_neighbour_node(segments, line_position);
             }
+            //last in intersections is most left after intersection
+            //right_node is last non intersection
+            most_left_segment = intersections.back();
+
+
         }
     }	
 }
