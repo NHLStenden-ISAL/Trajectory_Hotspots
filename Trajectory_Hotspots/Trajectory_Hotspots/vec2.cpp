@@ -18,7 +18,7 @@ float Vec2::length() const
 
 float Vec2::cross(const Vec2& other) const
 {
-	return x * other.y - y * other.x;
+    return x * other.y - y * other.x;
 }
 
 

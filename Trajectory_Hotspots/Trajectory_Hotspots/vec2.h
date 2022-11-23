@@ -16,7 +16,7 @@ public:
     float squared_length() const;
 
     float length() const;
-	
+    
     float cross(const Vec2& other) const;
 
     void normalize();

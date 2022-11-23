@@ -516,10 +516,10 @@ namespace Segment_Intersection_Sweep_Line
         }
 
 
-		
+        
         return nullptr;
     }
-	
+    
     const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_right_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
     {
         if (right != nullptr)
@@ -549,7 +549,7 @@ namespace Segment_Intersection_Sweep_Line
 
         return nullptr;
     }
-	
+    
     void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
     {
         //TODO: test this with left/right neighbour function
