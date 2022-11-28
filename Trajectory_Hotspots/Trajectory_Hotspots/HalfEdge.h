@@ -1,5 +1,9 @@
 #pragma once
 
+class Vertex;
+class Dcel;
+class Face;
+
 class HalfEdge {
 
 public:
@@ -15,15 +19,17 @@ public:
 	//Splits edges on an intersection
 	std::vector<HalfEdge*> split_edges(HalfEdge* edge1, HalfEdge* edge2, Vertex* intersection);
 
-	std::vector<float*> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
+	std::vector<float> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
 	
 	HalfEdge* splice_edges(HalfEdge* edge1, HalfEdge* edge2, HalfEdge* edge11, HalfEdge* edge22);
+
+	float get_closest_angle(std::vector<float> angles, float new_angle);
 
 	//Gets the first clockwise half edge with origin V
 	HalfEdge* get_cw_halfedge(HalfEdge* halfedge, Vertex* v);
 	
 	//Insert an intersecting edge
-	HalfEdge* insert_edge(HalfEdge* halfedge, Dcel dcel);
+	//HalfEdge* insert_edge(HalfEdge* halfedge, Dcel dcel);
 
 	
 

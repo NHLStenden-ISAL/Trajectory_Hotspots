@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "HalfEdge.h"
 
-#include "Vertex.h"
-#include "Face.h"
+#include "vertex.h"
+#include "face.h"
 #include "dcel.h"
+#include "halfedge.h"
 
 //First offset_edge index is N. First twin_edge index is N+1.
 std::vector<HalfEdge*> HalfEdge::through_vertex_halfedges(Vertex* v)
@@ -59,11 +59,11 @@ std::vector<HalfEdge*> HalfEdge::split_edges(HalfEdge* edge1, HalfEdge* edge2, V
 
 	//Get angles from all the halfedges around the intersection
 	std::vector<HalfEdge*> halfedges = through_vertex_halfedges(intersection);
-	std::vector<float*> angles = get_polar_angles(halfedges, intersection);
+	std::vector<float> angles = get_polar_angles(halfedges, intersection);
 
 	//Get the angles from the new edges to compare them
 	std::vector<HalfEdge*> new_edges = { new_edge1, new_edge2 };
-	std::vector<float*> new_angles = get_polar_angles(new_edges, intersection);
+	std::vector<float> new_angles = get_polar_angles(new_edges, intersection);
 
 
 	
@@ -74,7 +74,25 @@ std::vector<HalfEdge*> HalfEdge::split_edges(HalfEdge* edge1, HalfEdge* edge2, V
 	return result;
 }
 
-std::vector<float*> HalfEdge::get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v)
+float HalfEdge::get_closest_angle(std::vector<float> angles, float new_angle)
+{
+	{
+		float closest_angle = 0;
+		float closest_angle_diff = 1000000;
+		for (float& angle : angles)
+		{
+			float angle_diff = abs(angle - new_angle);
+			if (angle_diff < closest_angle_diff)
+			{
+				closest_angle = angle;
+				closest_angle_diff = angle_diff;
+			}
+		}
+		return closest_angle;
+	}
+}
+
+std::vector<float> HalfEdge::get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v)
 {
 	std::vector<HalfEdge*> incidentedges;
 
@@ -97,7 +115,7 @@ std::vector<float*> HalfEdge::get_polar_angles(std::vector<HalfEdge*> halfedges,
 		vertex_positions.emplace_back(xy);
 	}
 
-	std::vector<float*> polar_angles;
+	std::vector<float> polar_angles;
 
 	for (size_t i = 0; i < vertex_positions.size(); i++)
 	{
@@ -140,6 +158,7 @@ HalfEdge* HalfEdge::splice_edges(HalfEdge* edge1, HalfEdge* edge2, HalfEdge* edg
 //		HalfEdge new_halfedges = HalfEdge(&intersection, &halfedge, halfedge.incidentFace, nullptr, nullptr);
 //		halfedges.emplace_back(new_halfedges);
 //	}
+	return nullptr;
   }
 
 HalfEdge* HalfEdge::get_cw_halfedge(HalfEdge* halfedge, Vertex* v)
@@ -153,8 +172,8 @@ HalfEdge* HalfEdge::get_cw_halfedge(HalfEdge* halfedge, Vertex* v)
 	}
 }
 
-HalfEdge* HalfEdge::insert_edge(HalfEdge* halfedge, Dcel dcel)
-{
-	return dcel.halfedges.emplace_back(halfedge);
-}
+//HalfEdge* HalfEdge::insert_edge(HalfEdge* halfedge, Dcel dcel)
+//{
+//	return dcel.halfedges.emplace_back(halfedge);
+//}
 

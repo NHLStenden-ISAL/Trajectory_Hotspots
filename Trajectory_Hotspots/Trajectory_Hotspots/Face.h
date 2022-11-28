@@ -1,5 +1,7 @@
 #pragma once
 
+class HalfEdge;
+
 class Face {
 
 public:
@@ -18,6 +20,5 @@ public:
 private:
 
 	HalfEdge* outerComponent;
-
 
 };
