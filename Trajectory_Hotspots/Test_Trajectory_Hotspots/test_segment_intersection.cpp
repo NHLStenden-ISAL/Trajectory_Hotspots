@@ -26,6 +26,7 @@ namespace TestTrajectoryHotspots
 			//test_segments.emplace_back(Vec2(9.0f, 7.0f), Vec2(6.0f, 2.0f)); //f
 			test_segments.emplace_back(Vec2(9.0f, 7.0f), Vec2(6.0f, 2.0f)); //f
 			test_segments.emplace_back(Vec2(9.2f, 4.35f), Vec2(8.01f, 8.22f)); //g
+			//status_structure.set_line_position(line_pos);
 			std::vector<Vec2> test = find_segment_intersections(test_segments);
 			std::vector<Vec2> correct;
 			correct.emplace_back(Vec2(8.593479498861f, 6.3224658314351f));

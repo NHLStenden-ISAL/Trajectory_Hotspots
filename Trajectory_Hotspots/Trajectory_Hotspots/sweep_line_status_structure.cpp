@@ -429,7 +429,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
+            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -461,7 +461,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
+            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -524,8 +524,8 @@ namespace Segment_Intersection_Sweep_Line
     {
         if (right != nullptr)
         {
+            //TODO: doesnt match as left neighbour
             const Node* current_right = right.get();
-
             while (current_right->left != nullptr)
             {
                 current_right = current_right->left.get();
@@ -628,17 +628,22 @@ namespace Segment_Intersection_Sweep_Line
             }
             //last in intersections is most right after intersection
             //left_node is last non intersection
-            most_right_segment = intersections.back();
-
+            //TODO: if nullptr crash
+            if (intersections.size() > 1)
+            {
+                most_right_segment = intersections.back();
+            }
+            
             while (right_node != nullptr)
             {
+                //TODO: if event.x is nearly equal to the y.intersect x infinite loop
                 float new_intersection = segments.at(right_node->segment).y_intersect(line_position);
                 if (nearly_equal(intersection, new_intersection))
                 {
                     if (*segments.at(right_node->segment).get_top_point() == event_point)
                     {
                         bottom_segments.push_back(right_node->segment);
-                    }
+                    }   
                     else
                     {
                         intersections.push_back(right_node->segment);
@@ -652,8 +657,10 @@ namespace Segment_Intersection_Sweep_Line
             }
             //last in intersections is most left after intersection
             //right_node is last non intersection
-            most_left_segment = intersections.back();
-
+            if (intersections.size() > 1)
+            {
+                most_left_segment = intersections.back();
+            }
 
         }
     }	

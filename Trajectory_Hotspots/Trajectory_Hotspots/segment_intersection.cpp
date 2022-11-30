@@ -26,16 +26,18 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
     //Initialize status structure with the highest event point
     Sweep_Line_Status_structure status_structure(event_queue.begin()->first.y);
 
-    Vec2 intersection;
     std::vector<Segment> result;
 
     std::vector<Vec2> intersections;
 
     while (!event_queue.empty())
     {
-        Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second, intersection, result);
-        intersections.push_back(intersection);
-        event_queue.erase(event_queue.begin());
+        Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second, result);
+        if (result.size() > 0)
+        {
+            intersections.push_back(event_queue.begin()->first);
+        }
+        event_queue.erase(event_queue.begin()); 
     }
 
 
@@ -85,16 +87,18 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     const std::vector<Segment>& segments,
     const Vec2& event_point,
     const std::vector<int>& top_segments,
-    Vec2& intersection,
     std::vector<Segment>& result_segments)
 {
     std::vector<int> intersections;
     std::vector<int> bottom_segments;
-
     int left_neighbour = -1;
     int right_neighbour = -1;
     int most_left_segment = -1;
     int most_right_segment = -1;
+
+    //TODO: float not best solution here
+    float line_pos = event_point.y;
+    status_structure.set_line_position(line_pos);
 
     status_structure.get_all_nodes_on(segments, event_point, intersections, bottom_segments, most_left_segment, most_right_segment);
 
@@ -102,15 +106,15 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     {
         for (int segment : top_segments)
         {
-            result_segments.push_back(segments.at(top_segments.at(segment)));
+            result_segments.push_back(segments.at(segment));
         }
         for (int segment : bottom_segments)
         {
-            result_segments.push_back(segments.at(bottom_segments.at(segment)));
+            result_segments.push_back(segments.at(segment));
         }
         for (int segment : intersections)
         {
-            result_segments.push_back(segments.at(intersections.at(segment)));
+            result_segments.push_back(segments.at(segment));
         }
         //TODO return intersection + segments, check later if from same dcel
         //add to result
@@ -119,19 +123,17 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     // after the final remove we have the right and left neighbour of all intersecting segments
     for (int segment : bottom_segments)
     {
-        status_structure.remove(segments, bottom_segments.at(segment), left_neighbour, right_neighbour);
+        status_structure.remove(segments, segment, left_neighbour, right_neighbour);
     }
     for (int segment : intersections)
     {
-        status_structure.remove(segments, intersections.at(segment), left_neighbour, right_neighbour);
+        status_structure.remove(segments, segment, left_neighbour, right_neighbour);
     }
 
     //delete lower and intersection
     // set_lineposition 
 
-    //TODO: float not best solution here
-    float line_pos = event_point.y;
-    status_structure.set_line_position(line_pos);
+    
 
     bool neighbours_filled = false;
     if (left_neighbour != -1 || right_neighbour != -1)
@@ -143,12 +145,12 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     int right_node = -1;
     for (int segment : intersections)
     {
-        status_structure.insert(segments, intersections.at(segment), left_node, right_node);
+        status_structure.insert(segments, segment, left_node, right_node);
     }
     for (int segment : top_segments)
     {
-        status_structure.insert(segments, top_segments.at(segment), left_node, right_node);
-        if (neighbours_filled)
+        status_structure.insert(segments, segment, left_node, right_node);
+        if (!neighbours_filled)
         {
             left_neighbour = left_node;
             right_neighbour = right_node;
@@ -156,11 +158,11 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         }
         if (left_node == left_neighbour || left_neighbour == -1)
         {
-            most_left_segment = top_segments.at(segment);
+            most_left_segment = segment;
         }
         if (right_node == right_neighbour || right_neighbour == -1)
         {
-            most_right_segment = top_segments.at(segment);
+            most_right_segment = segment;
         }
     }
 
@@ -188,21 +190,24 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     {
 
         Vec2 intersection;
-        if (left_node != -1)
+        if (most_left_segment != -1 && left_neighbour != -1)
         {
-            if (Segment::intersection_two_segments(&segments.at(left_node), &segments.at(left_neighbour), intersection))
+            if (Segment::intersection_two_segments(&segments.at(most_left_segment), &segments.at(left_neighbour), intersection))
             {
                 auto event_pair = event_queue.emplace(intersection, std::vector<int>());
             }
         }
-        if (right_node != -1)
+        if (most_right_segment != -1 && right_neighbour != -1)
         {
-            if (Segment::intersection_two_segments(&segments.at(right_node), &segments.at(right_neighbour), intersection))
+            if (Segment::intersection_two_segments(&segments.at(most_right_segment), &segments.at(right_neighbour), intersection))
             {
                 auto event_pair = event_queue.emplace(intersection, std::vector<int>());
             }
 
         }
+        // never intersects if theres only 1 neighbour
+         
+         
         //Else if upper + intersection == 0
         //Remove bottom, check neighbours, add new events when needed (bellow or to the right of current event_point
 

@@ -257,7 +257,7 @@ namespace TestTrajectoryHotspots
             std::vector<Segment> test_segments;
             test_segments.emplace_back(Vec2(5, 5), Vec2(6, 10)); //f
             test_segments.emplace_back(Vec2(7, 3), Vec2(7, 8)); //h
-            test_segments.emplace_back(Vec2(3.04, 3.13), Vec2(12, 10)); //i
+            test_segments.emplace_back(Vec2(3.04, 3.13), Vec2(3, 8)); //i
             test_segments.emplace_back(Vec2(12, 10), Vec2(14, 5)); //j
             test_segments.emplace_back(Vec2(9, 8), Vec2(10, 3)); //g
 
