@@ -444,6 +444,22 @@ namespace Segment_Intersection_Sweep_Line
 
         return -1;
     }
+    bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position,const Vec2& event_point, std::vector<Node*>& right_nodes) const
+    {
+        bool had_neighbour;
+        if (right != nullptr)
+        {
+        }
+        if (left != nullptr)
+        {
+           had_neighbour = left->get_right_neighbours(segments,line_position,event_point,right_nodes);
+        }
+        if (!had_neighbour)
+        {
+            return false;
+        }
+        return false;
+    }
 
     const int Sweep_Line_Status_structure::Node::get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
