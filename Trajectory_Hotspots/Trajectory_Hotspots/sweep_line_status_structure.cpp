@@ -484,27 +484,18 @@ namespace Segment_Intersection_Sweep_Line
         // Check if right pointer of left node is empty or not
         if (left != nullptr)
         {
-            const Node* current_right = left.get();
-            while (current_right->right != nullptr)
+            const Node* current_left = left.get();
+            while (current_left->right != nullptr)
             {
-                const Node* current_right = left->right.get();
-                while (current_right->left != nullptr)
-                {
-                    current_right = current_right->right.get();
-                    if (current_right == nullptr)
-                    {
-                        return nullptr;
-                    }
-                }
-                return current_right;
+                current_left = current_left->right.get();
             }
-
+            return current_left;
         }
         if (parent != nullptr)
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
+            while (current_x_position >= segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -515,8 +506,6 @@ namespace Segment_Intersection_Sweep_Line
             return current_parent;
         }
 
-
-        
         return nullptr;
     }
     
@@ -536,7 +525,8 @@ namespace Segment_Intersection_Sweep_Line
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
+            //TODO: Is equal or only less then? Currently this returns the same left and right in the case of no childs and equal parent..
+            while (current_x_position <= segments.at(current_parent->segment).y_intersect(line_position))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -631,7 +621,7 @@ namespace Segment_Intersection_Sweep_Line
             //TODO: if nullptr crash
             if (intersections.size() > 1)
             {
-                most_right_segment = intersections.back();
+                most_right_segment = intersections.front();
             }
             
             while (right_node != nullptr)
@@ -640,7 +630,7 @@ namespace Segment_Intersection_Sweep_Line
                 float new_intersection = segments.at(right_node->segment).y_intersect(line_position);
                 if (nearly_equal(intersection, new_intersection))
                 {
-                    if (*segments.at(right_node->segment).get_top_point() == event_point)
+                    if (*segments.at(right_node->segment).get_bottom_point() == event_point)
                     {
                         bottom_segments.push_back(right_node->segment);
                     }   
