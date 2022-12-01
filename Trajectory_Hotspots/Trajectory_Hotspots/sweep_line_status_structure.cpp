@@ -444,21 +444,81 @@ namespace Segment_Intersection_Sweep_Line
 
         return -1;
     }
-    bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position,const Vec2& event_point, std::vector<Node*>& right_nodes) const
+
+    bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<Node*>& right_nodes) const
     {
-        bool had_neighbour;
-        if (right != nullptr)
-        {
-        }
+        bool had_neighbour = true;
+
         if (left != nullptr)
         {
-           had_neighbour = left->get_right_neighbours(segments,line_position,event_point,right_nodes);
+            had_neighbour = had_neighbour && left->get_right_neighbours(segments, line_position, event_point, right_nodes);
+            
+            //If left subtree contained a segment not on this point, early out.
+            if (!had_neighbour)
+            {
+                return false;
+            }
         }
-        if (!had_neighbour)
+
+        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
+        {
+            right_nodes.emplace_back(this);
+        }
+        else
         {
             return false;
         }
-        return false;
+
+        if (right != nullptr)
+        {
+            had_neighbour = had_neighbour && right->get_right_neighbours(segments, line_position, event_point, right_nodes);
+
+            //If right subtree contained a segment not on this point, early out.
+            if (!had_neighbour)
+            {
+                return false;
+            }
+        }
+
+        return had_neighbour;
+    }
+
+    bool Sweep_Line_Status_structure::Node::get_left_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<Node*>& left_nodes) const
+    {
+        bool had_neighbour = true;
+
+        if (right != nullptr)
+        {
+            had_neighbour = had_neighbour && right->get_right_neighbours(segments, line_position, event_point, left_nodes);
+
+            //If right subtree contained a segment not on this point, early out.
+            if (!had_neighbour)
+            {
+                return false;
+            }
+        }
+
+        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
+        {
+            left_nodes.emplace_back(this);
+        }
+        else
+        {
+            return false;
+        }
+
+        if (left != nullptr)
+        {
+            had_neighbour = had_neighbour && left->get_right_neighbours(segments, line_position, event_point, left_nodes);
+
+            //If left subtree contained a segment not on this point, early out.
+            if (!had_neighbour)
+            {
+                return false;
+            }
+        }
+
+        return had_neighbour;
     }
 
     const int Sweep_Line_Status_structure::Node::get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const
@@ -524,7 +584,7 @@ namespace Segment_Intersection_Sweep_Line
 
         return nullptr;
     }
-    
+
     const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_right_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
     {
         if (right != nullptr)
@@ -555,7 +615,7 @@ namespace Segment_Intersection_Sweep_Line
 
         return nullptr;
     }
-    
+
     void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
     {
         //TODO: test this with left/right neighbour function
@@ -639,7 +699,7 @@ namespace Segment_Intersection_Sweep_Line
             {
                 most_right_segment = intersections.front();
             }
-            
+
             while (right_node != nullptr)
             {
                 //TODO: if event.x is nearly equal to the y.intersect x infinite loop
@@ -649,7 +709,7 @@ namespace Segment_Intersection_Sweep_Line
                     if (*segments.at(right_node->segment).get_bottom_point() == event_point)
                     {
                         bottom_segments.push_back(right_node->segment);
-                    }   
+                    }
                     else
                     {
                         intersections.push_back(right_node->segment);
@@ -669,5 +729,5 @@ namespace Segment_Intersection_Sweep_Line
             }
 
         }
-    }	
+    }
 }
