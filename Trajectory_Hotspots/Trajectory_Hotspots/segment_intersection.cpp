@@ -36,8 +36,9 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
         if (result.size() > 0)
         {
             intersections.push_back(event_queue.begin()->first);
+            result.clear();
         }
-        event_queue.erase(event_queue.begin()); 
+        event_queue.erase(event_queue.begin());
     }
 
 
@@ -133,7 +134,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     //delete lower and intersection
     // set_lineposition 
 
-    
+
 
     bool neighbours_filled = false;
     if (left_neighbour != -1 || right_neighbour != -1)
@@ -206,8 +207,8 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
 
         }
         // never intersects if theres only 1 neighbour
-         
-         
+
+
         //Else if upper + intersection == 0
         //Remove bottom, check neighbours, add new events when needed (bellow or to the right of current event_point
 

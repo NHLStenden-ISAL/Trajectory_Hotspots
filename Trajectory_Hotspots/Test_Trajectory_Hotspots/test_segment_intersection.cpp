@@ -16,6 +16,7 @@ namespace TestTrajectoryHotspots
 	TEST_CLASS(TestSegmentintersection)
 	{
 	public:
+
 		TEST_METHOD(build_tree_with_intersection)
 		{
 			std::vector<Segment> test_segments;
@@ -33,6 +34,7 @@ namespace TestTrajectoryHotspots
 			Assert::AreEqual(test, correct);
 
 		}
+
 		TEST_METHOD(build_tree_with_2_segments_with_2_intersections)
 		{
 			std::vector<Segment> test_segments;
@@ -48,6 +50,7 @@ namespace TestTrajectoryHotspots
 			Assert::AreEqual(test, correct);
 
 		}
+
 		TEST_METHOD(build_tree_with_nasty_case_1)
 		{
 			std::vector<Segment> test_segments;

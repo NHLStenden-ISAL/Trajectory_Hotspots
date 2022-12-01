@@ -27,9 +27,6 @@ namespace Segment_Intersection_Sweep_Line
             int height_difference();
             const int get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const;
             const int get_left_neighbour(const std::vector<Segment>& segments, const float line_position) const;
-            const Node* get_right_neighbour_node(const std::vector<Segment>& segments, const float line_position) const;
-            const Node* get_left_neighbour_node(const std::vector<Segment>& segments, const float line_position) const;
-            //get right / left node
             
             void get_all_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& neighbouring_nodes, int& left_neighbour, int& right_neighbour) const;
             bool get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const;

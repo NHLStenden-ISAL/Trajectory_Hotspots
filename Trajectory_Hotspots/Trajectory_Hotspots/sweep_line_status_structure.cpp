@@ -37,15 +37,15 @@ namespace Segment_Intersection_Sweep_Line
         float current_x_position = segments.at(new_segment).y_intersect(line_position);
         float node_x_position = segments.at(new_root->segment).y_intersect(line_position);
 
-            //A  = new_root-segment
-            //B  = new_segment
-            // CROSS A x B
-            // if cross is negative, then the new segment is on the left
+        //A  = new_root-segment
+        //B  = new_segment
+        // CROSS A x B
+        // if cross is negative, then the new segment is on the left
 
-        Vec2 new_root_segment = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
-        Vec2 new_segment_vec = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
+        Vec2 node_segment = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
+        Vec2 new_segment_vec = *segments.at(new_segment).get_bottom_point() - Vec2(current_x_position, line_position);
 
-        if (current_x_position < node_x_position || new_root_segment.cross(new_segment_vec) < 0)
+        if (current_x_position < node_x_position || node_segment.cross(new_segment_vec) < 0)
         {
             new_root->left = add_to_subtree(std::move(new_root->left), segments, new_segment, added_node, new_root.get());
 
@@ -479,16 +479,21 @@ namespace Segment_Intersection_Sweep_Line
         {
             //Get all nodes intersecting the same point, the last element returned is the most left node
             left->get_left_neighbours(segments, line_position, event_point, neighbouring_nodes);
-            left_neighbour = neighbouring_nodes.back()->get_left_neighbour(segments, line_position);
         }
+
+        //There should always be at least the root node in this list
+        left_neighbour = neighbouring_nodes.back()->get_left_neighbour(segments, line_position);
 
 
         if (right != nullptr)
         {
             //Get all nodes intersecting the same point, the last element returned is the most right node
             right->get_right_neighbours(segments, line_position, event_point, neighbouring_nodes);
-            right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
         }
+
+        //There should always be at least the root node in this list
+        right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
+
     }
 
     bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const
@@ -555,72 +560,6 @@ namespace Segment_Intersection_Sweep_Line
         return true;
     }
 
-
-    const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_left_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
-    {
-        // voor linker neighbour grootste getal in de linker kant van root
-        // voor de rechter neighbour kleinste getal in de rechter kan van root
-        // als groot
-
-        // Check if right pointer of left node is empty or not
-        if (left != nullptr)
-        {
-            const Node* current_left = left.get();
-            while (current_left->right != nullptr)
-            {
-                current_left = current_left->right.get();
-            }
-            return current_left;
-        }
-        if (parent != nullptr)
-        {
-            float current_x_position = segments.at(segment).y_intersect(line_position);
-            const Node* current_parent = parent;
-            while (current_x_position >= segments.at(current_parent->segment).y_intersect(line_position))
-            {
-                current_parent = current_parent->parent;
-                if (current_parent == nullptr)
-                {
-                    return nullptr;
-                }
-            }
-            return current_parent;
-        }
-
-        return nullptr;
-    }
-
-    const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_right_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
-    {
-        if (right != nullptr)
-        {
-            //TODO: doesnt match as left neighbour
-            const Node* current_right = right.get();
-            while (current_right->left != nullptr)
-            {
-                current_right = current_right->left.get();
-            }
-            return current_right;
-        }
-        if (parent != nullptr)
-        {
-            float current_x_position = segments.at(segment).y_intersect(line_position);
-            const Node* current_parent = parent;
-            //TODO: Is equal or only less then? Currently this returns the same left and right in the case of no childs and equal parent..
-            while (current_x_position <= segments.at(current_parent->segment).y_intersect(line_position))
-            {
-                current_parent = current_parent->parent;
-                if (current_parent == nullptr)
-                {
-                    return nullptr;
-                }
-            }
-            return current_parent;
-        }
-
-        return nullptr;
-    }
-
     void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
     {
         //TODO: test this with left/right neighbour function
@@ -671,19 +610,23 @@ namespace Segment_Intersection_Sweep_Line
     {
         const Node* event_node = get_node(segments, event_point);
 
-        std::vector<const Node*> neighbouring_nodes;
-        event_node->get_all_neighbours(segments, line_position, event_point, neighbouring_nodes, left_neighbour, right_neighbour);
-
-        //TODO: Optimization? pass these lists to get_all? downside is we need to check which list got added to last.
-        for (const Node* node : neighbouring_nodes)
+        if (event_node != nullptr)
         {
-            if (*segments[node->segment].get_bottom_point() == event_point)
+            std::vector<const Node*> neighbouring_nodes;
+            neighbouring_nodes.push_back(event_node);
+            event_node->get_all_neighbours(segments, line_position, event_point, neighbouring_nodes, left_neighbour, right_neighbour);
+
+            //TODO: Optimization? pass these lists to get_all? downside is we need to check which list got added to last.
+            for (const Node* node : neighbouring_nodes)
             {
-                bottom_segments.push_back(node->segment);
-            }
-            else
-            {
-                intersections.push_back(node->segment);
+                if (*segments[node->segment].get_bottom_point() == event_point)
+                {
+                    bottom_segments.push_back(node->segment);
+                }
+                else
+                {
+                    intersections.push_back(node->segment);
+                }
             }
         }
     }
