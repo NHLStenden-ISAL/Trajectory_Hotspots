@@ -399,6 +399,7 @@ namespace Segment_Intersection_Sweep_Line
 
         return left_height - right_height;
     }
+
     // Get Left neighbour of the Segment and not the node!
     const int Sweep_Line_Status_structure::Node::get_left_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
@@ -409,22 +410,17 @@ namespace Segment_Intersection_Sweep_Line
         // Check if right pointer of left node is empty or not
         if (left != nullptr)
         {
-            const Node* current_right = left.get();
-            while (current_right->right != nullptr)
-            {
-                const Node* current_right = left->right.get();
-                while (current_right->left != nullptr)
-                {
-                    current_right = current_right->right.get();
-                    if (current_right == nullptr)
-                    {
-                        return -1;
-                    }
-                }
-                return current_right->segment;
-            }
+            const Node* current_left = left.get();
 
+            //Traverse to the most right leaf node
+            while (current_left->right != nullptr)
+            {
+                current_left = current_left->right.get();
+            }
+            return current_left->segment;
         }
+
+        //No left subtree, one of the parents can be the left neighbour
         if (parent != nullptr)
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
@@ -440,99 +436,25 @@ namespace Segment_Intersection_Sweep_Line
             return current_parent->segment;
         }
 
-
-
         return -1;
-    }
-
-    bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<Node*>& right_nodes) const
-    {
-        bool had_neighbour = true;
-
-        if (left != nullptr)
-        {
-            had_neighbour = had_neighbour && left->get_right_neighbours(segments, line_position, event_point, right_nodes);
-            
-            //If left subtree contained a segment not on this point, early out.
-            if (!had_neighbour)
-            {
-                return false;
-            }
-        }
-
-        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
-        {
-            right_nodes.emplace_back(this);
-        }
-        else
-        {
-            return false;
-        }
-
-        if (right != nullptr)
-        {
-            had_neighbour = had_neighbour && right->get_right_neighbours(segments, line_position, event_point, right_nodes);
-
-            //If right subtree contained a segment not on this point, early out.
-            if (!had_neighbour)
-            {
-                return false;
-            }
-        }
-
-        return had_neighbour;
-    }
-
-    bool Sweep_Line_Status_structure::Node::get_left_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<Node*>& left_nodes) const
-    {
-        bool had_neighbour = true;
-
-        if (right != nullptr)
-        {
-            had_neighbour = had_neighbour && right->get_right_neighbours(segments, line_position, event_point, left_nodes);
-
-            //If right subtree contained a segment not on this point, early out.
-            if (!had_neighbour)
-            {
-                return false;
-            }
-        }
-
-        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
-        {
-            left_nodes.emplace_back(this);
-        }
-        else
-        {
-            return false;
-        }
-
-        if (left != nullptr)
-        {
-            had_neighbour = had_neighbour && left->get_right_neighbours(segments, line_position, event_point, left_nodes);
-
-            //If left subtree contained a segment not on this point, early out.
-            if (!had_neighbour)
-            {
-                return false;
-            }
-        }
-
-        return had_neighbour;
     }
 
     const int Sweep_Line_Status_structure::Node::get_right_neighbour(const std::vector<Segment>& segments, const float line_position) const
     {
+        // Check if left pointer of right node is empty or not
         if (right != nullptr)
         {
             const Node* current_right = right.get();
 
+            //Traverse to the most left leaf node
             while (current_right->left != nullptr)
             {
                 current_right = current_right->left.get();
             }
             return current_right->segment;
         }
+
+        //No right subtree, one of the parents can be the right neighbour
         if (parent != nullptr)
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
@@ -550,6 +472,89 @@ namespace Segment_Intersection_Sweep_Line
 
         return -1;
     }
+
+    void Sweep_Line_Status_structure::Node::get_all_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& neighbouring_nodes, int& left_neighbour, int& right_neighbour) const
+    {
+        if (left != nullptr)
+        {
+            //Get all nodes intersecting the same point, the last element returned is the most left node
+            left->get_left_neighbours(segments, line_position, event_point, neighbouring_nodes);
+            left_neighbour = neighbouring_nodes.back()->get_left_neighbour(segments, line_position);
+        }
+
+
+        if (right != nullptr)
+        {
+            //Get all nodes intersecting the same point, the last element returned is the most right node
+            right->get_right_neighbours(segments, line_position, event_point, neighbouring_nodes);
+            right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
+        }
+    }
+
+    bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const
+    {
+        if (left != nullptr)
+        {
+            //If left subtree contained a segment not on this point, early out.
+            if (!left->get_right_neighbours(segments, line_position, event_point, right_nodes))
+            {
+                return false;
+            }
+        }
+
+        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
+        {
+            right_nodes.emplace_back(this);
+        }
+        else
+        {
+            return false;
+        }
+
+        if (right != nullptr)
+        {
+            //If right subtree contained a segment not on this point, early out.
+            if (!right->get_right_neighbours(segments, line_position, event_point, right_nodes))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool Sweep_Line_Status_structure::Node::get_left_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& left_nodes) const
+    {
+        if (right != nullptr)
+        {
+            //If right subtree contained a segment not on this point, early out.
+            if (!right->get_right_neighbours(segments, line_position, event_point, left_nodes))
+            {
+                return false;
+            }
+        }
+
+        if (nearly_equal(event_point.x, segments[segment].y_intersect(line_position)))
+        {
+            left_nodes.emplace_back(this);
+        }
+        else
+        {
+            return false;
+        }
+
+        if (left != nullptr)
+        {
+            //If left subtree contained a segment not on this point, early out.
+            if (!left->get_right_neighbours(segments, line_position, event_point, left_nodes))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     const Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::Node::get_left_neighbour_node(const std::vector<Segment>& segments, const float line_position) const
     {
@@ -657,77 +662,29 @@ namespace Segment_Intersection_Sweep_Line
     }
 
     void Sweep_Line_Status_structure::get_all_nodes_on(
-        const std::vector<Segment> segments, 
-        const Vec2& event_point, 
-        std::vector<int>& intersections, 
-        std::vector<int>& bottom_segments, 
-        int& most_left_segment, 
-        int& most_right_segment)
+        const std::vector<Segment> segments,
+        const Vec2& event_point,
+        std::vector<int>& intersections,
+        std::vector<int>& bottom_segments,
+        int& left_neighbour,
+        int& right_neighbour)
     {
         const Node* event_node = get_node(segments, event_point);
-        if (event_node != nullptr)
+
+        std::vector<const Node*> neighbouring_nodes;
+        event_node->get_all_neighbours(segments, line_position, event_point, neighbouring_nodes, left_neighbour, right_neighbour);
+
+        //TODO: Optimization? pass these lists to get_all? downside is we need to check which list got added to last.
+        for (const Node* node : neighbouring_nodes)
         {
-            const Node* left_node = event_node->get_left_neighbour_node(segments, line_position);
-            const Node* right_node = event_node->get_right_neighbour_node(segments, line_position);
-
-            float intersection = event_point.x;
-
-            while (left_node != nullptr)
+            if (*segments[node->segment].get_bottom_point() == event_point)
             {
-                float new_intersection = segments.at(left_node->segment).y_intersect(line_position);
-                if (nearly_equal(intersection, new_intersection))
-                {
-                    if (*segments.at(left_node->segment).get_bottom_point() == event_point)
-                    {
-                        bottom_segments.push_back(left_node->segment);
-                    }
-                    else
-                    {
-                        intersections.push_back(left_node->segment);
-                    }
-                }
-                else
-                {
-                    break;
-                }
-                left_node = left_node->get_left_neighbour_node(segments, line_position);
+                bottom_segments.push_back(node->segment);
             }
-            //last in intersections is most right after intersection
-            //left_node is last non intersection
-            //TODO: if nullptr crash
-            if (intersections.size() > 1)
+            else
             {
-                most_right_segment = intersections.front();
+                intersections.push_back(node->segment);
             }
-
-            while (right_node != nullptr)
-            {
-                //TODO: if event.x is nearly equal to the y.intersect x infinite loop
-                float new_intersection = segments.at(right_node->segment).y_intersect(line_position);
-                if (nearly_equal(intersection, new_intersection))
-                {
-                    if (*segments.at(right_node->segment).get_bottom_point() == event_point)
-                    {
-                        bottom_segments.push_back(right_node->segment);
-                    }
-                    else
-                    {
-                        intersections.push_back(right_node->segment);
-                    }
-                }
-                else
-                {
-                    break;
-                }
-                right_node = right_node->get_right_neighbour_node(segments, line_position);
-            }
-            //last in intersections is most left after intersection
-            //right_node is last non intersection
-            if (intersections.size() > 1)
-            {
-                most_left_segment = intersections.back();
-            }
-
         }
     }
 }
