@@ -97,11 +97,6 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     //delete lower and intersection
     // set_lineposition 
 
-    bool neighbours_filled = false; //This is only false if we have only top segments, or the tree has one node
-    if (left_neighbour != -1 || right_neighbour != -1)
-    {
-        neighbours_filled = true;
-    }
 
 
     for (int segment : intersections)
@@ -110,27 +105,31 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         status_structure.insert(segments, segment, l, r);
     }
 
-    int left_node = -1;
-    int right_node = -1;
+    //If we only have top segments we did not find the neighbouring nodes yet
+    bool neighbours_found = !bottom_segments.empty() && !intersections.empty();
+
+    int new_left_neighbour = -1;
+    int new_right_neighbour = -1;
     for (int segment : top_segments)
     {
-        status_structure.insert(segments, segment, left_node, right_node);
+        status_structure.insert(segments, segment, new_left_neighbour, new_right_neighbour);
 
         //If we did not have intersecting or bottom segments we don't know the neighbours of this point.
         //In this case, the first top insert gives us these neighbours
-        if (!neighbours_filled)
+        if (!neighbours_found)
         {
-            left_neighbour = left_node;
-            right_neighbour = right_node;
-            neighbours_filled = true;
+            left_neighbour = new_left_neighbour;
+            right_neighbour = new_right_neighbour;
+            neighbours_found = true;
         }
 
-        if (left_node == left_neighbour || left_neighbour == -1)
+        //If the neighbour of this inserted segment is the first non-intersecting segment, this top segment is the new outer segment
+        if (new_left_neighbour == left_neighbour || left_neighbour == -1)
         {
             most_left_segment = segment;
         }
 
-        if (right_node == right_neighbour || right_neighbour == -1)
+        if (new_right_neighbour == right_neighbour || right_neighbour == -1)
         {
             most_right_segment = segment;
         }
