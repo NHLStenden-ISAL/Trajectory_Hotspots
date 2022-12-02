@@ -45,7 +45,7 @@ namespace Segment_Intersection_Sweep_Line
         Vec2 node_segment = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
         Vec2 new_segment_vec = *segments.at(new_segment).get_bottom_point() - Vec2(current_x_position, line_position);
 
-        if (current_x_position < node_x_position || node_segment.cross(new_segment_vec) < 0)
+        if (current_x_position < node_x_position || (current_x_position == node_x_position && node_segment.cross(new_segment_vec) < 0))
         {
             new_root->left = add_to_subtree(std::move(new_root->left), segments, new_segment, added_node, new_root.get());
 
