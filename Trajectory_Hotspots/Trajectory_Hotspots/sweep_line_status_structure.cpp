@@ -232,7 +232,7 @@ namespace Segment_Intersection_Sweep_Line
         return false;
     }
     //TODO: returns true if another segment intersect at the same point.
-    Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::get_node(const std::vector<Segment>& segments, const Vec2& event_point)
+    Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::get_node(const std::vector<Segment>& segments, const Vec2& event_point) const
     {
         Node* node = root.get();
         //TODO: Is this correct?
@@ -473,17 +473,49 @@ namespace Segment_Intersection_Sweep_Line
         return -1;
     }
 
-    void Sweep_Line_Status_structure::Node::get_all_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& neighbouring_nodes, int& left_neighbour, int& right_neighbour) const
+    void Sweep_Line_Status_structure::Node::get_all_neighbours(
+        const std::vector<Segment>& segments,
+        const float line_position,
+        const Vec2& event_point,
+        std::vector<int>& intersections,
+        std::vector<int>& bottom_segments,
+        int& most_left_intersecting_segment, int& most_right_intersecting_segment,
+        int& left_neighbour, int& right_neighbour
+    ) const
     {
+        //TODO: Can we clean this up?
+        std::vector<const Node*> neighbouring_nodes;
+        neighbouring_nodes.push_back(this);
+
         if (left != nullptr)
         {
             //Get all nodes intersecting the same point, the last element returned is the most left node
             left->get_left_neighbours(segments, line_position, event_point, neighbouring_nodes);
         }
 
-        //There should always be at least the root node in this list
+        //Set the first left neighbour that doesnt intersect, there should always be at least the root node in the list
         left_neighbour = neighbouring_nodes.back()->get_left_neighbour(segments, line_position);
 
+        //Seperate the segments in bottom and intersection segments
+        for (const Node* node : neighbouring_nodes)
+        {
+            if (*segments[node->segment].get_bottom_point() == event_point)
+            {
+                bottom_segments.push_back(node->segment);
+            }
+            else
+            {
+                intersections.push_back(node->segment);
+            }
+        }
+
+        if (!intersections.empty())
+        {
+            //The last segment is the most left node in the tree after the get_left_neighbours call
+            most_left_intersecting_segment = intersections.back();
+        }
+
+        neighbouring_nodes.clear();
 
         if (right != nullptr)
         {
@@ -491,9 +523,35 @@ namespace Segment_Intersection_Sweep_Line
             right->get_right_neighbours(segments, line_position, event_point, neighbouring_nodes);
         }
 
-        //There should always be at least the root node in this list
-        right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
+        if (!neighbouring_nodes.empty())
+        {
+            //Set the first right neighbour that doesnt intersect
+            right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
 
+            //Seperate the segments in bottom and intersection segments
+            for (const Node* node : neighbouring_nodes)
+            {
+                if (*segments[node->segment].get_bottom_point() == event_point)
+                {
+                    bottom_segments.push_back(node->segment);
+                }
+                else
+                {
+                    intersections.push_back(node->segment);
+                }
+            }
+        }
+        else
+        {
+            //If there are no right neighbours, get the right neighbour of the root node
+            right_neighbour = this->get_right_neighbour(segments, line_position);
+        }
+
+        if (!intersections.empty())
+        {
+            //The most right intersecting segment in the tree is the last node in the insersections list after the get_right_neighbours call
+            most_right_intersecting_segment = intersections.back();
+        }
     }
 
     bool Sweep_Line_Status_structure::Node::get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const
@@ -600,34 +658,23 @@ namespace Segment_Intersection_Sweep_Line
         return nullptr;
     }
 
-    void Sweep_Line_Status_structure::get_all_nodes_on(
+    void Sweep_Line_Status_structure::get_all_nodes_on_point(
         const std::vector<Segment> segments,
         const Vec2& event_point,
         std::vector<int>& intersections,
         std::vector<int>& bottom_segments,
+        int& most_left_intersecting_segment,
+        int& most_right_intersecting_segment,
         int& left_neighbour,
-        int& right_neighbour)
+        int& right_neighbour) const
     {
+        //Find the first root node containing a segment intersecting the given event point
         const Node* event_node = get_node(segments, event_point);
 
         if (event_node != nullptr)
         {
-            std::vector<const Node*> neighbouring_nodes;
-            neighbouring_nodes.push_back(event_node);
-            event_node->get_all_neighbours(segments, line_position, event_point, neighbouring_nodes, left_neighbour, right_neighbour);
-
-            //TODO: Optimization? pass these lists to get_all? downside is we need to check which list got added to last.
-            for (const Node* node : neighbouring_nodes)
-            {
-                if (*segments[node->segment].get_bottom_point() == event_point)
-                {
-                    bottom_segments.push_back(node->segment);
-                }
-                else
-                {
-                    intersections.push_back(node->segment);
-                }
-            }
+            //Find all the neighbouring nodes that contain segments that intersect the point as well, these are adjacent in the tree
+            event_node->get_all_neighbours(segments, line_position, event_point, intersections, bottom_segments, most_left_intersecting_segment, most_right_intersecting_segment, left_neighbour, right_neighbour);
         }
     }
 }
