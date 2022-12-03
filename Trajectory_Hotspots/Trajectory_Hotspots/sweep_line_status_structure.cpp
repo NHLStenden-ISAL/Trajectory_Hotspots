@@ -591,7 +591,7 @@ namespace Segment_Intersection_Sweep_Line
         if (right != nullptr)
         {
             //If right subtree contained a segment not on this point, early out.
-            if (!right->get_right_neighbours(segments, line_position, event_point, left_nodes))
+            if (!right->get_left_neighbours(segments, line_position, event_point, left_nodes))
             {
                 return false;
             }
@@ -609,7 +609,7 @@ namespace Segment_Intersection_Sweep_Line
         if (left != nullptr)
         {
             //If left subtree contained a segment not on this point, early out.
-            if (!left->get_right_neighbours(segments, line_position, event_point, left_nodes))
+            if (!left->get_left_neighbours(segments, line_position, event_point, left_nodes))
             {
                 return false;
             }
