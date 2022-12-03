@@ -39,7 +39,7 @@ namespace Segment_Intersection_Sweep_Line
             bool get_right_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const;
             bool get_left_neighbours(const std::vector<Segment>& segments, const float line_position, const Vec2& event_point, std::vector<const Node*>& left_nodes) const;
 
-
+            void print_tree(Node* root, int spacing, std::string& tree_string) const;
         };
 
         Sweep_Line_Status_structure(float line_position) : line_position(line_position) {};
@@ -63,6 +63,7 @@ namespace Segment_Intersection_Sweep_Line
 
         Node* get_node(const std::vector<Segment>& segments, const Vec2& event_point) const;
 
+        std::string print_tree() const;
 
         std::unique_ptr<Node> root;
 
@@ -85,7 +86,7 @@ namespace Segment_Intersection_Sweep_Line
         Node* find_node(const std::vector<Segment>& segments, int segment_index);
         //get node
 
-
+        void print_tree(Node* root, int spacing, std::string& tree_string) const;
     };
 
 }

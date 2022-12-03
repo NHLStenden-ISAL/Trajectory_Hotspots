@@ -42,3 +42,35 @@ bool nearly_equal(const float a, const float b, const float fixedEpsilon, const 
 
     return ulps_distance(a, b) <= ulpsEpsilon;
 }
+
+bool nearly_less(const float a, const float b)
+{
+    //If equal
+    if (nearly_equal(a, b))
+    {
+        return false;
+    }
+    //If less then
+    else if (a < b)
+    {
+        return true;
+    }
+
+    //Greater then
+    return false;
+}
+
+bool nearly_greater(const float a, const float b)
+{
+    return (!nearly_less(a, b) && !nearly_equal(a, b));
+}
+
+bool nearly_greater_or_equal(const float a, const float b)
+{
+    return nearly_equal(a, b) || nearly_greater(a, b);
+}
+
+bool nearly_less_or_equal(const float a, const float b)
+{
+    return nearly_equal(a, b) || nearly_less(a, b);
+}

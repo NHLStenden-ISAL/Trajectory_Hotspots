@@ -45,13 +45,13 @@ namespace Segment_Intersection_Sweep_Line
         Vec2 node_segment = *segments.at(new_root->segment).get_bottom_point() - Vec2(current_x_position, line_position);
         Vec2 new_segment_vec = *segments.at(new_segment).get_bottom_point() - Vec2(current_x_position, line_position);
 
-        if (current_x_position < node_x_position || (current_x_position == node_x_position && node_segment.cross(new_segment_vec) < 0))
+        if (nearly_less(current_x_position, node_x_position) || (nearly_equal(current_x_position, node_x_position) && node_segment.cross(new_segment_vec) < 0))
         {
             new_root->left = add_to_subtree(std::move(new_root->left), segments, new_segment, added_node, new_root.get());
 
             if (new_root->height_difference() == 2)
             {
-                if (current_x_position <= segments.at(new_root->left->segment).y_intersect(line_position))
+                if (nearly_less_or_equal(current_x_position, segments.at(new_root->left->segment).y_intersect(line_position)))
                 {
                     new_root = rotate_right(std::move(new_root));
                 }
@@ -67,7 +67,7 @@ namespace Segment_Intersection_Sweep_Line
 
             if (new_root->height_difference() == -2)
             {
-                if (current_x_position > segments.at(new_root->right->segment).y_intersect(line_position))
+                if (nearly_greater(current_x_position, segments.at(new_root->right->segment).y_intersect(line_position)))
                 {
                     new_root = rotate_left(std::move(new_root));
                 }
@@ -132,10 +132,10 @@ namespace Segment_Intersection_Sweep_Line
             }
 
             //Find most right of left subtree
-            std::unique_ptr<Node> child = std::move(new_root->left);
+            Node* child = new_root->left.get();
             while (child->right != nullptr)
             {
-                child = std::move(child->right);
+                child = child->right.get();
             }
 
             //Hoist the segment from the left child to the new root node and remove it from left (balancing in the process)
@@ -156,7 +156,7 @@ namespace Segment_Intersection_Sweep_Line
                 }
             }
         }
-        else if (current_x_position < segments.at(new_root->segment).y_intersect(line_position))
+        else if (nearly_less(current_x_position, segments.at(new_root->segment).y_intersect(line_position)))
         {
             new_root->left = remove_from_parent(std::move(new_root->left), segments, segment_to_remove);
 
@@ -215,11 +215,11 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
+            if (nearly_less(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->left.get();
             }
-            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
+            else if (nearly_greater(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->right.get();
             }
@@ -240,11 +240,11 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
+            if (nearly_less(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->left.get();
             }
-            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
+            else if (nearly_greater(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->right.get();
             }
@@ -425,7 +425,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position < segments.at(current_parent->segment).y_intersect(line_position))
+            while (nearly_less_or_equal(current_x_position, segments.at(current_parent->segment).y_intersect(line_position)))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -459,7 +459,7 @@ namespace Segment_Intersection_Sweep_Line
         {
             float current_x_position = segments.at(segment).y_intersect(line_position);
             const Node* current_parent = parent;
-            while (current_x_position > segments.at(current_parent->segment).y_intersect(line_position))
+            while (nearly_greater_or_equal(current_x_position, segments.at(current_parent->segment).y_intersect(line_position)))
             {
                 current_parent = current_parent->parent;
                 if (current_parent == nullptr)
@@ -528,6 +528,9 @@ namespace Segment_Intersection_Sweep_Line
             //Set the first right neighbour that doesnt intersect
             right_neighbour = neighbouring_nodes.back()->get_right_neighbour(segments, line_position);
 
+            //The most right intersecting segment in the tree is the last node in the insersections list because we do a inorder traversal
+            most_right_intersecting_segment = neighbouring_nodes.back()->segment;
+
             //Seperate the segments in bottom and intersection segments
             for (const Node* node : neighbouring_nodes)
             {
@@ -545,12 +548,9 @@ namespace Segment_Intersection_Sweep_Line
         {
             //If there are no right neighbours, get the right neighbour of the root node
             right_neighbour = this->get_right_neighbour(segments, line_position);
-        }
 
-        if (!intersections.empty())
-        {
-            //The most right intersecting segment in the tree is the last node in the insersections list after the get_right_neighbours call
-            most_right_intersecting_segment = intersections.back();
+            //The most right will also be the segment in the root node
+            most_right_intersecting_segment = segment;
         }
     }
 
@@ -641,11 +641,11 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
+            if (nearly_less(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->left.get();
             }
-            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
+            else if (nearly_greater(current_x_position, segments.at(node->segment).y_intersect(line_position)))
             {
                 node = node->right.get();
             }
@@ -676,5 +676,42 @@ namespace Segment_Intersection_Sweep_Line
             //Find all the neighbouring nodes that contain segments that intersect the point as well, these are adjacent in the tree
             event_node->get_all_neighbours(segments, line_position, event_point, intersections, bottom_segments, most_left_intersecting_segment, most_right_intersecting_segment, left_neighbour, right_neighbour);
         }
+    }
+
+    //Returns a string containing a pretty printed tree
+    std::string Sweep_Line_Status_structure::print_tree() const
+    {
+        std::string tree_string = "";
+        if (root != nullptr)
+        {
+            root->print_tree(root.get(), 0, tree_string);
+        }
+
+        return tree_string;
+    }
+
+    void Sweep_Line_Status_structure::Node::print_tree(Node* root, int spacing, std::string& tree_string) const
+    {
+        if (root == nullptr)
+        {
+            return;
+        }
+
+        spacing += 12;
+
+        print_tree(root->right.get(), spacing, tree_string);
+
+        tree_string += '\n';
+
+        for (size_t i = 12; i < spacing; i++)
+        {
+            tree_string += " ";
+        }
+
+        tree_string += std::to_string(root->segment);
+        tree_string += '\n';
+
+        print_tree(root->left.get(), spacing, tree_string);
+
     }
 }
