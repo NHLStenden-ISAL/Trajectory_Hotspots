@@ -389,5 +389,6 @@ namespace TestTrajectoryHotspots
             Assert::IsNull(status_structure.root.get());
         }
 
+        //TODO: There is probably still a bug with rounding errors we need to check. Make a test that has multiple intersection types on top of eachother.
     };
 }
