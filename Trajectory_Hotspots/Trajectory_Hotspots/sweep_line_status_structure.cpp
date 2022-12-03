@@ -51,7 +51,8 @@ namespace Segment_Intersection_Sweep_Line
 
             if (new_root->height_difference() == 2)
             {
-                if (nearly_less_or_equal(current_x_position, segments.at(new_root->left->segment).y_intersect(line_position)))
+                //if (nearly_less_or_equal(current_x_position, segments.at(new_root->left->segment).y_intersect(line_position)))
+                if(new_root->left->height_difference() >= 0)
                 {
                     new_root = rotate_right(std::move(new_root));
                 }
@@ -67,7 +68,8 @@ namespace Segment_Intersection_Sweep_Line
 
             if (new_root->height_difference() == -2)
             {
-                if (nearly_greater(current_x_position, segments.at(new_root->right->segment).y_intersect(line_position)))
+                //if (nearly_greater(current_x_position, segments.at(new_root->right->segment).y_intersect(line_position)))
+                if(new_root->right->height_difference() <= 0)
                 {
                     new_root = rotate_left(std::move(new_root));
                 }

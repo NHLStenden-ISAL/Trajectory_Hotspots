@@ -98,7 +98,6 @@ namespace TestTrajectoryHotspots
 
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
                 int right_node;
                 status_structure.insert(test_segments, i,left_node,right_node);
@@ -374,7 +373,6 @@ namespace TestTrajectoryHotspots
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             for (size_t i = 0; i < test_segments.size(); i++)
             {
-                status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
                 int right_node;
                 status_structure.insert(test_segments, i, left_node, right_node);
