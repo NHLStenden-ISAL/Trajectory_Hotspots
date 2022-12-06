@@ -6,7 +6,7 @@ public:
 
     Segment_Search_Tree_Node();
 
-    //Build the tree bottom-up from a lsit of ordered segments
+    //Build the tree bottom-up from a list of ordered segments
     Segment_Search_Tree_Node(const std::vector<Segment>& ordered_segments, const size_t start_index, const size_t end_index);
 
     //Query tree, returns bounding box from start_t to end_t
