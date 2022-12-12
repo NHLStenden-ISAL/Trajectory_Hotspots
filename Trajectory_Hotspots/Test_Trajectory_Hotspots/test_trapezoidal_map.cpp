@@ -125,6 +125,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(trapezoidal_map.right_border, *query_result_right->right_segment);
 
             //TODO: Check point on segment?
+            
         }
 
         TEST_METHOD(update_with_simple_case_fully_embedded_bottom_overlap)

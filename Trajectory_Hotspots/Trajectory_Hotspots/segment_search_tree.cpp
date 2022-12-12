@@ -38,11 +38,11 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
     }
 }
 
-//Query tree, reutrns bounding box from start_t to end_t
+//Query tree, returns bounding box from start_t to end_t
 AABB Segment_Search_Tree_Node::Query(const float start_t, const float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?
-    AABB bounding_box(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
+    AABB bounding_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
     if (left != nullptr)
     {
@@ -127,7 +127,7 @@ AABB Segment_Search_Tree_Node::Query_Left(const float start_t) const
         return AABB(min, max);
     }
 
-    return AABB(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
+    return AABB(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
 }
 
@@ -168,7 +168,7 @@ AABB Segment_Search_Tree_Node::Query_Right(const float end_t) const
         return AABB(min, max);
     }
 
-    return AABB(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
+    return AABB(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 }
 
 Segment_Search_Tree::Segment_Search_Tree(const std::vector<Segment>& ordered_segments)
