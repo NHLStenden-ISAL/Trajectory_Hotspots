@@ -4,7 +4,7 @@
 
 //From: https://bitbashing.io/comparing-floats.html
 //Returns the units of least precision between two floats
-int32_t ulps_distance(const float a, const float b)
+int32_t Float::ulps_distance(const float a, const float b) const
 {
     // Save work if the floats are equal.
     // Also handles +0 == -0
@@ -34,7 +34,7 @@ int32_t ulps_distance(const float a, const float b)
 
 
 //Check for nearly equal float values
-bool Float::nearly_equal(const float a, const float b, const float fixedEpsilon, const int ulpsEpsilon)
+bool Float::nearly_equal(const float a, const float b, const float fixedEpsilon, const int ulpsEpsilon) const
 {
     // Handle the near-zero case.
     const float difference = fabs(a - b);
@@ -43,7 +43,7 @@ bool Float::nearly_equal(const float a, const float b, const float fixedEpsilon,
     return ulps_distance(a, b) <= ulpsEpsilon;
 }
 
-bool Float::nearly_less(const float a, const float b)
+bool Float::nearly_less(const float a, const float b) const
 {
     //If equal
     if (nearly_equal(a, b))
@@ -60,178 +60,188 @@ bool Float::nearly_less(const float a, const float b)
     return false;
 }
 
-bool Float::nearly_greater(const float a, const float b)
+bool Float::nearly_greater(const float a, const float b) const
 {
     return (!nearly_less(a, b) && !nearly_equal(a, b));
 }
 
-bool Float::nearly_greater_or_equal(const float a, const float b)
+bool Float::nearly_greater_or_equal(const float a, const float b) const
 {
     return nearly_equal(a, b) || nearly_greater(a, b);
 }
 
-bool Float::nearly_less_or_equal(const float a, const float b)
+bool Float::nearly_less_or_equal(const float a, const float b) const
 {
     return nearly_equal(a, b) || nearly_less(a, b);
 }
 
 Float& Float::operator=(const Float& other)
 {
-    // TODO: insert return statement here
+    value = other.value;
+    return *this;
 }
 
-Float& Float::operator=(float value)
+Float& Float::operator=(float new_value)
 {
-    // TODO: insert return statement here
-}
-
-Float::operator float() const
-{
+    value = value;
+    return *this;
 }
 
 bool Float::operator==(const Float& other) const
 {
-    return false;
+    return nearly_equal(value, other.value);
 }
 
 bool Float::operator==(float value) const
 {
-    return false;
+    return nearly_equal(this->value, value);
 }
 
 bool Float::operator!=(const Float& other) const
 {
-    return false;
+    return !nearly_equal(this->value, other.value);
 }
 
 bool Float::operator!=(float value) const
 {
-    return false;
+    return !nearly_equal(this->value, value);
 }
 
 bool Float::operator<(const Float& other) const
 {
-    return false;
+    return !nearly_greater_or_equal(value, other.value);
 }
 
 bool Float::operator<(float value) const
 {
-    return false;
+    return !nearly_greater_or_equal(this->value, value);
+
 }
 
 bool Float::operator>(const Float& other) const
 {
-    return false;
+    return nearly_greater(this->value, other.value);
 }
 
 bool Float::operator>(float value) const
 {
-    return false;
+    return nearly_greater(this->value, value);
 }
 
 bool Float::operator<=(const Float& other) const
 {
-    return false;
+    return nearly_less_or_equal(this->value, other.value);
 }
 
 bool Float::operator<=(float value) const
 {
-    return false;
+    return nearly_less_or_equal(this->value, value);
+
 }
 
 bool Float::operator>=(const Float& other) const
 {
-    return false;
+    return nearly_greater_or_equal(this->value, other.value);
 }
 
 bool Float::operator>=(float value) const
 {
-    return false;
+    return nearly_greater_or_equal(this->value, value);
 }
 
 Float Float::operator+(const Float& other) const
 {
-    return Float();
+    return Float(this->value + other.value);
 }
 
 Float Float::operator+(float value) const
 {
-    return Float();
+    return Float(this->value + value);
 }
 
 Float Float::operator-(const Float& other) const
 {
-    return Float();
+    return Float(this->value - other.value);
 }
 
 Float Float::operator-(float value) const
 {
-    return Float();
+    return Float(this->value - value);
 }
 
 Float Float::operator*(const Float& other) const
 {
-    return Float();
+    return Float(this->value * other.value);
+
 }
 
 Float Float::operator*(float value) const
 {
-    return Float();
+    return Float(this->value * value);
+
 }
 
 Float Float::operator/(const Float& other) const
 {
-    return Float();
+    return Float(this->value / other.value);
+
 }
 
 Float Float::operator/(float value) const
 {
-    return Float();
+    return Float(this->value / value);
+
 }
 
 Float& Float::operator+=(const Float& other)
 {
-    // TODO: insert return statement here
+    value += other.value;
+    return *this;
 }
 
 Float& Float::operator+=(float value)
 {
-    // TODO: insert return statement here
+    value += value;
+    return *this;
 }
 
 Float& Float::operator-=(const Float& other)
 {
-    // TODO: insert return statement here
+    value -= other.value;
+    return *this;
 }
 
 Float& Float::operator-=(float value)
 {
-    // TODO: insert return statement here
+    value -= value;
+    return *this;
 }
 
 Float& Float::operator*=(const Float& other)
 {
-    // TODO: insert return statement here
+    value *= other.value;
+    return *this;
 }
 
 Float& Float::operator*=(float value)
 {
-    // TODO: insert return statement here
+    value *= value;
+    return *this;
 }
 
 Float& Float::operator/=(const Float& other)
 {
-    // TODO: insert return statement here
+    value /= other.value;
+    return *this;
 }
 
 Float& Float::operator/=(float value)
 {
-    // TODO: insert return statement here
+    value /= value;
+    return *this;
 }
 
 Float Float::operator-() const
 {
-    return Float();
+    return Float(-value);
 }
-
-

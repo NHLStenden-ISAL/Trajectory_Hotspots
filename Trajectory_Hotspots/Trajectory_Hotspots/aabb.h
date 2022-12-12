@@ -60,11 +60,11 @@ public:
     float width() const
     {
         float width = max.x - min.x;
-		
+        
         if (isinf(width))
         {
-			return std::numeric_limits<float>::infinity();
-		}
+            return std::numeric_limits<float>::infinity();
+        }
 
         return width; //TODO: We would like to return angle and width
     }

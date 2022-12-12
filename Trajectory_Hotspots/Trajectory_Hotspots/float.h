@@ -3,75 +3,78 @@
 class Float
 {
 public:
-	Float();
-	Float(float value);
-	Float(const Float& other);
-	~Float();
+    Float() {};
+    Float(float value) : value(value) {};
+    Float(const Float& other) : value(other.value) {};
+    ~Float() {};
 
-	Float& operator=(const Float& other);
-	Float& operator=(float value);
 
-	operator float() const;
+    float get_value() const { return value; }
+    float set_value(float value) { this->value = value; }
 
-	bool operator==(const Float& other) const;
-	bool operator==(float value) const;
+    Float& operator=(const Float& other);
+    Float& operator=(float value);
 
-	bool operator!=(const Float& other) const;
-	bool operator!=(float value) const;
+    bool operator==(const Float& other) const;
+    bool operator==(float value) const;
 
-	bool operator<(const Float& other) const;
-	bool operator<(float value) const;
+    bool operator!=(const Float& other) const;
+    bool operator!=(float value) const;
 
-	bool operator>(const Float& other) const;
-	bool operator>(float value) const;
+    bool operator<(const Float& other) const;
+    bool operator<(float value) const;
 
-	bool operator<=(const Float& other) const;
-	bool operator<=(float value) const;
+    bool operator>(const Float& other) const;
+    bool operator>(float value) const;
 
-	bool operator>=(const Float& other) const;
-	bool operator>=(float value) const;
+    bool operator<=(const Float& other) const;
+    bool operator<=(float value) const;
 
-	Float operator+(const Float& other) const;
-	Float operator+(float value) const;
+    bool operator>=(const Float& other) const;
+    bool operator>=(float value) const;
 
-	Float operator-(const Float& other) const;
-	Float operator-(float value) const;
+    Float operator+(const Float& other) const;
+    Float operator+(float value) const;
 
-	Float operator*(const Float& other) const;
-	Float operator*(float value) const;
+    Float operator-(const Float& other) const;
+    Float operator-(float value) const;
 
-	Float operator/(const Float& other) const;
-	Float operator/(float value) const;
+    Float operator*(const Float& other) const;
+    Float operator*(float value) const;
 
-	Float& operator+=(const Float& other);
-	Float& operator+=(float value);
+    Float operator/(const Float& other) const;
+    Float operator/(float value) const;
 
-	Float& operator-=(const Float& other);
-	Float& operator-=(float value);
+    Float& operator+=(const Float& other);
+    Float& operator+=(float value);
 
-	Float& operator*=(const Float& other);
-	Float& operator*=(float value);
+    Float& operator-=(const Float& other);
+    Float& operator-=(float value);
 
-	Float& operator/=(const Float& other);
-	Float& operator/=(float value);
+    Float& operator*=(const Float& other);
+    Float& operator*=(float value);
 
-	Float operator-() const;
+    Float& operator/=(const Float& other);
+    Float& operator/=(float value);
+
+    Float operator-() const;
 
 private:
-	
-	//From: https://bitbashing.io/comparing-floats.html
-	//Returns the units of least precision between two floats
-	int32_t ulps_distance(const float a, const float b);
 
-	//Check for nearly equal float values
-	bool nearly_equal(const float a, const float b, const float fixedEpsilon = 0.0000001f, const int ulpsEpsilon = 3);
+    //From: https://bitbashing.io/comparing-floats.html
+    //Returns the units of least precision between two floats
+    int32_t ulps_distance(const float a, const float b) const;
 
-	bool nearly_less(const float a, const float b);
+    //Check for nearly equal float values
+    bool nearly_equal(const float a, const float b, const float fixedEpsilon = 0.0000001f, const int ulpsEpsilon = 3) const;
 
-	bool nearly_greater(const float a, const float b);
+    bool nearly_less(const float a, const float b) const;
 
-	bool nearly_greater_or_equal(const float a, const float b);
+    bool nearly_greater(const float a, const float b) const;
 
-	bool nearly_less_or_equal(const float a, const float b);
+    bool nearly_greater_or_equal(const float a, const float b) const;
 
+    bool nearly_less_or_equal(const float a, const float b) const;
+
+    float value = 0.0f;
 };
