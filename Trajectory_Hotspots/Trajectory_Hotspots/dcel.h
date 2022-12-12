@@ -17,6 +17,8 @@ public:
 	}
 
 	Dcel map_overlay(Dcel dcel1, Dcel dcel2);
+
+	std::vector<std::unique_ptr<HalfEdge>>& get_halfedges();
 	
 	std::vector<std::unique_ptr<HalfEdge>> halfedges;
 	std::vector<std::unique_ptr<Face>> faces;

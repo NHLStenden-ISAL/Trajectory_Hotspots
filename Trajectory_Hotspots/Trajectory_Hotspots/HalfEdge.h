@@ -14,19 +14,16 @@ public:
 	}
 
 	//Loops through all the half edges around a vertex
-	std::vector<HalfEdge*> through_vertex_halfedges(Vertex* v);
+	std::vector<HalfEdge*> get_incident_edges(Vertex* v);
+
+	void correct_prev_next_ptrs(Vertex* v, std::vector<float> angles, float new_angle, HalfEdge* new_edge, std::vector<HalfEdge*> halfedges);
 
 	//Splits edges on an intersection
 	std::vector<HalfEdge*> split_edges(HalfEdge* edge1, HalfEdge* edge2, Vertex* intersection);
 
 	std::vector<float> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
-	
-	HalfEdge* splice_edges(HalfEdge* edge1, HalfEdge* edge2, HalfEdge* edge11, HalfEdge* edge22);
 
-	float get_closest_angle(std::vector<float> angles, float new_angle);
-
-	//Gets the first clockwise half edge with origin V
-	HalfEdge* get_cw_halfedge(HalfEdge* halfedge, Vertex* v);
+	std::vector<Vec2> get_vertex_positions(std::vector<HalfEdge*> halfedges, Vertex* v);
 	
 	//Insert an intersecting edge
 	//HalfEdge* insert_edge(HalfEdge* halfedge, Dcel dcel);

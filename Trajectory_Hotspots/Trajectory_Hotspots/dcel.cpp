@@ -10,3 +10,8 @@ Dcel Dcel::map_overlay(Dcel dcel1, Dcel dcel2)
 	return Dcel(std::vector<std::unique_ptr<HalfEdge>>(), std::vector<std::unique_ptr<Face>>(), std::vector<std::unique_ptr<Vertex>>());
 }
 
+std::vector<std::unique_ptr<HalfEdge>>& Dcel::get_halfedges()
+{
+	return halfedges;
+}
+
