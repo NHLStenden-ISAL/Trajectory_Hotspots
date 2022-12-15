@@ -43,7 +43,7 @@ Vec2 Vec2::operator-=(const Vec2& other) const { return Vec2(x - other.x, y - ot
 Vec2 Vec2::operator*=(const Float& scalar) const { return Vec2(x * scalar, y * scalar); }
 Vec2 Vec2::operator/=(const Float& scalar) const { return Vec2(x / scalar, y / scalar); }
 
-bool Vec2::operator==(const Vec2& operand) const { return nearly_equal(x.get_value(), operand.x.get_value()) && nearly_equal(y.get_value(), operand.y.get_value()); }
+bool Vec2::operator==(const Vec2& operand) const { return x == operand.x && y == operand.y; }
 bool Vec2::operator!=(const Vec2& operand) const { return !(*this == operand); }
 
 Vec2 operator*(const Float& scalar, const Vec2& vec) { return Vec2(vec.x * scalar, vec.y * scalar); }
