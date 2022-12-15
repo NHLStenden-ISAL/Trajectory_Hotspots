@@ -17,6 +17,20 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(test_float.get_value() == 2.0f);
         }
 
+        TEST_METHOD(Assignment)
+        {
+            Float test_float;
+
+            float f1 = 2132.f;
+            Float fc1 = 12313.f;
+
+            test_float = f1;
+            Assert::IsTrue(test_float == f1);
+
+            test_float = fc1;
+            Assert::IsTrue(test_float == fc1);
+        }
+
         TEST_METHOD(Is_Equal)
         {
             Float first_float(3.1232131f);
@@ -32,7 +46,7 @@ namespace TestTrajectoryHotspots
         {
             Float first_float(10.762141f);
             Float same_float(10.762141f);
-            Float different_float(146546.4);
+            Float different_float(146546.4f);
 
             Assert::IsFalse(first_float != same_float);
             Assert::IsTrue(first_float != different_float);

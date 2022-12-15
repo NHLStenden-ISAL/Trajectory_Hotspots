@@ -39,11 +39,11 @@ namespace TestTrajectoryHotspots
         {
             Trapezoidal_Map trapezoidal_map;
 
-            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.x);
-            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.y);
+            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.x.get_value());
+            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.y.get_value());
 
-            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.x);
-            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.y);
+            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.x.get_value());
+            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.y.get_value());
         }
 
         TEST_METHOD(update_with_simple_case_fully_embedded)

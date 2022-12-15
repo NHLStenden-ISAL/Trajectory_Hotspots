@@ -12,5 +12,6 @@
 #include <cassert>
 
 #include "utils.h"
+#include "float.h"
 #include "aabb.h"
 #include "segment.h"

@@ -8,7 +8,6 @@ public:
     Float(const Float& other) : value(other.value) {};
     ~Float() {};
 
-
     float get_value() const { return value; }
     float set_value(float value) { this->value = value; }
 
@@ -58,6 +57,9 @@ public:
     Float& operator/=(float value);
 
     Float operator-() const;
+
+    //Implicit conversion to float
+    operator float() const;
 
 private:
 
