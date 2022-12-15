@@ -42,6 +42,9 @@
     <ClCompile Include="trapezoidal_map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="float.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="trapezoidal_map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="float.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

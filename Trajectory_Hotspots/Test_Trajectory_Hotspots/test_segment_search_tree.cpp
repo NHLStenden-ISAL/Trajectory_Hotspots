@@ -26,7 +26,7 @@ namespace TestTrajectoryHotspots
 
             //Convert points to segments
             std::vector<Segment> ordered_segments;
-            float total_time_t = 0.0f;
+            Float total_time_t = 0.0f;
             for (size_t i = 0; i < ordered_points.size() - 1; i++)
             {
                 ordered_segments.push_back(Segment(ordered_points.at(i), ordered_points.at(i + 1), total_time_t));
@@ -64,7 +64,7 @@ namespace TestTrajectoryHotspots
 
             //Convert points to segments
             std::vector<Segment> ordered_segments;
-            float total_time_t = 0.0f;
+            Float total_time_t = 0.0f;
             for (size_t i = 0; i < ordered_points.size() - 1; i++)
             {
                 ordered_segments.push_back(Segment(ordered_points.at(i), ordered_points.at(i + 1), total_time_t));

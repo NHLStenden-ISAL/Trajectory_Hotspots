@@ -3,6 +3,7 @@
 
 Trapezoidal_Map::Trapezoidal_Map()
 {
+    //TODO: Change infinity to max/lowest like in segment_search_tree.cpp?
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
     left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
@@ -96,6 +97,7 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
     else
     {
         //TODO: Vector for multiple bottom/top points, almost same code
+        //TODO: Middle vector?
         add_overlapping_segment(intersecting_trapezoids, segment);
     }
 
@@ -994,7 +996,7 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
     //If the startpoint of the query segment is the same as the endpoint of this segment, the query segment lies to the right.
     //(This is always true because we order the start and endpoints from left to right and only use this for a graph, so all points have degree 2)
     //TODO: Test if this needs to be nearly_equal, we init with the same points...
-    if (nearly_equal(query_segment.start.x, segment->end.x) && nearly_equal(query_segment.start.y, segment->end.y))
+    if (query_segment.start == segment->end)
     {
         return right->query_start_point(query_segment);
     }
@@ -1002,7 +1004,7 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
     {
         return right->query_start_point(query_segment);
     }
-    else if (nearly_equal(query_segment.end.x, segment->start.x) && nearly_equal(query_segment.end.y, segment->start.y))
+    else if (query_segment.end == segment->start)
     {
         return left->query_start_point(query_segment);
     }

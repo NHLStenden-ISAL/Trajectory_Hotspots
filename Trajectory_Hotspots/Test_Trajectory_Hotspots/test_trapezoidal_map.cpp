@@ -39,11 +39,11 @@ namespace TestTrajectoryHotspots
         {
             Trapezoidal_Map trapezoidal_map;
 
-            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.x);
-            Assert::AreEqual(-std::numeric_limits<float>::infinity(), trapezoidal_map.bottom_point.y);
+            Assert::IsTrue(trapezoidal_map.bottom_point.x == -std::numeric_limits<float>::infinity());
+            Assert::IsTrue(trapezoidal_map.bottom_point.y == -std::numeric_limits<float>::infinity());
 
-            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.x);
-            Assert::AreEqual(std::numeric_limits<float>::infinity(), trapezoidal_map.top_point.y);
+            Assert::IsTrue(trapezoidal_map.top_point.x == std::numeric_limits<float>::infinity());
+            Assert::IsTrue(trapezoidal_map.top_point.y == std::numeric_limits<float>::infinity());
         }
 
         TEST_METHOD(update_with_simple_case_fully_embedded)
@@ -622,7 +622,6 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(query_result_right_4, query_result_right_5);
             Assert::AreEqual(query_result_right_of_5, query_result_right_4->bottom_right);
             Assert::AreEqual(query_result_right_of_7, query_result_right_5->top_right);
-
         }
     };
 }

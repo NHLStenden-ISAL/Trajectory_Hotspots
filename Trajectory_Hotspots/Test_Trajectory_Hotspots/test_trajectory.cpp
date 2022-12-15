@@ -43,7 +43,7 @@ namespace TestTrajectoryHotspots
             trajectory_points.emplace_back(10.f, 1.f);
 
             //Create trajectory edges, set t with lengths
-            float start_t = 0.f;
+            Float start_t = 0.f;
             for (size_t i = 0; i < trajectory_points.size() - 1; i++)
             {
                 trajectory_edges.emplace_back(trajectory_points.at(i), trajectory_points.at(i + 1), start_t);

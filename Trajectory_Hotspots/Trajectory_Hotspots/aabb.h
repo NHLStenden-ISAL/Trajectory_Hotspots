@@ -8,7 +8,6 @@ class AABB
 {
 public:
 
-
     AABB() : min(0.f, 0.f), max(0.f, 0.f)
     {
     }
@@ -19,7 +18,7 @@ public:
     {
     }
 
-    AABB(const float min_x, const float min_y, const float max_x, const float max_y) :
+    AABB(const Float min_x, const Float min_y, const Float max_x, const Float max_y) :
         min(min_x, min_y),
         max(max_x, max_y)
     {
@@ -47,11 +46,11 @@ public:
     //TODO: Ensure this stays a square
     static AABB combine(const AABB& a, const AABB& b)
     {
-        float min_x = std::min(a.min.x, b.min.x);
-        float min_y = std::min(a.min.y, b.min.y);
+        Float min_x = std::min(a.min.x, b.min.x);
+        Float min_y = std::min(a.min.y, b.min.y);
 
-        float max_x = std::max(a.max.x, b.max.x);
-        float max_y = std::max(a.max.y, b.max.y);
+        Float max_x = std::max(a.max.x, b.max.x);
+        Float max_y = std::max(a.max.y, b.max.y);
 
         return AABB(Vec2(min_x, min_y), Vec2(max_x, max_y));
     }
@@ -59,15 +58,16 @@ public:
     Vec2 min;
     Vec2 max;
 
-    float width() const
-    {
-        float width = max.x - min.x;
 
-        if (isinf(width))
+    Float width() const
+    {
+        Float width = max.x - min.x;
+
+        if (width.is_inf())
         {
             return std::numeric_limits<float>::infinity();
         }
 
-        return max.x - min.x;
+        return width;
     }
 };

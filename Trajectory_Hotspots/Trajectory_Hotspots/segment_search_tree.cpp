@@ -41,7 +41,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
 }
 
 //Query tree, reutrns bounding box from start_t to end_t
-AABB Segment_Search_Tree_Node::query(const float start_t, const float end_t) const
+AABB Segment_Search_Tree_Node::query(const Float start_t, const Float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?
     AABB bounding_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -77,9 +77,9 @@ AABB Segment_Search_Tree_Node::query(const float start_t, const float end_t) con
     {
         const Segment& segment = segment_list.at(segment_index);
 
-        const float segment_length_t = node_end_t - node_start_t;
-        const float start_scalar = start_t - node_start_t;
-        const float end_scalar = end_t - node_start_t;
+        const Float segment_length_t = node_end_t - node_start_t;
+        const Float start_scalar = start_t - node_start_t;
+        const Float end_scalar = end_t - node_start_t;
         Vec2 segment_vec = segment.end - segment.start;
 
         Vec2 start_point = segment.start + start_scalar * segment_vec;
@@ -95,7 +95,7 @@ AABB Segment_Search_Tree_Node::query(const float start_t, const float end_t) con
 }
 
 //Query tree, returns bounding box from start_t to the last point contained in the (sub)tree
-AABB Segment_Search_Tree_Node::query_left(const float start_t) const
+AABB Segment_Search_Tree_Node::query_left(const Float start_t) const
 {
     if (right != nullptr)
     {
@@ -124,7 +124,7 @@ AABB Segment_Search_Tree_Node::query_left(const float start_t) const
         const Segment& segment = segment_list.at(segment_index);
 
         //Calculate boundingbox from point at start_t to the endpoint of the segment
-        float length_scalar = (node_end_t - start_t) / (node_end_t - node_start_t);
+        Float length_scalar = (node_end_t - start_t) / (node_end_t - node_start_t);
         Vec2 point_on_segment = segment.end + (length_scalar * (segment.start - segment.end));
 
         Vec2 min(std::min(point_on_segment.x, segment.end.x), std::min(point_on_segment.y, segment.end.y));
@@ -138,7 +138,7 @@ AABB Segment_Search_Tree_Node::query_left(const float start_t) const
 }
 
 //Query tree, returns bounding box from the first point in the (sub)tree to end_t
-AABB Segment_Search_Tree_Node::query_right(const float end_t) const
+AABB Segment_Search_Tree_Node::query_right(const Float end_t) const
 {
     if (left != nullptr)
     {
@@ -167,7 +167,7 @@ AABB Segment_Search_Tree_Node::query_right(const float end_t) const
         const Segment& segment = segment_list.at(segment_index);
 
         //Calculate boundingbox from the startpoint of the segment to the point at end_t
-        float length_scalar = (end_t - node_start_t) / (node_end_t - node_start_t);
+        Float length_scalar = (end_t - node_start_t) / (node_end_t - node_start_t);
         Vec2 point_on_segment = segment.start + (length_scalar * (segment.end - segment.start));
 
         Vec2 min(std::min(point_on_segment.x, segment.start.x), std::min(point_on_segment.y, segment.start.y));
@@ -179,7 +179,7 @@ AABB Segment_Search_Tree_Node::query_right(const float end_t) const
     return AABB(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 }
 
-int Segment_Search_Tree_Node::query(const float t) const
+int Segment_Search_Tree_Node::query(const Float t) const
 {
     if (left != nullptr)
     {
@@ -209,4 +209,5 @@ int Segment_Search_Tree_Node::query(const float t) const
 
 Segment_Search_Tree::Segment_Search_Tree(const std::vector<Segment>& ordered_segments) : root(ordered_segments, 0, ordered_segments.size() - 1)
 {
+
 }

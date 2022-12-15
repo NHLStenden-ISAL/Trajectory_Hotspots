@@ -3,13 +3,13 @@
 #include "aabb.h"
 #include "segment.h"
 
-float Segment::length() const
+Float Segment::length() const
 {
     Vec2 distance_vector = start - end;
     return distance_vector.length();
 }
 
-float Segment::squared_length() const
+Float Segment::squared_length() const
 {
     Vec2 distance_vector = start - end;
     return distance_vector.squared_length();
@@ -74,9 +74,9 @@ AABB Segment::get_AABB() const
 
 
 //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
-float Segment::x_intersect(float x) const
+Float Segment::x_intersect(Float x) const
 {
-    float x_diff = end.x - start.x;
+    Float x_diff = end.x - start.x;
 
     //Vertical segment, either no or infinite intersections
     if (x_diff == 0.f)
@@ -85,17 +85,17 @@ float Segment::x_intersect(float x) const
     }
     else
     {
-        float segment_to_x = x - start.x;
-        float intersection_y = start.y + (segment_to_x / x_diff * (end.y - start.y));
+        Float segment_to_x = x - start.x;
+        Float intersection_y = start.y + (segment_to_x / x_diff * (end.y - start.y));
 
         return intersection_y;
     }
 }
 
 //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
-float Segment::y_intersect(float y) const
+Float Segment::y_intersect(Float y) const
 {
-    float y_diff = end.y - start.y;
+    Float y_diff = end.y - start.y;
 
     //Horizontal segment, either no or infinite intersections
     if (y_diff == 0.f)
@@ -104,15 +104,15 @@ float Segment::y_intersect(float y) const
     }
     else
     {
-        float segment_to_y = y - start.y;
-        float intersection_x = start.x + (segment_to_y / y_diff * (end.x - start.x));
+        Float segment_to_y = y - start.y;
+        Float intersection_x = start.x + (segment_to_y / y_diff * (end.x - start.x));
 
         return intersection_x;
     }
 }
 
 //If the vertical line at position x intersects the segment, gets the y coordinate of the intersection
-bool Segment::x_intersects(float x, float& intersection_point_y) const
+bool Segment::x_intersects(const Float x, Float& intersection_point_y) const
 {
     //If the query line is left or right of segment, return false
     if (x < start.x && x < end.x)
@@ -131,7 +131,7 @@ bool Segment::x_intersects(float x, float& intersection_point_y) const
 }
 
 //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
-bool Segment::y_intersects(float y, float& intersection_point_x) const
+bool Segment::y_intersects(const Float y, Float& intersection_point_x) const
 {
     //If the query line is above or below segment, return false
     if (y < start.y && y < end.y)
@@ -149,22 +149,22 @@ bool Segment::y_intersects(float y, float& intersection_point_x) const
     return true;
 }
 
-float Segment::get_time_at_x(const float x) const
+Float Segment::get_time_at_x(const Float x) const
 {
-    float x_fraction = (x - start.x) / (end.x - start.x);
+    Float x_fraction = (x - start.x) / (end.x - start.x);
     return x_fraction * (end_t - start_t);
 }
 
-float Segment::get_time_at_y(const float y) const
+Float Segment::get_time_at_y(const Float y) const
 {
-    float y_fraction = (y - start.y) / (end.y - start.y);
+    Float y_fraction = (y - start.y) / (end.y - start.y);
     return y_fraction * (end_t - start_t);
 }
 
-float Segment::get_time_at_point(const Vec2& point) const
+Float Segment::get_time_at_point(const Vec2& point) const
 {
     Vec2 start_to_point = point - start;
-    float time_fraction = start_to_point.length() / length();
+    Float time_fraction = start_to_point.length() / length();
     return time_fraction * (end_t - start_t);
 }
 
@@ -176,7 +176,7 @@ bool point_right_of_segment(const Segment& segment, const Vec2& point)
     const Vec2* top = segment.get_top_point();
     const Vec2* bottom = segment.get_bottom_point();
 
-    float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
+    Float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
 
     return direction < 0 ? false : true;
 }
