@@ -133,7 +133,6 @@
     <ClCompile Include="trajectory.cpp" />
     <ClCompile Include="trajectory_hotspots.cpp" />
     <ClCompile Include="trapezoidal_map.cpp" />
-    <ClCompile Include="utils.cpp" />
     <ClCompile Include="vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -144,7 +143,6 @@
     <ClInclude Include="segment_search_tree.h" />
     <ClInclude Include="trajectory.h" />
     <ClInclude Include="trapezoidal_map.h" />
-    <ClInclude Include="utils.h" />
     <ClInclude Include="vec2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
