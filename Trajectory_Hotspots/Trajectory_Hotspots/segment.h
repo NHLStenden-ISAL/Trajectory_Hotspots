@@ -12,13 +12,13 @@ public:
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const float start_t, const float end_t) :
+    Segment(const Vec2 start, const Vec2 end, const Float start_t, const Float end_t) :
         start(start), end(end), start_t(start_t), end_t(end_t)
     {
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const float start_t) :
+    Segment(const Vec2 start, const Vec2 end, const Float start_t) :
         start(start), end(end), start_t(start_t)
     {
         end_t = start_t + this->length();
@@ -29,7 +29,7 @@ public:
     {
     }
 
-    Segment(const float start_x, const float start_y, const float end_x, const float end_y, const float start_t, const float end_t) :
+    Segment(const Float start_x, const Float start_y, const Float end_x, const Float end_y, const Float start_t, const Float end_t) :
         start(start_x, start_y), end(end_x, end_y), start_t(start_t), end_t(end_t)
     {
 
@@ -38,8 +38,8 @@ public:
     bool operator==(const Segment& operand) const;
     bool operator!=(const Segment& operand) const;
 
-    float length() const;
-    float squared_length() const;
+    Float length() const;
+    Float squared_length() const;
 
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;
@@ -50,8 +50,8 @@ public:
     Vec2 end;
 
     //TODO: Not sure I like this in here.. can we move this to the tree?
-    float start_t;
-    float end_t;
+    Float start_t;
+    Float end_t;
 };
 
 bool point_right_of_segment(const Segment& segment, const Vec2& point);

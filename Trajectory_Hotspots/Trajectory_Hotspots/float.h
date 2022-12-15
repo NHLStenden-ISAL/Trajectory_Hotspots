@@ -8,7 +8,6 @@ public:
     Float(const Float& other) : value(other.value) {};
     ~Float() {};
 
-
     float get_value() const { return value; }
     float set_value(float value) { this->value = value; }
 
@@ -59,6 +58,10 @@ public:
 
     Float operator-() const;
 
+    bool is_inf() const;
+    //Implicit conversion to float
+    //operator float() const;
+
 private:
 
     //From: https://bitbashing.io/comparing-floats.html
@@ -78,3 +81,5 @@ private:
 
     float value = 0.0f;
 };
+
+Float operator/(const float& value, const Float& divider);

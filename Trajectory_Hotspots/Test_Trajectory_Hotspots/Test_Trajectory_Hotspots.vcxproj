@@ -133,6 +133,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_with_fsanitize|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test_float.cpp" />
     <ClCompile Include="test_segment_search_tree.cpp" />
     <ClCompile Include="test_trajectory_hotspots.cpp" />
     <ClCompile Include="test_trapezoidal_map.cpp" />

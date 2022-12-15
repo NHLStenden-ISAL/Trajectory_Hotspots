@@ -77,13 +77,13 @@ bool Float::nearly_less_or_equal(const float a, const float b) const
 
 Float& Float::operator=(const Float& other)
 {
-    value = other.value;
+    this->value = other.value;
     return *this;
 }
 
 Float& Float::operator=(float new_value)
 {
-    value = value;
+    this->value = new_value;
     return *this;
 }
 
@@ -244,4 +244,20 @@ Float& Float::operator/=(float value)
 Float Float::operator-() const
 {
     return Float(-value);
+}
+
+bool Float::is_inf() const
+{
+    return isinf(value);
+}
+
+//Implicit conversion to float
+//Float::operator float() const
+//{
+//    return value;
+//}
+
+Float operator/(const float& value, const Float& divider)
+{
+    return Float(value / divider.get_value());
 }

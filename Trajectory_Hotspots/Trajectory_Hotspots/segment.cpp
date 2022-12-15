@@ -3,13 +3,13 @@
 #include "aabb.h"
 #include "segment.h"
 
-float Segment::length() const
+Float Segment::length() const
 {
     Vec2 distance_vector = start - end;
     return distance_vector.length();
 }
 
-float Segment::squared_length() const
+Float Segment::squared_length() const
 {
     Vec2 distance_vector = start - end;
     return distance_vector.squared_length();
@@ -54,7 +54,7 @@ bool point_right_of_segment(const Segment& segment, const Vec2& point)
     const Vec2* top = segment.get_top_point();
     const Vec2* bottom = segment.get_bottom_point();
 
-    float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
+    Float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
 
     return direction < 0 ? false : true;
 }
