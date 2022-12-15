@@ -58,8 +58,8 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(dotAC == 13.0f);
             Assert::IsTrue(dotCA == 13.0f);
 
-
-            Assert::IsTrue(a.normalized().dot(c.normalized()) == 1.0f);
+            Float dotACNorm = a.normalized().dot(c.normalized());
+            Assert::IsTrue(dotACNorm == 1.0f);
 
             Vec2 neg_c = -c;
 

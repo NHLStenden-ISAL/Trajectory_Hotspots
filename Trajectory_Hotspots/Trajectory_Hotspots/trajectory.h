@@ -9,11 +9,11 @@ public:
     Trajectory(std::vector<Segment>& ordered_segments);
 
 
-    AABB get_hotspot_fixed_radius(float radius) const;
-    AABB get_hotspot_fixed_length(float length) const;
+    AABB get_hotspot_fixed_radius(Float radius) const;
+    AABB get_hotspot_fixed_length(Float length) const;
 
-    AABB get_hotspot_fixed_radius_contiguous(float radius) const;
-    AABB get_hotspot_fixed_length_contiguous(float length) const;
+    AABB get_hotspot_fixed_radius_contiguous(Float radius) const;
+    AABB get_hotspot_fixed_length_contiguous(Float length) const;
 
 private:
 

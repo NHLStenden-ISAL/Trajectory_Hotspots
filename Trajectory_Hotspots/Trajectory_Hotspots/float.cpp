@@ -246,8 +246,18 @@ Float Float::operator-() const
     return Float(-value);
 }
 
-//Implicit conversion to float
-Float::operator float() const
+bool Float::is_inf() const
 {
-    return value;
+    return isinf(value);
+}
+
+//Implicit conversion to float
+//Float::operator float() const
+//{
+//    return value;
+//}
+
+Float operator/(const float& value, const Float& divider)
+{
+    return Float(value / divider.get_value());
 }

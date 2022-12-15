@@ -58,8 +58,9 @@ public:
 
     Float operator-() const;
 
+    bool is_inf() const;
     //Implicit conversion to float
-    operator float() const;
+    //operator float() const;
 
 private:
 
@@ -80,3 +81,5 @@ private:
 
     float value = 0.0f;
 };
+
+Float operator/(const float& value, const Float& divider);

@@ -6,22 +6,22 @@ Trajectory::Trajectory(std::vector<Segment>& ordered_segments) : trajectory_segm
 }
 
 //Returns a hotspot with a fixed radius at a position that maximizes the trajectory inside it
-AABB Trajectory::get_hotspot_fixed_radius(float radius) const
+AABB Trajectory::get_hotspot_fixed_radius(Float radius) const
 {
     return AABB();
 }
 
-AABB Trajectory::get_hotspot_fixed_length(float length) const
+AABB Trajectory::get_hotspot_fixed_length(Float length) const
 {
     return AABB();
 }
 
-AABB Trajectory::get_hotspot_fixed_radius_contiguous(float radius) const
+AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
 {
     return AABB();
 }
 
-AABB Trajectory::get_hotspot_fixed_length_contiguous(float length) const
+AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
 {
     return AABB();
 }
