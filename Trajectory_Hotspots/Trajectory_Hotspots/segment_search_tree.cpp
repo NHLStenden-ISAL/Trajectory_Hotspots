@@ -42,7 +42,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
 AABB Segment_Search_Tree_Node::Query(const Float start_t, const Float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?
-    AABB bounding_box(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+    AABB bounding_box(std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::lowest() / 2.f, std::numeric_limits<float>::lowest() / 2.f);
 
     if (left != nullptr)
     {
@@ -127,7 +127,7 @@ AABB Segment_Search_Tree_Node::Query_Left(const Float start_t) const
         return AABB(min, max);
     }
 
-    return AABB(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+    return AABB(std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::lowest() / 2.f, std::numeric_limits<float>::lowest() / 2.f);
 
 }
 
