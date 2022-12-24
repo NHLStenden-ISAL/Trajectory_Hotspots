@@ -66,6 +66,23 @@ public:
             return std::numeric_limits<float>::infinity();
         }
 
-        return width; //TODO: We would like to return angle and width
+        return width;
+    }
+
+    Float height() const
+    {
+        Float width = max.y - min.y;
+
+        if (width.is_inf())
+        {
+            return std::numeric_limits<float>::infinity();
+        }
+
+        return width;
+    }
+
+    Float max_size() const
+    {
+        return std::max(width(), height());
     }
 };

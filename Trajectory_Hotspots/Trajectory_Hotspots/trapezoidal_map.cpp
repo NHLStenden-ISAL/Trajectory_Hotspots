@@ -3,7 +3,6 @@
 
 Trapezoidal_Map::Trapezoidal_Map()
 {
-    //TODO: Change infinity to max/lowest like in segment_search_tree.cpp?
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
     left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
