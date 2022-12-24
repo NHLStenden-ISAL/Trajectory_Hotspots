@@ -8,6 +8,7 @@ class AABB
 {
 public:
 
+
     AABB() : min(0.f, 0.f), max(0.f, 0.f)
     {
     }
@@ -32,7 +33,6 @@ public:
     }
 
     //Combine this AABB with another by keeping the extremes in all four directions
-    //TODO: Ensure this stays a square
     void combine(const AABB& other)
     {
         min.x = std::min(min.x, other.min.x);
@@ -43,7 +43,6 @@ public:
     }
 
     //Combine two AABBs with each other by keeping the extremes in all four directions
-    //TODO: Ensure this stays a square
     static AABB combine(const AABB& a, const AABB& b)
     {
         Float min_x = std::min(a.min.x, b.min.x);
@@ -58,7 +57,6 @@ public:
     Vec2 min;
     Vec2 max;
 
-
     Float width() const
     {
         Float width = max.x - min.x;
@@ -69,5 +67,22 @@ public:
         }
 
         return width;
+    }
+
+    Float height() const
+    {
+        Float width = max.y - min.y;
+
+        if (width.is_inf())
+        {
+            return std::numeric_limits<float>::infinity();
+        }
+
+        return width;
+    }
+
+    Float max_size() const
+    {
+        return std::max(width(), height());
     }
 };
