@@ -12,6 +12,24 @@ Trajectory::Trajectory(std::vector<Segment>& ordered_segments) : trajectory_segm
     }
 }
 
+Trajectory::Trajectory(const std::vector<Vec2>& ordered_trajectory_points)
+{
+    trajectory_segments.reserve(ordered_trajectory_points.size() - 1);
+
+    //Create trajectory edges, set t with lengths
+    Float start_t = 0.f;
+    for (size_t i = 0; i < ordered_trajectory_points.size() - 1; i++)
+    {
+        trajectory_segments.emplace_back(ordered_trajectory_points[i], ordered_trajectory_points[i + 1], start_t);
+        start_t += trajectory_segments.cbegin()->length();
+    }
+
+    trajectory_start = trajectory_segments.front().start_t;
+    trajectory_end = trajectory_segments.back().end_t;
+
+    trajectory_length = start_t;
+}
+
 //Returns a hotspot with a fixed radius at a position that maximizes the trajectory inside it
 AABB Trajectory::get_hotspot_fixed_radius(Float radius) const
 {
@@ -105,6 +123,7 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
         //Check breakpoints IV and V
         for (size_t end_index = end_range_start_index; end_index <= end_range_end_index; ++end_index)
         {
+            //TODO: Is this check ok for V? Or do we do a seperate loop for V?
             if (end_index - start_index < 2)
             {
                 //Skip if same segment or connected segments

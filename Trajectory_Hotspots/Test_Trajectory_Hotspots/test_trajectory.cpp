@@ -34,7 +34,6 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(get_hotspot_fixed_length_contiguous_full_diagonal)
         {
             std::vector<Vec2> trajectory_points;
-            std::vector<Segment> trajectory_edges;
 
             trajectory_points.emplace_back(1.f, 1.f);
             trajectory_points.emplace_back(2.f, 4.f);
@@ -42,15 +41,7 @@ namespace TestTrajectoryHotspots
             trajectory_points.emplace_back(8.f, 4.f);
             trajectory_points.emplace_back(10.f, 1.f);
 
-            //Create trajectory edges, set t with lengths
-            Float start_t = 0.f;
-            for (size_t i = 0; i < trajectory_points.size() - 1; i++)
-            {
-                trajectory_edges.emplace_back(trajectory_points.at(i), trajectory_points.at(i + 1), start_t);
-                start_t += trajectory_edges.cbegin()->length();
-            }
-
-            Trajectory trajectory(trajectory_edges);
+            Trajectory trajectory(trajectory_points);
 
             Float query_length = 2.0f;
 
@@ -62,7 +53,6 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(get_hotspot_fixed_length_contiguous_curl)
         {
             std::vector<Vec2> trajectory_points;
-            std::vector<Segment> trajectory_edges;
 
             trajectory_points.emplace_back(4.f, 5.f);
             trajectory_points.emplace_back(2.f, 4.f);

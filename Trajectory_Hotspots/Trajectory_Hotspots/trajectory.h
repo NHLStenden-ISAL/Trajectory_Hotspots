@@ -7,6 +7,7 @@ class Trajectory
 public:
 
     Trajectory(std::vector<Segment>& ordered_segments);
+    Trajectory(const std::vector<Vec2>& ordered_points);
 
 
     AABB get_hotspot_fixed_radius(Float radius) const;
