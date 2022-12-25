@@ -60,15 +60,7 @@ namespace TestTrajectoryHotspots
             trajectory_points.emplace_back(8.f, 4.f);
             trajectory_points.emplace_back(10.f, 1.f);
 
-            //Create trajectory edges, set t with lengths
-            Float start_t = 0.f;
-            for (size_t i = 0; i < trajectory_points.size() - 1; i++)
-            {
-                trajectory_edges.emplace_back(trajectory_points.at(i), trajectory_points.at(i + 1), start_t);
-                start_t += trajectory_edges.cbegin()->length();
-            }
-
-            Trajectory trajectory(trajectory_edges);
+            Trajectory trajectory(trajectory_points);
 
             Float query_length = 6.4787086646191f;
 
@@ -79,6 +71,27 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(hotspot.min == Vec2(2.f, 4.f));
             Assert::IsTrue(hotspot.max == Vec2(5.f, 7.f));
         }
+
+        TEST_METHOD(get_hotspot_fixed_length_contiguous_basic_breakpoint_v)
+        {
+            std::vector<Vec2> trajectory_points;
+
+            trajectory_points.emplace_back(3.f, 3.f);
+            trajectory_points.emplace_back(5.14f, 5.69f);
+            trajectory_points.emplace_back(5.5f, 5.5f);
+            trajectory_points.emplace_back(4.5f, 3.5f);
+
+            Trajectory trajectory(trajectory_points);
+
+            Float query_length = 1.8041624196468f;
+
+            //TODO: This bugs on the 2nd segment? it returns a bounding box around the 2nd segment.. (segment length < query_length...)
+            AABB hotspot = trajectory.get_hotspot_fixed_length_contiguous(query_length);
+
+            Assert::IsTrue(hotspot.min == Vec2(4.5910780669145f, 5.f));
+            Assert::IsTrue(hotspot.max == Vec2(5.5f, 5.69f));
+        }
+
     };
 
 
