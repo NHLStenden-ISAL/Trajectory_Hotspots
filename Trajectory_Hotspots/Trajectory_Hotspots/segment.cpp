@@ -152,20 +152,20 @@ bool Segment::y_intersects(const Float y, Float& intersection_point_x) const
 Float Segment::get_time_at_x(const Float x) const
 {
     Float x_fraction = (x - start.x) / (end.x - start.x);
-    return x_fraction * (end_t - start_t);
+    return start_t + (x_fraction * (end_t - start_t));
 }
 
 Float Segment::get_time_at_y(const Float y) const
 {
     Float y_fraction = (y - start.y) / (end.y - start.y);
-    return y_fraction * (end_t - start_t);
+    return start_t + (y_fraction * (end_t - start_t));
 }
 
 Float Segment::get_time_at_point(const Vec2& point) const
 {
     Vec2 start_to_point = point - start;
     Float time_fraction = start_to_point.length() / length();
-    return time_fraction * (end_t - start_t);
+    return start_t + (time_fraction * (end_t - start_t));
 }
 
 //Returns the point on the segment at a given time
