@@ -31,16 +31,15 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
 AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
 {
     //TODO:Check if length is enough for an UV to exist..
-    //TODO: This works for now with using time because time == length, but we might want to change the tree to also store the lengths..
     Segment_Search_Tree tree(trajectory_segments);
 
     AABB smallest_hotspot(
-        std::numeric_limits<float>::max(),
-        std::numeric_limits<float>::max(),
-        std::numeric_limits<float>::lowest(),
-        std::numeric_limits<float>::lowest());
+        std::numeric_limits<float>::max() / 2.f,
+        std::numeric_limits<float>::max() / 2.f,
+        std::numeric_limits<float>::lowest() / 2.f,
+        std::numeric_limits<float>::lowest() / 2.f);
 
-    //Breakpoint type I, start at vertices of the trajectory
+    //Breakpoint type I, the subtrajectory starts at a vertex of the trajectory
     for (auto& trajectory_segment : trajectory_segments)
     {
         Float start = trajectory_segment.start_t;
@@ -52,15 +51,15 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
             break;
         }
 
-        AABB current_hotspot = tree.query(start, end);
+        const AABB current_hotspot = tree.query(start, end);
 
-        if (current_hotspot.width() < smallest_hotspot.width())
+        if (current_hotspot.max_size() < smallest_hotspot.max_size())
         {
             smallest_hotspot = current_hotspot;
         }
     }
 
-    //Breakpoint type II, end at the vertices of the trajectory
+    //Breakpoint type II, the subtrajectory ends at a vertex of the trajectory
     std::vector<Segment>::const_reverse_iterator r_iterator;
     for (r_iterator = trajectory_segments.rbegin(); r_iterator != trajectory_segments.rend(); r_iterator++)
     {
@@ -73,28 +72,29 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
             break;
         }
 
-        AABB current_hotspot = tree.query(start, end);
+        const AABB current_hotspot = tree.query(start, end);
 
-        if (current_hotspot.width() < smallest_hotspot.width())
+        if (current_hotspot.max_size() < smallest_hotspot.max_size())
         {
             smallest_hotspot = current_hotspot;
         }
     }
 
     //Breakpoint type III and IV, the start/end of the subtrajectory coincides 
-    //with the minimum or maximum x or y-coordinate of the bounding box based on the first and last vertex
+    //with the minimum or maximum x or y-coordinate of the bounding box 
+    //based on the subtrajectory between the first and last vertex on the optimal subtrajectory
 
-    //For each segment, query with start + L and query with end + L, iterate from first to last.
+    //For each segment, query with start + L and end + L, iterate from first to last.
     //For each end segment query bounding box uv, then check if the border lines intersect the start of end segment
-    for (auto& trajectory_segment : trajectory_segments)
+    for (const Segment& trajectory_segment : trajectory_segments)
     {
 
-        //Find all segments in which the sub-trajectories starting in this segment end
-        Float end_range_start = trajectory_segment.start_t + length;
-        Float end_range_end = trajectory_segment.end_t + length;
+        //Find all segments in which the sub-trajectories starting on this segment end
+        const Float end_range_start = trajectory_segment.start_t + length;
+        const Float end_range_end = trajectory_segment.end_t + length;
 
-        int end_range_start_index = tree.query(end_range_start);
-        int end_range_end_index = tree.query(end_range_end);
+        const int end_range_start_index = tree.query(end_range_start);
+        const int end_range_end_index = tree.query(end_range_end);
 
         //Get u, the time at the first vertex after the sub-trajectory start point
         Float start = trajectory_segment.end_t;
@@ -116,94 +116,157 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
 
             //Breakpoint IV, Check if any of the four sides of the AABB of the subtrajectory between u and v intersects either the start or end segment, if so, check for new hotspot
             AABB current_hotspot;
-            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.min.x, current_hotspot))
-            {
-                if (current_hotspot.width() < smallest_hotspot.width())
-                {
-                    smallest_hotspot = current_hotspot;
-                }
-            }
-            if (flc_breakpoint_III_x(tree, length, trajectory_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_III_y(tree, length, trajectory_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_x(length, trajectory_segment, end_segment, uv_bounding_box.min.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_x(length, trajectory_segment, end_segment, uv_bounding_box.max.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_y(length, trajectory_segment, end_segment, uv_bounding_box.min.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_III_y(length, trajectory_segment, end_segment, uv_bounding_box.max.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
 
-            if (flc_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.min.x, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_IV_x(tree, length, end_segment, uv_bounding_box.max.x, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.min.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_IV_y(tree, length, end_segment, uv_bounding_box.max.y, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_x(length, trajectory_segment, end_segment, uv_bounding_box.min.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_x(length, trajectory_segment, end_segment, uv_bounding_box.max.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_y(length, trajectory_segment, end_segment, uv_bounding_box.min.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_IV_y(length, trajectory_segment, end_segment, uv_bounding_box.max.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
 
             //Breakpoint V, the start and end of the subtrajectory lie on the same x or y coordinate
             //TODO: What if a segment lies perpendicular to the other segment? Add condition in overlap? Probably fine because of the L restraint, still check the math..
-            if (flc_breakpoint_V_x(tree, length, trajectory_segment, end_segment, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_V_y(tree, length, trajectory_segment, end_segment, current_hotspot)) { if (current_hotspot.width() < smallest_hotspot.width()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_V_x(tree, length, trajectory_segment, end_segment, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_V_y(tree, length, trajectory_segment, end_segment, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
         }
     }
 
     return smallest_hotspot;
 }
 
-bool Trajectory::flc_breakpoint_III_x(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_x, AABB& potential_hotspot) const
+//Checks if the vertical line through the side of the uv AABB intersects the starting segment and returns a potential hotspot if the subtrajectory still ends in the end segment
+bool Trajectory::flc_breakpoint_III_x(const Float length, const Segment& start_segment, const Segment& end_segment, const Float vertical_line_x, const AABB& uv_bounding_box, AABB& potential_hotspot) const
 {
     Float intersection_y;
-    if (trajectory_segment.x_intersects(line_x, intersection_y))
+
+    //Does the line through the side of the AABB intersect the start segment?
+    if (!start_segment.x_intersects(vertical_line_x, intersection_y))
     {
-        Float start_t = trajectory_segment.get_time_at_y(intersection_y);
-        Float end_t = start_t + length;
-
-        potential_hotspot = tree.query(start_t, end_t);
-
-        return true;
+        return false;
     }
 
-    return false;
+    Float start_time = start_segment.get_time_at_x(vertical_line_x);
+    Float end_time = start_time + length;
+
+    //TODO: If intersection is infinite we exit here, is that ok?
+    //The trajectory must start and end on the start and end segments or it violates the breakpoint because u and v change
+    if (end_time < end_segment.start_t || end_time > end_segment.end_t)
+    {
+        return false;
+    }
+
+    //The vertical line intersects this start segment, construct start point
+    Vec2 start_point(vertical_line_x, intersection_y);
+
+    //Find the end point of the trajectory on the end segment
+    Vec2 end_point = end_segment.get_point_at_time(end_time);
+
+    //Augment the hotspot with the start and end points and return
+    potential_hotspot = AABB::augment(uv_bounding_box, start_point);
+    potential_hotspot.augment(end_point);
+
+    return true;
 }
 
-bool Trajectory::flc_breakpoint_III_y(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_y, AABB& potential_hotspot) const
+//Checks if the horizontal line through the side of the uv AABB intersects the starting segment and returns a potential hotspot if the subtrajectory still ends in the end segment
+bool Trajectory::flc_breakpoint_III_y(const Float length, const Segment& start_segment, const Segment& end_segment, const Float horizontal_line_y, const AABB& uv_bounding_box, AABB& potential_hotspot) const
 {
     Float intersection_x;
-    if (trajectory_segment.y_intersects(line_y, intersection_x))
+
+    //Does the line through the side of the AABB intersect the start segment?
+    if (!start_segment.y_intersects(horizontal_line_y, intersection_x))
     {
-        Float start_t = trajectory_segment.get_time_at_x(intersection_x);
-        Float end_t = start_t + length;
-
-        potential_hotspot = tree.query(start_t, end_t);
-
-        return true;
+        return false;
     }
 
-    return false;
+    Float start_time = start_segment.get_time_at_y(horizontal_line_y);
+    Float end_time = start_time + length;
+
+    //The trajectory must start and end on the start and end segments or it violates the breakpoint because u and v change
+    if (end_time < end_segment.start_t || end_time > end_segment.end_t)
+    {
+        return false;
+    }
+
+    //The horizontal line intersects this start segment, construct start point
+    Vec2 start_point(intersection_x, horizontal_line_y);
+
+    //Find the end point of the trajectory on the end segment
+    Vec2 end_point = end_segment.get_point_at_time(end_time);
+
+    //Augment the hotspot with the start and end points and return
+    potential_hotspot = AABB::augment(uv_bounding_box, start_point);
+    potential_hotspot.augment(end_point);
+
+    return true;
 }
 
-bool Trajectory::flc_breakpoint_IV_x(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_x, AABB& potential_hotspot) const
+//Checks if the vertical line through the side of the uv AABB intersects the end segment and returns a potential hotspot if the subtrajectory still starts in the start segment
+bool Trajectory::flc_breakpoint_IV_x(const Float length, const Segment& start_segment, const Segment& end_segment, const Float vertical_line_x, const AABB& uv_bounding_box, AABB& potential_hotspot) const
 {
     Float intersection_y;
-    if (trajectory_segment.x_intersects(line_x, intersection_y))
+
+    //Does the line through the side of the AABB intersect the end segment?
+    if (!end_segment.x_intersects(vertical_line_x, intersection_y))
     {
-        Float end_t = trajectory_segment.get_time_at_y(intersection_y);
-        Float start_t = end_t - length;
-
-        potential_hotspot = tree.query(start_t, end_t);
-
-        return true;
+        return false;
     }
 
-    return false;
+    Float end_time = end_segment.get_time_at_x(vertical_line_x);
+    Float start_time = end_time - length;
+
+    //The trajectory must start and end on the start and end segments or it violates the breakpoint because u and v change
+    if (start_time < start_segment.start_t || start_time > start_segment.end_t)
+    {
+        return false;
+    }
+
+    //The vertical line intersects this end segment, construct end point
+    Vec2 end_point(vertical_line_x, intersection_y);
+
+    //Find the start point of the trajectory on the start segment
+    Vec2 start_point = end_segment.get_point_at_time(start_time);
+
+    //Augment the hotspot with the start and end points and return
+    potential_hotspot = AABB::augment(uv_bounding_box, start_point);
+    potential_hotspot.augment(end_point);
+
+    return true;
 }
 
-bool Trajectory::flc_breakpoint_IV_y(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_y, AABB& potential_hotspot) const
+//Checks if the horizontal line through the side of the uv AABB intersects the end segment and returns a potential hotspot if the subtrajectory still starts in the start segment
+bool Trajectory::flc_breakpoint_IV_y(const Float length, const Segment& start_segment, const Segment& end_segment, const Float horizontal_line_y, const AABB& uv_bounding_box, AABB& potential_hotspot) const
 {
     Float intersection_x;
-    if (trajectory_segment.y_intersects(line_y, intersection_x))
+
+    //Does the line through the side of the AABB intersect the end segment?
+    if (!end_segment.y_intersects(horizontal_line_y, intersection_x))
     {
-        Float end_t = trajectory_segment.get_time_at_x(intersection_x);
-        Float start_t = end_t - length;
-
-        potential_hotspot = tree.query(start_t, end_t);
-
-        return true;
+        return false;
     }
 
-    return false;
+    Float end_time = end_segment.get_time_at_y(horizontal_line_y);
+    Float start_time = end_time - length;
+
+    //The trajectory must start and end on the start and end segments or it violates the breakpoint because u and v change
+    if (start_time < start_segment.start_t || start_time > start_segment.end_t)
+    {
+        return false;
+    }
+
+    //The vertical line intersects this end segment, construct end point
+    Vec2 end_point(intersection_x, horizontal_line_y);
+
+    //Find the start point of the trajectory on the start segment
+    Vec2 start_point = end_segment.get_point_at_time(start_time);
+
+    //Augment the hotspot with the start and end points and return
+    potential_hotspot = AABB::augment(uv_bounding_box, start_point);
+    potential_hotspot.augment(end_point);
+
+    return true;
 }
 
 ////bool Trajectory::flc_breakpoint_V(Float length, vec2* s1, vec2* s2, vec2* s3, vec2* s4, vec2& p, vec2& q, bool x) {

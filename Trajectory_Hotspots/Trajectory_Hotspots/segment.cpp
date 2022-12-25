@@ -86,7 +86,7 @@ Float Segment::x_intersect(Float x) const
     else
     {
         Float segment_to_x = x - start.x;
-        Float intersection_y = start.y + (segment_to_x / x_diff * (end.y - start.y));
+        Float intersection_y = start.y + ((segment_to_x / x_diff) * (end.y - start.y));
 
         return intersection_y;
     }
@@ -105,7 +105,7 @@ Float Segment::y_intersect(Float y) const
     else
     {
         Float segment_to_y = y - start.y;
-        Float intersection_x = start.x + (segment_to_y / y_diff * (end.x - start.x));
+        Float intersection_x = start.x + ((segment_to_y / y_diff) * (end.x - start.x));
 
         return intersection_x;
     }
@@ -166,6 +166,16 @@ Float Segment::get_time_at_point(const Vec2& point) const
     Vec2 start_to_point = point - start;
     Float time_fraction = start_to_point.length() / length();
     return time_fraction * (end_t - start_t);
+}
+
+//Returns the point on the segment at a given time
+Vec2 Segment::get_point_at_time(const Float time) const
+{
+    Float fraction = (time - start_t) / (end_t - start_t);
+
+    Vec2 vector_to_point = (end - start) * fraction;
+
+    return (start + vector_to_point);
 }
 
 //Determine if a point lies to the left (false) or right (true) of a segment, oriented from start to end

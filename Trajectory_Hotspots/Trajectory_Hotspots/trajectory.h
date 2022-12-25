@@ -24,10 +24,11 @@ private:
     std::vector<Segment> trajectory_segments;
 
     //Helper functions for fixed_length_contiguous
-    bool flc_breakpoint_III_x(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_x, AABB& potential_hotspot) const;
-    bool flc_breakpoint_III_y(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_y, AABB& potential_hotspot) const;
-    bool flc_breakpoint_IV_x(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_x, AABB& potential_hotspot) const;
-    bool flc_breakpoint_IV_y(const Segment_Search_Tree& tree, const Float length, const Segment& trajectory_segment, const Float line_y, AABB& potential_hotspot) const;
+    bool flc_breakpoint_III_x(const Float length, const Segment& start_segment, const Segment& end_segment, const Float vertical_line_x, const AABB& uv_bounding_box, AABB& potential_hotspot) const;
+    bool flc_breakpoint_III_y(const Float length, const Segment& start_segment, const Segment& end_segment, const Float horizontal_line_y, const AABB& uv_bounding_box, AABB& potential_hotspot) const;
+    bool flc_breakpoint_IV_x(const Float length, const Segment& start_segment, const Segment& end_segment, const Float vertical_line_x, const AABB& uv_bounding_box, AABB& potential_hotspot) const;
+    bool flc_breakpoint_IV_y(const Float length, const Segment& start_segment, const Segment& end_segment, const Float horizontal_line_y, const AABB& uv_bounding_box, AABB& potential_hotspot) const;
+
     //bool flc_breakpoint_V(const Segment_Search_Tree& tree, const float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;
     bool flc_breakpoint_V_x(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;
     bool flc_breakpoint_V_y(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const;

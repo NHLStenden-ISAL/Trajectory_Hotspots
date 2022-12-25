@@ -54,6 +54,8 @@ public:
     Float get_time_at_x(const Float x) const;
     Float get_time_at_y(const Float y) const;
     Float get_time_at_point(const Vec2& point) const;
+    
+    Vec2 get_point_at_time(const Float time) const;
 
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;
