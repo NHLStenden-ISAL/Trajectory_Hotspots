@@ -21,7 +21,7 @@ Trajectory::Trajectory(const std::vector<Vec2>& ordered_trajectory_points)
     for (size_t i = 0; i < ordered_trajectory_points.size() - 1; i++)
     {
         trajectory_segments.emplace_back(ordered_trajectory_points[i], ordered_trajectory_points[i + 1], start_t);
-        start_t += trajectory_segments.cbegin()->length();
+        start_t += trajectory_segments.back().length();
     }
 
     trajectory_start = trajectory_segments.front().start_t;

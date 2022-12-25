@@ -85,7 +85,7 @@ namespace TestTrajectoryHotspots
 
             Float query_length = 1.8041624196468f;
 
-            //TODO: This bugs on the 2nd segment? it returns a bounding box around the 2nd segment.. (segment length < query_length...)
+            //TODO: Now this gives a non-optimal result
             AABB hotspot = trajectory.get_hotspot_fixed_length_contiguous(query_length);
 
             Assert::IsTrue(hotspot.min == Vec2(4.5910780669145f, 5.f));
