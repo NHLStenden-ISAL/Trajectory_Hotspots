@@ -54,7 +54,7 @@ public:
     Float get_time_at_x(const Float x) const;
     Float get_time_at_y(const Float y) const;
     Float get_time_at_point(const Vec2& point) const;
-    
+
     Vec2 get_point_at_time(const Float time) const;
 
     const Vec2* get_bottom_point() const;
@@ -67,10 +67,12 @@ public:
 
     AABB get_AABB() const;
 
+    static bool get_points_on_same_axis_with_distance_l(const Segment& start_segment, const Segment& end_segment, const Float length, const bool axis, Vec2& point_on_start_segment, Vec2& point_on_end_segment);
+
     Vec2 start;
     Vec2 end;
 
-    //TODO: Not sure I like this in here.. can we move this to the tree?
+    //TODO: Not sure I like this in here.. can we move this to a wrapper class?
     Float start_t;
     Float end_t;
 };

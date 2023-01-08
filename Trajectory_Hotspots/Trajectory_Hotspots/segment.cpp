@@ -72,6 +72,63 @@ AABB Segment::get_AABB() const
     return AABB(std::min(start.x, end.x), std::min(start.y, end.y), std::max(start.x, end.x), std::max(start.y, end.y));
 }
 
+//Finds the points on the given segments that share the same axis, and lie a given length away from each other
+//When axis is set to true, uses the x-axis, else the y-axis
+bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segment, const Segment& end_segment, const Float length, const bool axis, Vec2& point_on_start_segment, Vec2& point_on_end_segment)
+{
+    if (axis)
+    {
+        if (!start_segment.x_overlap(end_segment))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!start_segment.y_overlap(end_segment))
+        {
+            return false;
+        }
+    }
+
+    const Vec2 start_vector = start_segment.start - start_segment.end;
+    const Vec2 end_vector = end_segment.end - end_segment.start;
+
+    const Float start_vector_axis = axis ? start_vector.x : start_vector.y;
+    const Float end_vector_axis = axis ? end_vector.x : end_vector.y;
+
+    const Float determinant = start_vector_axis * end_vector.length() - end_vector_axis * start_vector.length();
+
+    //TODO: Determinant perpendicular?
+    if (determinant == 0.f)
+    {
+        return false;
+    }
+
+    const Float edge_distance = (end_segment.start_t - start_segment.end_t);
+    const Float remaining_length = length - edge_distance;
+
+    const Float start_length = start_vector.length();
+    const Float end_length = end_vector.length();
+
+    const Float start_end_difference = axis ? start_segment.end.x - end_segment.start.x : start_segment.end.y - end_segment.start.y;
+
+    //Calculate the scalar for the vectors pointing to points p and q
+    const Float lambda = ((start_end_difference * end_length) - (-end_vector_axis * remaining_length)) / start_length;
+    const Float rho = ((start_vector_axis * remaining_length) - (start_end_difference * start_length)) / end_length;
+
+    //Return false if p or q do not lie on their respective segment
+    if (lambda < 0.f || lambda > 1.0f || rho < 0.f || rho > 1.0f)
+    {
+        return false;
+    }
+
+    //Calculate start and end point using the scalars
+    point_on_start_segment = start_segment.end + (lambda * start_vector);
+    point_on_end_segment = end_segment.start + (rho * end_vector);
+
+    return true;
+}
 
 //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
 Float Segment::x_intersect(Float x) const

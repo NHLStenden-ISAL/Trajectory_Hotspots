@@ -8,6 +8,7 @@
     <ClCompile Include="test_trajectory_hotspots.cpp" />
     <ClCompile Include="test_trapezoidal_map.cpp" />
     <ClCompile Include="test_vec2.cpp" />
+    <ClCompile Include="test_segment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

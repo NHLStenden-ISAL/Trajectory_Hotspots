@@ -156,8 +156,8 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
 
             //Breakpoint V, the start and end of the subtrajectory lie on the same x or y coordinate
             //TODO: What if a segment lies perpendicular to the other segment? Add condition in overlap? Probably fine because of the L restraint, still check the math..
-            if (flc_breakpoint_V_x(tree, length, start_segment, end_segment, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_V_y(tree, length, start_segment, end_segment, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_V(tree, length, start_segment, end_segment, true, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_V(tree, length, start_segment, end_segment, false, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
         }
     }
 
@@ -348,93 +348,18 @@ bool Trajectory::flc_breakpoint_IV_y(const Float length, const Segment& start_se
 //    return true;
 //}
 
-bool Trajectory::flc_breakpoint_V_x(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const
+bool Trajectory::flc_breakpoint_V(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, const bool axis, AABB& potential_hotspot) const
 {
-    if (!start_segment.x_overlap(end_segment))
+    //Calculate start and end point
+    Vec2 p;
+    Vec2 q;
+
+    const bool found_valid_points = Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, axis, p, q);
+
+    if (!found_valid_points)
     {
         return false;
     }
-
-    Vec2 start_vector = start_segment.start - start_segment.end;
-    Vec2 end_vector = end_segment.end - end_segment.start;
-
-    Float determinant_x = start_vector.x * end_vector.length() - end_vector.x * start_vector.length();
-
-    //TODO: Determinant perpendicular?
-    if (determinant_x == 0.f)
-    {
-        return false;
-    }
-
-    //TODO: This works for now with using time (start_t & end_t) because time == length, but we might want to change the tree to also store the lengths..
-    Float edge_distance = (end_segment.start_t - start_segment.end_t) * trajectory_length;
-    Float remaining_length = length - edge_distance;
-
-    Float start_length = start_vector.length();
-    Float end_length = end_vector.length();
-
-    Float start_end_difference = start_segment.end.x - end_segment.start.x;
-
-    //Calculate the scalar for the vectors pointing to points p and q
-    Float lambda = ((start_end_difference * end_length) - (-end_vector.x * remaining_length)) / determinant_x;
-    Float rho = ((start_vector.x * remaining_length) - (start_end_difference * start_length)) / determinant_x;
-
-    //Return false if p or q does not lie on their respective segment
-    if (lambda < 0.f || lambda > 1.0f || rho < 0.f || rho > 1.0f)
-    {
-        return false;
-    }
-
-    //Calculate start and end point using the scalars
-    Vec2 p = start_segment.end + (lambda * start_vector);
-    Vec2 q = end_segment.start + (rho * end_vector);
-
-    //Query the tree using the found start and end point
-    potential_hotspot = tree.query(start_segment.get_time_at_point(p), end_segment.get_time_at_point(q));
-
-    return true;
-}
-
-bool Trajectory::flc_breakpoint_V_y(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, AABB& potential_hotspot) const
-{
-    if (!start_segment.y_overlap(end_segment))
-    {
-        return false;
-    }
-
-    Vec2 start_vector = start_segment.start - start_segment.end;
-    Vec2 end_vector = end_segment.end - end_segment.start;
-
-    Float determinant_y = start_vector.y * end_vector.length() - end_vector.y * start_vector.length();
-
-    //TODO: Determinant perpendicular?
-    if (determinant_y == 0.f)
-    {
-        return false;
-    }
-
-    //TODO: This works for now with using time because time == length, but we might want to change the tree to also store the lengths..
-    Float edge_distance = (end_segment.start_t - start_segment.end_t) * trajectory_length;
-    Float remaining_length = length - edge_distance;
-
-    Float start_length = start_vector.length();
-    Float end_length = end_vector.length();
-
-    Float start_end_difference = start_segment.end.y - end_segment.start.y;
-
-    //Calculate the scalar for the vectors pointing to points p and q
-    Float lambda = ((start_end_difference * end_length) - (-end_vector.y * remaining_length)) / determinant_y;
-    Float rho = ((start_vector.y * remaining_length) - (start_end_difference * start_length)) / determinant_y;
-
-    //Return false if p or q does not lie on their segment
-    if (lambda < 0.f || lambda > 1.0f || rho < 0.f || rho > 1.0f)
-    {
-        return false;
-    }
-
-    //Calculate start and end point using the scalars
-    Vec2 p = start_segment.end + lambda * start_vector;
-    Vec2 q = end_segment.start + rho * end_vector;
 
     //Query the tree using the found start and end point
     potential_hotspot = tree.query(start_segment.get_time_at_point(p), end_segment.get_time_at_point(q));
