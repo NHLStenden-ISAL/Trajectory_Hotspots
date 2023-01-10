@@ -91,15 +91,15 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
         }
     }
 
-    const Vec2 start_vector = start_segment.start - start_segment.end;
-    const Vec2 end_vector = end_segment.end - end_segment.start;
+    const Float start_axis_difference = axis ? start_segment.end.x - start_segment.start.x : start_segment.end.y - start_segment.start.y;
+    const Float end_axis_difference = axis ? end_segment.end.x - end_segment.start.x : end_segment.end.y - end_segment.start.y;
 
-    const Float start_vector_axis = axis ? start_vector.x : start_vector.y;
-    const Float end_vector_axis = axis ? end_vector.x : end_vector.y;
+    const Float start_length = start_segment.length();
+    const Float end_length = end_segment.length();
 
-    const Float determinant = start_vector_axis * end_vector.length() - end_vector_axis * start_vector.length();
+    const Float determinant = start_axis_difference * end_length - end_axis_difference * start_length;
 
-    //TODO: Determinant perpendicular?
+    //Determinant is zero when the two segments lie on the same line, skip
     if (determinant == 0.f)
     {
         return false;
@@ -108,14 +108,11 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
     const Float edge_distance = (end_segment.start_t - start_segment.end_t);
     const Float remaining_length = length - edge_distance;
 
-    const Float start_length = start_vector.length();
-    const Float end_length = end_vector.length();
-
     const Float start_end_difference = axis ? start_segment.end.x - end_segment.start.x : start_segment.end.y - end_segment.start.y;
 
     //Calculate the scalar for the vectors pointing to points p and q
-    const Float lambda = ((start_end_difference * end_length) - (-end_vector_axis * remaining_length)) / start_length;
-    const Float rho = ((start_vector_axis * remaining_length) - (start_end_difference * start_length)) / end_length;
+    const Float lambda = ((start_end_difference * end_length) - (end_axis_difference * remaining_length)) / determinant;
+    const Float rho = ((start_axis_difference * remaining_length) - (start_end_difference * start_length)) / determinant;
 
     //Return false if p or q do not lie on their respective segment
     if (lambda < 0.f || lambda > 1.0f || rho < 0.f || rho > 1.0f)
@@ -124,8 +121,8 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
     }
 
     //Calculate start and end point using the scalars
-    point_on_start_segment = start_segment.end + (lambda * start_vector);
-    point_on_end_segment = end_segment.start + (rho * end_vector);
+    point_on_start_segment = start_segment.end + (lambda * (start_segment.start - start_segment.end));
+    point_on_end_segment = end_segment.start + (rho * (end_segment.end - end_segment.start));
 
     return true;
 }
