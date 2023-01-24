@@ -270,7 +270,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(segment_aabb.max.y, Float(24.f));
         }
 
-        TEST_METHOD(get_points_on_same_axis_with_distance_l)
+        TEST_METHOD(get_points_on_same_axis_with_distance_l_down_up)
         {
             Segment start_segment(Vec2(2.f, 10.f), Vec2(6.f, 2.f), 0.f);
             Segment end_segment(Vec2(10.f, 4.f), Vec2(18.f, 12.f), start_segment.length() + 10.f);
@@ -286,7 +286,61 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual(p, expected_p);
             Assert::AreEqual(q, expected_q);
+        }
 
+        TEST_METHOD(get_points_on_same_axis_with_distance_l_down_down)
+        {
+            Segment start_segment(Vec2(2.f, 10.f), Vec2(6.f, 2.f), 0.f);
+            Segment end_segment(Vec2(18.f, 12.f), Vec2(10.f, 4.f), start_segment.length() + 10.f);
+
+            Float length = 17.f;
+
+            Vec2 p, q;
+
+            Vec2 expected_p(4.0593470965373f, 5.8813058069254f);
+            Vec2 expected_q(11.8813058069254f, 5.8813058069254f);
+
+            Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q);
+
+            Assert::AreEqual(p, expected_p);
+            Assert::AreEqual(q, expected_q);
+        }
+
+        TEST_METHOD(get_points_on_same_axis_with_distance_l_no_shared_axis)
+        {
+            Segment start_segment(Vec2(3.f, 16.f), Vec2(4.f, 13.f), 0.f);
+            Segment end_segment(Vec2(13.f, 10.f), Vec2(10.f, 4.f), start_segment.length() + 10.f);
+
+            Float length = 17.f;
+
+            Vec2 p, q;
+
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
+
+            start_segment = Segment(Vec2(10.f, 16.f), Vec2(13.f, 13.f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+
+            start_segment = Segment(Vec2(14.f, 16.f), Vec2(16.f, 13.f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
+
+            start_segment = Segment(Vec2(14.f, 6.f), Vec2(16.f, 10.f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
+
+            start_segment = Segment(Vec2(14.f, 3.5f), Vec2(16.f, 0.f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
+
+            start_segment = Segment(Vec2(11.f, 3.5f), Vec2(13.f, 0.f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+
+            start_segment = Segment(Vec2(5.f, 3.5f), Vec2(6.f, 0.5f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q));
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
+
+            start_segment = Segment(Vec2(4.5f, 8.f), Vec2(5.5f, 5.5f), 0.f);
+            Assert::IsFalse(Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, true, p, q));
         }
     };
 

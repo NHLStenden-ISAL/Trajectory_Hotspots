@@ -94,8 +94,8 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
     const Float start_axis_difference = axis ? start_segment.end.x - start_segment.start.x : start_segment.end.y - start_segment.start.y;
     const Float end_axis_difference = axis ? end_segment.end.x - end_segment.start.x : end_segment.end.y - end_segment.start.y;
 
-    const Float start_length = start_segment.length();
-    const Float end_length = end_segment.length();
+    Float start_length = start_segment.length();
+    Float end_length = end_segment.length();
 
     const Float determinant = start_axis_difference * end_length - end_axis_difference * start_length;
 
