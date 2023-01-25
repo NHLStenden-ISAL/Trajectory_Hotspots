@@ -290,15 +290,15 @@ namespace TestTrajectoryHotspots
 
         TEST_METHOD(get_points_on_same_axis_with_distance_l_down_down)
         {
-            Segment start_segment(Vec2(2.f, 10.f), Vec2(6.f, 2.f), 0.f);
-            Segment end_segment(Vec2(18.f, 12.f), Vec2(10.f, 4.f), start_segment.length() + 10.f);
+            Segment start_segment(Vec2(2.5f, 11.7f), Vec2(6.5f, 3.6f), 0.f);
+            Segment end_segment(Vec2(16.5f, 10.0f), Vec2(13.3f, 0.8f), start_segment.length() + 10.f);
 
             Float length = 17.f;
 
             Vec2 p, q;
 
-            Vec2 expected_p(4.0593470965373f, 5.8813058069254f);
-            Vec2 expected_q(11.8813058069254f, 5.8813058069254f);
+            Vec2 expected_p(4.5437655f, 7.5613751f);
+            Vec2 expected_q(15.651783f, 7.5613784f);
 
             Segment::get_points_on_same_axis_with_distance_l(start_segment, end_segment, length, false, p, q);
 
