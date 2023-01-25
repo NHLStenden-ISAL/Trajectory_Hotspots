@@ -46,8 +46,15 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
     return AABB();
 }
 
+//Find the smallest hotspot that contains a subtrajectory with at least the given length inside of it
 AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
 {
+    if (length > trajectory_length)
+    {
+        //Invalid length
+        return AABB();
+    }
+
     //TODO:Check if length is enough for an UV to exist..
     Segment_Search_Tree tree(trajectory_segments);
 
@@ -296,57 +303,6 @@ bool Trajectory::flc_breakpoint_IV_y(const Float length, const Segment& start_se
 
     return true;
 }
-
-////bool Trajectory::flc_breakpoint_V(Float length, vec2* s1, vec2* s2, vec2* s3, vec2* s4, vec2& p, vec2& q, bool x) {
-//bool Trajectory::flc_breakpoint_V(const Float length, const Segment& start_segment, const Segment& start_segment, const Segment& end_segment, vec2& p, vec2& q, bool x) const
-//{
-//    try {
-//        Float distanceBetweenEdges = (s3->time - s2->time) * this->getTotalLength();
-//        Float remainingLength = length - distanceBetweenEdges;
-//        vec2 startVector = *s1 - *s2;
-//        vec2 endVector = *s4 - *s3;
-//        vec2 startEndDifference = *s2 - *s3;
-//
-//        Float startDiff = (x) ? s2->getX() - s1->getX() : s2->getY() - s1->getY();
-//        Float endDiff = (x) ? s3->getX() - s4->getX() : s3->getY() - s4->getY();
-//        Float startLength = s1->calculateDistance(s2);
-//        Float endLength = s3->calculateDistance(s4);
-//
-//        if (startDiff >= 0) {
-//            startLength *= -1;
-//        }
-//
-//        if (endDiff >= 0) {
-//            endLength *= -1;
-//        }
-//
-//        Float determinant = startDiff * endLength - -endDiff * startLength;
-//
-//        if (determinant == 0) {
-//            return false;
-//        }
-//
-//        Float a = startDiff;
-//        Float b = -endDiff;
-//        Float c = startLength;
-//        Float d = endLength;
-//
-//        Float e = (x) ? startEndDifference.getX() : startEndDifference.getY();
-//        Float f = remainingLength;
-//
-//        Float lambda = (e * d - b * f) / determinant;
-//        Float rho = (a * f - e * c) / determinant;
-//
-//        p = *s2 + (startVector * lambda);
-//        q = *s3 + (endVector * rho);
-//
-//        return true;
-//    }
-//    catch (std::invalid_argument& e) {
-//        return false;
-//    }
-//    return true;
-//}
 
 bool Trajectory::flc_breakpoint_V(const Segment_Search_Tree& tree, const Float length, const Segment& start_segment, const Segment& end_segment, const bool axis, AABB& potential_hotspot) const
 {
