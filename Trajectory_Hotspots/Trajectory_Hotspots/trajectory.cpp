@@ -182,6 +182,12 @@ bool Trajectory::flc_breakpoint_III_x(const Float length, const Segment& start_s
         return false;
     }
 
+    //If the found point is the end point of the starting segment we can skip, this is just breakpoint type I
+    if (start_segment.end.y == intersection_y)
+    {
+        return false;
+    }
+
     Float start_time = start_segment.get_time_at_x(vertical_line_x);
     Float end_time = start_time + length;
 
@@ -212,6 +218,12 @@ bool Trajectory::flc_breakpoint_III_y(const Float length, const Segment& start_s
 
     //Does the line through the side of the AABB intersect the start segment?
     if (!start_segment.y_intersects(horizontal_line_y, intersection_x))
+    {
+        return false;
+    }
+
+    //If the found point is the end point of the starting segment we can skip, this is just breakpoint type I
+    if (start_segment.end.x == intersection_x)
     {
         return false;
     }
@@ -249,6 +261,12 @@ bool Trajectory::flc_breakpoint_IV_x(const Float length, const Segment& start_se
         return false;
     }
 
+    //If the found point is the start point of the end segment we can skip, this is just breakpoint type II
+    if (end_segment.start.y == intersection_y)
+    {
+        return false;
+    }
+
     Float end_time = end_segment.get_time_at_x(vertical_line_x);
     Float start_time = end_time - length;
 
@@ -278,6 +296,12 @@ bool Trajectory::flc_breakpoint_IV_y(const Float length, const Segment& start_se
 
     //Does the line through the side of the AABB intersect the end segment?
     if (!end_segment.y_intersects(horizontal_line_y, intersection_x))
+    {
+        return false;
+    }
+
+    //If the found point is the start point of the end segment we can skip, this is just breakpoint type II
+    if (end_segment.start.x == intersection_x)
     {
         return false;
     }

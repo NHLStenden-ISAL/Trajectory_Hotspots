@@ -85,11 +85,30 @@ namespace TestTrajectoryHotspots
 
             Float query_length = 1.8041624196468f;
 
-            //TODO: Now this gives a non-optimal result
             AABB hotspot = trajectory.get_hotspot_fixed_length_contiguous(query_length);
 
-            Assert::IsTrue(hotspot.min == Vec2(4.5910780669145f, 5.f));
+            Assert::IsTrue(hotspot.min == Vec2(4.60556459f, 5.018209f));
             Assert::IsTrue(hotspot.max == Vec2(5.5f, 5.69f));
+        }
+
+        TEST_METHOD(get_hotspot_fixed_length_contiguous_basic_breakpoint_I)
+        {
+            std::vector<Vec2> trajectory_points;
+
+            trajectory_points.emplace_back(4.f, 24.f);
+            trajectory_points.emplace_back(4.f, 20.f);
+            trajectory_points.emplace_back(6.f, 16.f);
+            trajectory_points.emplace_back(8.f, 14.f);
+            trajectory_points.emplace_back(12.f, 10.5f);
+
+            Trajectory trajectory(trajectory_points);
+
+            Float query_length = 3.f;
+
+            AABB hotspot = trajectory.get_hotspot_fixed_length_contiguous(query_length);
+
+            Assert::IsTrue(hotspot.min == Vec2(6.f, 13.8870182f));
+            Assert::IsTrue(hotspot.max == Vec2(8.12912178f, 16.f));
         }
 
     };
