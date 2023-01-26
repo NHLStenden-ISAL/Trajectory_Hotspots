@@ -127,18 +127,30 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
         Float start = start_segment.end_t;
 
         //Loop through all the possible end segments and query for an AABB of the sub-trajectory between u and v
-        //Check breakpoints IV and V
+        //Check breakpoints III, IV, and V
         for (size_t end_index = end_range_start_index; end_index <= end_range_end_index; ++end_index)
         {
-            //TODO: Is this check ok for V? Or do we do a seperate loop for V?
-            if (end_index - start_index < 2)
+            if (end_index - start_index < 1)
             {
-                //Skip if same segment or connected segments
-                //No UV or UV are the same point (so no bounding box)
+                //Skip if same segment (No U & V)
                 continue;
             }
 
+            AABB current_hotspot;
+
             const Segment& end_segment = trajectory_segments[end_index];
+
+            //Breakpoint V, the start and end of the subtrajectory lie on the same x or y coordinate
+            if (flc_breakpoint_V(tree, length, start_segment, end_segment, true, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+            if (flc_breakpoint_V(tree, length, start_segment, end_segment, false, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
+
+            if (end_index - start_index < 2)
+            {
+                //Skip III & IV if connected segments
+                //U & V are the same point (so no bounding box)
+                continue;
+            }
+
 
             //Get v, the time at the first vertex before the sub-trajectory end point
             Float end = end_segment.start_t;
@@ -146,11 +158,7 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
             //Obtain the bounding box of the subtrajectory between u and v
             AABB uv_bounding_box = tree.query(start, end);
 
-            //TODO: Check if forward/backward time is on the end/start segment, the trajectory has to start/end in the same start/end segments else UV condition breaks!
-            //TODO: Pass start_t& and end_t& to flc_breakpoint III and IV instead of tree and current_hoptspot?
-
-            //Breakpoint IV, Check if any of the four sides of the AABB of the subtrajectory between u and v intersects either the start or end segment, if so, check for new hotspot
-            AABB current_hotspot;
+            //Breakpoints III and IV, Check if any of the four sides of the AABB of the subtrajectory between u and v intersects either the start or end segment, if so, check for new hotspot
             if (flc_breakpoint_III_x(length, start_segment, end_segment, uv_bounding_box.min.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
             if (flc_breakpoint_III_x(length, start_segment, end_segment, uv_bounding_box.max.x, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
             if (flc_breakpoint_III_y(length, start_segment, end_segment, uv_bounding_box.min.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
@@ -161,10 +169,6 @@ AABB Trajectory::get_hotspot_fixed_length_contiguous(Float length) const
             if (flc_breakpoint_IV_y(length, start_segment, end_segment, uv_bounding_box.min.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
             if (flc_breakpoint_IV_y(length, start_segment, end_segment, uv_bounding_box.max.y, uv_bounding_box, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
 
-            //Breakpoint V, the start and end of the subtrajectory lie on the same x or y coordinate
-            //TODO: What if a segment lies perpendicular to the other segment? Add condition in overlap? Probably fine because of the L restraint, still check the math..
-            if (flc_breakpoint_V(tree, length, start_segment, end_segment, true, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
-            if (flc_breakpoint_V(tree, length, start_segment, end_segment, false, current_hotspot)) { if (current_hotspot.max_size() < smallest_hotspot.max_size()) { smallest_hotspot = current_hotspot; } }
         }
     }
 
