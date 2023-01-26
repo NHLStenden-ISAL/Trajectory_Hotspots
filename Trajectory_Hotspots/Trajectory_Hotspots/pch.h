@@ -14,3 +14,6 @@
 #include "float.h"
 #include "aabb.h"
 #include "segment.h"
+#include "segment_search_tree.h"
+
+//TODO: Axis enum

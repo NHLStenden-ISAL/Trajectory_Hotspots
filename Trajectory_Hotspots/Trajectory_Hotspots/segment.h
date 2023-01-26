@@ -41,17 +41,42 @@ public:
     Float length() const;
     Float squared_length() const;
 
+    //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
+    Float x_intersect(Float x) const;
+    //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
+    Float y_intersect(Float y) const;
+
+    //If the vertical line at position x intersects the segment, gets the y coordinate of the intersection
+    bool x_intersects(const Float x, Float& intersection_point_y) const;
+    //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
+    bool y_intersects(const Float y, Float& intersection_point_x) const;
+
+    Float get_time_at_x(const Float x) const;
+    Float get_time_at_y(const Float y) const;
+    Float get_time_at_point(const Vec2& point) const;
+
+    Vec2 get_point_at_time(const Float time) const;
+
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;
 
+    //Determines if two segments share a y-axis
+    bool x_overlap(const Segment& segment) const;
+    //Determines if two segments share a x-axis
+    bool y_overlap(const Segment& segment) const;
+
     AABB get_AABB() const;
+
+    static bool get_points_on_same_axis_with_distance_l(const Segment& start_segment, const Segment& end_segment, const Float length, const bool axis, Vec2& point_on_start_segment, Vec2& point_on_end_segment);
 
     Vec2 start;
     Vec2 end;
 
-    //TODO: Not sure I like this in here.. can we move this to the tree?
+    //TODO: Not sure I like this in here.. can we move this to a wrapper class?
     Float start_t;
     Float end_t;
 };
 
+//Determine if a point lies to the left or right of a segment, oriented from start to end
+//If the point lies on the segment this function will return true (right)
 bool point_right_of_segment(const Segment& segment, const Vec2& point);

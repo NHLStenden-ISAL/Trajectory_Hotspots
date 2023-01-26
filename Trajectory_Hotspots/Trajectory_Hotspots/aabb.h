@@ -8,7 +8,6 @@ class AABB
 {
 public:
 
-
     AABB() : min(0.f, 0.f), max(0.f, 0.f)
     {
     }
@@ -54,8 +53,24 @@ public:
         return AABB(Vec2(min_x, min_y), Vec2(max_x, max_y));
     }
 
-    Vec2 min;
-    Vec2 max;
+    //Potentially increase the size of the aabb based on the given point
+    void augment(const Vec2& point)
+    {
+        min.x = std::min(min.x, point.x);
+        min.y = std::min(min.y, point.y);
+        max.x = std::max(max.x, point.x);
+        max.y = std::max(max.y, point.y);
+    }
+
+    //Potentially increase the size of given aabb based on the given point
+    static AABB augment(const AABB& aabb, const Vec2& point)
+    {
+        return AABB(
+            std::min(aabb.min.x, point.x),
+            std::min(aabb.min.y, point.y),
+            std::max(aabb.max.x, point.x),
+            std::max(aabb.max.y, point.y));
+    }
 
     Float width() const
     {
@@ -85,4 +100,8 @@ public:
     {
         return std::max(width(), height());
     }
+
+    Vec2 min;
+    Vec2 max;
+
 };

@@ -12,4 +12,33 @@
 #include <limits>
 #include <iostream>
 
+#include "CppUnitTest.h"
+
+#include "../Trajectory_Hotspots/pch.h"
+#include "../Trajectory_Hotspots/float.h"
+#include "../Trajectory_Hotspots/vec2.h"
+#include "../Trajectory_Hotspots/segment.h"
+#include "../Trajectory_Hotspots/trapezoidal_map.h"
+
+//namespace Microsoft
+//{
+//    namespace VisualStudio
+//    {
+//        namespace CppUnitTestFramework
+//        {
+//            template<> static std::wstring ToString<Segment>(const class Segment& t) { return L"Segment"; }
+//            template<> static std::wstring ToString<Segment>(const class Segment* t) { return L"Segment"; }
+//            template<> static std::wstring ToString<Segment>(class Segment* t) { return L"Segment"; }
+//            template<> static std::wstring ToString<Vec2>(const class Vec2& t) { return L"Vec2"; }
+//            template<> static std::wstring ToString<Vec2>(const class Vec2* t) { return L"Vec2"; }
+//            template<> static std::wstring ToString<Vec2>(class Vec2* t) { return L"Vec2"; }
+//            template<> static std::wstring ToString<Float>(class Float* t) { return L"Float"; }
+//            template<> static std::wstring ToString<Float>(const class Float& t) { return L"Float"; }
+//            template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(class Trapezoidal_Leaf_Node* t) { return L"Trapezoidal_Leaf_Node"; }
+//            template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(const class Trapezoidal_Leaf_Node* t) { return L"const Trapezoidal_Leaf_Node"; }
+//            template<> static std::wstring ToString<Trapezoidal_Leaf_Node>(const class Trapezoidal_Leaf_Node& t) { return L"const Trapezoidal_Leaf_Node"; }
+//        }
+//    }
+//}
+
 #endif //PCH_H
