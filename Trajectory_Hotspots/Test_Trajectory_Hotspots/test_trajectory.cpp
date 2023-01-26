@@ -111,6 +111,26 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(hotspot.max == Vec2(8.12912178f, 16.f));
         }
 
+        TEST_METHOD(get_hotspot_fixed_length_contiguous_basic_breakpoint_II)
+        {
+            std::vector<Vec2> trajectory_points;
+
+            trajectory_points.emplace_back(12.f, 10.5f);
+            trajectory_points.emplace_back(8.f, 14.f);
+            trajectory_points.emplace_back(6.f, 16.f);
+            trajectory_points.emplace_back(4.f, 20.f);
+            trajectory_points.emplace_back(4.f, 24.f);
+
+            Trajectory trajectory(trajectory_points);
+
+            Float query_length = 3.f;
+
+            AABB hotspot = trajectory.get_hotspot_fixed_length_contiguous(query_length);
+
+            Assert::IsTrue(hotspot.min == Vec2(6.f, 13.8870182f));
+            Assert::IsTrue(hotspot.max == Vec2(8.12912178f, 16.f));
+        }
+
     };
 
 
