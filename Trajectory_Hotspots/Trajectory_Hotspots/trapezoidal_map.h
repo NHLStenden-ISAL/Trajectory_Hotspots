@@ -9,10 +9,23 @@ public:
 
     Trapezoidal_Node() = default;
 
+    //TODO: Shouldn't this be const?
     virtual Trapezoidal_Leaf_Node* query_point(const Vec2& point) = 0;
     virtual Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment) = 0;
 
+    virtual void trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const = 0;
+
+    //TODO: Friend class?
     std::vector<Trapezoidal_Internal_Node*> parents;
+
+    friend class Trapezoidal_Node;
+    friend class Trapezoidal_Leaf_Node;
+    friend class Trapezoidal_X_Node;
+    friend class Trapezoidal_Y_Node;
+
+private:
+    virtual void trace_left(const Vec2& point, const Segment*& left_segment) const = 0;
+    virtual void trace_right(const Vec2& point, const Segment*& right_segment) const = 0;
 };
 
 class Trapezoidal_Internal_Node : public Trapezoidal_Node
@@ -41,9 +54,15 @@ public:
     void replace_bottom_neighbour(Trapezoidal_Leaf_Node* old_bottom_neighbour, Trapezoidal_Leaf_Node* new_bottom_neighbour);
     void replace_top_neighbour(Trapezoidal_Leaf_Node* old_top_neighbour, Trapezoidal_Leaf_Node* new_top_neighbour);
 
+    void trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const;
+
+private:
+    void trace_left(const Vec2& point, const Segment*& left_segment) const;
+    void trace_right(const Vec2& point, const Segment*& right_segment) const;
+
 public:
 
-	
+
     Trapezoidal_Leaf_Node* bottom_left;
     Trapezoidal_Leaf_Node* bottom_right;
     Trapezoidal_Leaf_Node* top_left;
@@ -75,6 +94,13 @@ public:
     Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
+    void trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const;
+
+private:
+    void trace_left(const Vec2& point, const Segment*& left_segment) const;
+    void trace_right(const Vec2& point, const Segment*& right_segment) const;
+
+public:
     void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child);
 
     const Segment* segment;
@@ -108,6 +134,13 @@ public:
     Trapezoidal_Leaf_Node* query_point(const Vec2& point);
     Trapezoidal_Leaf_Node* query_start_point(const Segment& query_segment);
 
+    void trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const;
+
+private:
+    void trace_left(const Vec2& point, const Segment*& left_segment) const;
+    void trace_right(const Vec2& point, const Segment*& right_segment) const;
+
+public:
     void replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child);
 
     const Vec2* point;
@@ -131,6 +164,10 @@ public:
     void add_fully_embedded_segment_with_top_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_fully_embedded_segment_with_bottom_endpoint_overlapping(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment);
     void add_overlapping_segment(const std::vector<Trapezoidal_Leaf_Node*>& overlapping_trapezoids, const Segment& segment);
+
+    void trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const;
+    //void trace_left(const Vec2& point, const Segment& left_segment) const;
+    //void trace_right(const Vec2& point, const Segment& right_segment) const;
 
 private:
 

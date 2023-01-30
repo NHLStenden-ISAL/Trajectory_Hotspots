@@ -811,6 +811,7 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
     }
 }
 
+
 //Follow along the segment from bottom to top registering the trapezoids it intersects
 //Returns the intersected trapezoids ordered from bottom to top
 std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segment& query_segment)
@@ -994,7 +995,6 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
 
     //If the startpoint of the query segment is the same as the endpoint of this segment, the query segment lies to the right.
     //(This is always true because we order the start and endpoints from left to right and only use this for a graph, so all points have degree 2)
-    //TODO: Test if this needs to be nearly_equal, we init with the same points...
     if (query_segment.start == segment->end)
     {
         return right->query_start_point(query_segment);
@@ -1024,6 +1024,81 @@ Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& quer
     {
         return below->query_start_point(query_segment);
     }
+}
+
+void Trapezoidal_Map::trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    root->trace_left_right(point, left_segment, right_segment);
+}
+
+void Trapezoidal_X_Node::trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    //TODO: On segment, never happens in our use case?
+    if (point_right_of_segment(*segment, point))
+    {
+        //Right of, or on segment
+        right->trace_left_right(point, left_segment, right_segment);
+    }
+    else
+    {
+        left->trace_left_right(point, left_segment, right_segment);
+    }
+}
+
+void Trapezoidal_Y_Node::trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    //TODO: Point on point
+
+    if (point == *this->point)
+    {
+
+    }
+
+    if (point.y >= this->point->y)
+    {
+        //Above or on point
+        above->trace_left_right(point, left_segment, right_segment);
+    }
+    else
+    {
+        below->trace_left_right(point, left_segment, right_segment);
+    }
+}
+
+void Trapezoidal_Leaf_Node::trace_left_right(const Vec2& point, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    left_segment = this->left_segment;
+    left_segment = this->right_segment;
+}
+
+void Trapezoidal_X_Node::trace_left(const Vec2& point, const Segment*& left_segment) const
+{
+
+}
+
+void Trapezoidal_Y_Node::trace_left(const Vec2& point, const Segment*& left_segment) const
+{
+
+}
+
+void Trapezoidal_Leaf_Node::trace_left(const Vec2& point, const Segment*& left_segment) const
+{
+
+}
+
+void Trapezoidal_X_Node::trace_right(const Vec2& point, const Segment*& right_segment) const
+{
+
+}
+
+void Trapezoidal_Y_Node::trace_right(const Vec2& point, const Segment*& right_segment) const
+{
+
+}
+
+void Trapezoidal_Leaf_Node::trace_right(const Vec2& point, const Segment*& right_segment) const
+{
+
 }
 
 void Trapezoidal_X_Node::replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child)
