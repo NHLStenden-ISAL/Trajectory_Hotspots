@@ -6,6 +6,11 @@ Float Vec2::dot(const Vec2& other) const
     return x * other.x + y * other.y;
 }
 
+Float Vec2::cross(const Vec2& other) const
+{
+    return (x * other.y) - (y * other.x);
+}
+
 Float Vec2::squared_length() const
 {
     return x * x + y * y;

@@ -41,6 +41,40 @@ const Vec2* Segment::get_top_point() const
 
 }
 
+const Vec2* Segment::get_left_point() const
+{
+    if (start.x < end.x)
+    {
+        return &start;
+    }
+    else
+    {
+        return &end;
+    }
+}
+
+const Vec2* Segment::get_right_point() const
+{
+    if (start.x < end.x)
+    {
+        return &end;
+    }
+    else
+    {
+        return &start;
+    }
+}
+
+bool Segment::is_horizontal() const
+{
+    return start.y == end.y;
+}
+
+bool Segment::is_vertical() const
+{
+    return start.x == end.x;
+}
+
 //Check if segments share a y-axis
 bool Segment::x_overlap(const Segment& other_segment) const
 {
@@ -232,17 +266,20 @@ Vec2 Segment::get_point_at_time(const Float time) const
     return (start + vector_to_point);
 }
 
+//Returns the orientation of a point vs the segment, <0 is left, >0 is right, 0 is on the segment
+Float Segment::point_direction(const Vec2& point) const
+{
+    const Vec2* top = get_top_point();
+    const Vec2* bottom = get_bottom_point();
+
+    return (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
+}
+
 //Determine if a point lies to the left (false) or right (true) of a segment, oriented from start to end
 //If the point lies on the segment this function will return true (right)
 bool point_right_of_segment(const Segment& segment, const Vec2& point)
 {
-    //TODO: Force end always top so we can remove this check?
-    const Vec2* top = segment.get_top_point();
-    const Vec2* bottom = segment.get_bottom_point();
-
-    Float direction = (point.x - bottom->x) * (top->y - bottom->y) - (point.y - bottom->y) * (top->x - bottom->x);
-
-    return direction < 0 ? false : true;
+    return segment.point_direction(point) < 0 ? false : true;
 }
 
 bool Segment::operator==(const Segment& operand) const

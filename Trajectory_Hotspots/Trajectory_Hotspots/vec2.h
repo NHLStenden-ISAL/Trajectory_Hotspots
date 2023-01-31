@@ -13,6 +13,8 @@ public:
 
     Float dot(const Vec2& other) const;
 
+    Float cross(const Vec2& other) const;
+
     Float squared_length() const;
 
     Float length() const;
