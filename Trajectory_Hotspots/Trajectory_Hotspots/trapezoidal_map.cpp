@@ -14,7 +14,7 @@ Trapezoidal_Map::Trapezoidal_Map()
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, const unsigned int seed)
+Trapezoidal_Map::Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed)
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
@@ -1132,7 +1132,7 @@ void Trapezoidal_X_Node::trace_left(const Vec2& point, const bool prefer_top, co
         {
             //TODO: Check for endpoint?
             //Segment leaves the bounds, return
-            left_segment == this->segment;
+            left_segment = this->segment;
         }
         else
         {
@@ -1151,7 +1151,7 @@ void Trapezoidal_Y_Node::trace_left(const Vec2& point, const bool prefer_top, co
         //If horizontal shoot over/under (based on prefered)
         if (upwards_segment == prefer_top && !this->left_segment->is_horizontal())
         {
-            left_segment == this->left_segment;
+            left_segment = this->left_segment;
         }
         else
         {
@@ -1200,7 +1200,7 @@ void Trapezoidal_X_Node::trace_right(const Vec2& point, const bool prefer_top, c
         {
             //TODO: Check for endpoint?
             //Segment leaves the bounds, return
-            right_segment == this->segment;
+            right_segment = this->segment;
         }
         else
         {
@@ -1219,7 +1219,7 @@ void Trapezoidal_Y_Node::trace_right(const Vec2& point, const bool prefer_top, c
         //If horizontal shoot over/under (based on prefered)
         if (upwards_segment == prefer_top && !this->right_segment->is_horizontal())
         {
-            right_segment == this->right_segment;
+            right_segment = this->right_segment;
         }
         else
         {
