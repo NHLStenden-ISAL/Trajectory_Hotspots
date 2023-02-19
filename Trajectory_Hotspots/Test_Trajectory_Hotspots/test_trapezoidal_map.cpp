@@ -654,7 +654,7 @@ namespace TestTrajectoryHotspots
 
             left_segment = nullptr;
             right_segment = nullptr;
-            
+
             trace_point = Vec2(10.f, 4.f);
 
             trapezoidal_map.trace_left_right(trace_point, true, left_segment, right_segment);
@@ -668,7 +668,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[3], *right_segment);
         }
 
-        TEST_METHOD(left_right_trace_in_trapezoid_edge_case_on_point)
+        TEST_METHOD(left_right_trace_in_trapezoid_edge_case_on_point_top_side)
         {
 
             const std::vector<Vec2> trajectory_points
@@ -685,7 +685,8 @@ namespace TestTrajectoryHotspots
 
             Trapezoidal_Map trapezoidal_map(trajectory.get_ordered_trajectory_segments());
 
-            Vec2 trace_point(10.f, 6.f);
+            //Both far
+            Vec2 trace_point = trajectory_points[3];
 
             const Segment* left_segment;
             const Segment* right_segment;
@@ -694,9 +695,80 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[1], *left_segment);
             Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[4], *right_segment);
+
+            //To infinity
+            trace_point = trajectory_points[5];
+
+            left_segment = nullptr;
+            right_segment = nullptr;
+
+            trapezoidal_map.trace_left_right(trace_point, true, left_segment, right_segment);
+
+            Assert::IsTrue(&trapezoidal_map.left_border == left_segment);
+            Assert::IsTrue(&trapezoidal_map.right_border == right_segment);
+
+            //Both neighbouring segments
+            trace_point = trajectory_points[4];
+
+            left_segment = nullptr;
+            right_segment = nullptr;
+
+            trapezoidal_map.trace_left_right(trace_point, true, left_segment, right_segment);
+
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[3], *left_segment);
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[4], *right_segment);
         }
 
+        TEST_METHOD(left_right_trace_in_trapezoid_edge_case_on_point_bottom_side)
+        {
 
+            const std::vector<Vec2> trajectory_points
+            {
+                Vec2(4.f, 4.f),
+                Vec2(6.f, 8.f),
+                Vec2(8.f, 7.f),
+                Vec2(10.f, 5.f),
+                Vec2(12.f, 6.f),
+                Vec2(16.f, 2.f)
+            };
+
+            Trajectory trajectory(trajectory_points);
+
+            Trapezoidal_Map trapezoidal_map(trajectory.get_ordered_trajectory_segments());
+
+            //Right connected, left further
+            Vec2 trace_point = trajectory_points[2];
+
+            const Segment* left_segment;
+            const Segment* right_segment;
+
+            trapezoidal_map.trace_left_right(trace_point, false, left_segment, right_segment);
+
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[0], *left_segment);
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[2], *right_segment);
+
+            //Both to infinity
+            trace_point = trajectory_points[5];
+
+            left_segment = nullptr;
+            right_segment = nullptr;
+
+            trapezoidal_map.trace_left_right(trace_point, false, left_segment, right_segment);
+
+            Assert::IsTrue(&trapezoidal_map.left_border == left_segment);
+            Assert::IsTrue(&trapezoidal_map.right_border == right_segment);
+
+            //Both connected segments
+            trace_point = trajectory_points[4];
+
+            left_segment = nullptr;
+            right_segment = nullptr;
+
+            trapezoidal_map.trace_left_right(trace_point, false, left_segment, right_segment);
+
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[3], *left_segment);
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[4], *right_segment);
+        }
 
 
     };
