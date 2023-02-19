@@ -30,6 +30,11 @@ Trajectory::Trajectory(const std::vector<Vec2>& ordered_trajectory_points)
     trajectory_length = start_t;
 }
 
+const std::vector<Segment>& Trajectory::get_ordered_trajectory_segments() const
+{
+    return trajectory_segments;
+}
+
 //Returns a hotspot with a fixed radius at a position that maximizes the trajectory inside it
 AABB Trajectory::get_hotspot_fixed_radius(Float radius) const
 {

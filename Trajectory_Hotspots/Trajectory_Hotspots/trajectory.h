@@ -16,6 +16,8 @@ public:
     AABB get_hotspot_fixed_radius_contiguous(Float radius) const;
     AABB get_hotspot_fixed_length_contiguous(Float length) const;
 
+    const std::vector<Segment>& get_ordered_trajectory_segments() const;
+
 private:
 
     Float trajectory_start = 0.f;

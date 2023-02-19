@@ -14,7 +14,7 @@ Trapezoidal_Map::Trapezoidal_Map()
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(std::vector<Segment>& trajectory_segments, const unsigned int seed)
+Trapezoidal_Map::Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed)
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
@@ -103,6 +103,7 @@ void Trapezoidal_Map::add_segment(const Segment& segment)
     segment_count++;
 }
 
+//Add a segment that does not overlap with any segment or points in the map
 void Trapezoidal_Map::add_fully_embedded_segment(Trapezoidal_Leaf_Node* current_trapezoid, const Segment& segment)
 {
     //Order endpoints bottom to top
@@ -811,6 +812,7 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
     }
 }
 
+
 //Follow along the segment from bottom to top registering the trapezoids it intersects
 //Returns the intersected trapezoids ordered from bottom to top
 std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segment& query_segment)
@@ -994,7 +996,6 @@ Trapezoidal_Leaf_Node* Trapezoidal_X_Node::query_start_point(const Segment& quer
 
     //If the startpoint of the query segment is the same as the endpoint of this segment, the query segment lies to the right.
     //(This is always true because we order the start and endpoints from left to right and only use this for a graph, so all points have degree 2)
-    //TODO: Test if this needs to be nearly_equal, we init with the same points...
     if (query_segment.start == segment->end)
     {
         return right->query_start_point(query_segment);
@@ -1024,6 +1025,76 @@ Trapezoidal_Leaf_Node* Trapezoidal_Y_Node::query_start_point(const Segment& quer
     {
         return below->query_start_point(query_segment);
     }
+}
+
+void Trapezoidal_Map::trace_left_right(const Vec2& point, const bool prefer_top, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    root->trace_left_right(point, prefer_top, left_segment, right_segment);
+}
+
+void Trapezoidal_X_Node::trace_left_right(const Vec2& point, const bool prefer_top, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    //This works based on the assumption that a point query reaching a x-node will always lay left, right, or on the segment, never above or below.
+    Float point_direction = segment->point_direction(point);
+
+    if (point_direction > 0.f)
+    {
+        right->trace_left_right(point, prefer_top, left_segment, right_segment);
+    }
+    else if (point_direction < 0.f)
+    {
+        left->trace_left_right(point, prefer_top, left_segment, right_segment);
+    }
+    else
+    {
+        //Point lies on the segment (including its endpoints)
+
+        //Check is segment points left up or left down
+        const Vec2 segment_vec = *segment->get_right_point() - *segment->get_left_point();
+        const Float orientation = Vec2(1.f, 0.f).cross(segment_vec);
+        const bool upwards_segment = orientation >= 0.f;
+
+        assert((*segment->get_top_point() == point) != prefer_top);
+        assert((*segment->get_bottom_point() == point) != !prefer_top);
+
+        if (upwards_segment == prefer_top)
+        {
+            left->trace_left_right(point, prefer_top, left_segment, right_segment);
+        }
+        else
+        {
+            right->trace_left_right(point, prefer_top, left_segment, right_segment);
+        }
+    }
+}
+
+void Trapezoidal_Y_Node::trace_left_right(const Vec2& point, const bool prefer_top, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    if (point.y > this->point->y)
+    {
+        above->trace_left_right(point, prefer_top, left_segment, right_segment);
+    }
+    else if (point.y < this->point->y)
+    {
+        below->trace_left_right(point, prefer_top, left_segment, right_segment);
+    }
+    else if (point == *this->point)
+    {
+        if (prefer_top)
+        {
+            above->trace_left_right(point, prefer_top, left_segment, right_segment);
+        }
+        else
+        {
+            below->trace_left_right(point, prefer_top, left_segment, right_segment);
+        }
+    }
+}
+
+void Trapezoidal_Leaf_Node::trace_left_right(const Vec2& point, const bool prefer_top, const Segment*& left_segment, const Segment*& right_segment) const
+{
+    left_segment = this->left_segment;
+    right_segment = this->right_segment;
 }
 
 void Trapezoidal_X_Node::replace_child(Trapezoidal_Node* old_child, std::shared_ptr<Trapezoidal_Node> new_child)
