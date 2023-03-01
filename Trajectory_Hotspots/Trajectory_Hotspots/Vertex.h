@@ -11,6 +11,10 @@ public:
 	{
 		
 	}
+	Vertex(Vec2 position) : position(position)
+	{
+
+	}
 
 	//Get a point inside the face (not on its edge) houd rekening met drie vertices op een lijn. (lijn 725 in main.cpp)
 	Vertex get_point(Face face);

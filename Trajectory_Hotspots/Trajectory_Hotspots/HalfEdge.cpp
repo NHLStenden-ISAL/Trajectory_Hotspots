@@ -167,6 +167,7 @@ std::vector<float> HalfEdge::get_polar_angles(std::vector<HalfEdge*> halfedges, 
 	return polar_angles;
 }
 
+
 //HalfEdge* HalfEdge::insert_edge(HalfEdge* halfedge, Dcel dcel)
 //{
 //	return dcel.halfedges.emplace_back(halfedge);

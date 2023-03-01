@@ -21,9 +21,9 @@ public:
 	//Splits edges on an intersection
 	std::vector<HalfEdge*> split_edges(HalfEdge* edge1, HalfEdge* edge2, Vertex* intersection);
 
-	std::vector<float> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
+	static std::vector<float> get_polar_angles(std::vector<HalfEdge*> halfedges, Vertex* v);
 
-	std::vector<Vec2> get_vertex_positions(std::vector<HalfEdge*> halfedges, Vertex* v);
+	static std::vector<Vec2> get_vertex_positions(std::vector<HalfEdge*> halfedges, Vertex* v);
 	
 	//Insert an intersecting edge
 	//HalfEdge* insert_edge(HalfEdge* halfedge, Dcel dcel);
