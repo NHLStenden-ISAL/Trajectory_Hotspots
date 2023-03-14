@@ -770,6 +770,25 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[4], *right_segment);
         }
 
+        TEST_METHOD(Construction_Bug)
+        {
+            const std::vector<Vec2> trajectory_points
+            {
+                Vec2(4.f, 4.f),
+                Vec2(6.f, 8.f),
+                Vec2(8.f, 7.f),
+                Vec2(10.f, 5.f),
+                Vec2(12.f, 6.f),
+                Vec2(16.f, 2.f)
+            };
+
+            Trajectory trajectory(trajectory_points);
+
+            Trapezoidal_Map trapezoidal_map(trajectory.get_ordered_trajectory_segments(), 3);
+
+
+        }
+
 
     };
 }
