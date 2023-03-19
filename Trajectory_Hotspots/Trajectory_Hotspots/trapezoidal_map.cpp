@@ -14,12 +14,12 @@ Trapezoidal_Map::Trapezoidal_Map()
     root = std::make_unique<Trapezoidal_Leaf_Node>(&left_border, &right_border, &bottom_point, &top_point);
 }
 
-Trapezoidal_Map::Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed)
+Trapezoidal_Map::Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed, const bool randomized_construction)
 {
     AABB bounding_box(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
     left_border = Segment(bounding_box.min, Vec2(bounding_box.min.x, bounding_box.max.y));
-    right_border = Segment(Vec2(bounding_box.max.x, bounding_box.max.y), bounding_box.max);
+    right_border = Segment(Vec2(bounding_box.max.x, bounding_box.min.y), bounding_box.max);
 
     bottom_point = bounding_box.min;
     top_point = bounding_box.max;
@@ -31,13 +31,16 @@ Trapezoidal_Map::Trapezoidal_Map(const std::vector<Segment>& trajectory_segments
 
     std::iota(random_permutation.begin(), random_permutation.end(), 0);
 
-    if (seed != 0)
+    if (randomized_construction)
     {
-        std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ seed });
-    }
-    else
-    {
-        std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ std::random_device{}() });
+        if (seed != 0)
+        {
+            std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ seed });
+        }
+        else
+        {
+            std::shuffle(random_permutation.begin(), random_permutation.end(), std::mt19937{ std::random_device{}() });
+        }
     }
 
     for (size_t i : random_permutation)
@@ -692,7 +695,6 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
             nullptr,                          //Top left
             top_right);                       //Top right
 
-
         //If no top then we need to fix the incoming pointer
         if (top_trapezoid == nullptr && top_right != nullptr)
         {
@@ -720,6 +722,11 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
         left_trapezoid->top_point = segment.get_top_point();
         left_trapezoid->top_left = top_left;
         left_trapezoid->top_right = nullptr;
+
+        if (top_trapezoid == nullptr && top_left != nullptr)
+        {
+            top_left->replace_bottom_neighbour(old_top_trapezoid, left_trapezoid.get());
+        }
     }
     else
     {
@@ -761,6 +768,11 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
         right_trapezoid->top_point = segment.get_top_point();
         right_trapezoid->top_left = nullptr;
         right_trapezoid->top_right = top_right;
+
+        if (top_trapezoid == nullptr && top_right != nullptr)
+        {
+            top_right->replace_bottom_neighbour(old_top_trapezoid, right_trapezoid.get());
+        }
     }
 
     if (top_trapezoid != nullptr)
@@ -1088,6 +1100,11 @@ void Trapezoidal_Y_Node::trace_left_right(const Vec2& point, const bool prefer_t
         {
             below->trace_left_right(point, prefer_top, left_segment, right_segment);
         }
+    }
+    else
+    {
+        //Point lies on the same horizontal line, arbitrarily choose above
+        above->trace_left_right(point, prefer_top, left_segment, right_segment);
     }
 }
 
