@@ -18,7 +18,7 @@ jobs:
       #Checkout code
       - name: Checkout code
         id: checkout_code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       #Locate MSBuild.eze and add to PATH
       - name: Add MSBuild to PATH
@@ -46,7 +46,7 @@ jobs:
       #Locate vstext.console.exe and add to PATH
       - name: Setup VSTest PATH
         id: setup_vstest
-        uses: darenm/Setup-VSTest@v1
+        uses: darenm/Setup-VSTest@v1.2
 
       #Run VSTest_Debug
       - name: Run VSTest Debug
