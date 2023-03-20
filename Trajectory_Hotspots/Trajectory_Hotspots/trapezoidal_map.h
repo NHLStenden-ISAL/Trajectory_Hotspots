@@ -141,7 +141,8 @@ class Trapezoidal_Map
 public:
     Trapezoidal_Map();
 
-    Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed = 0);
+    Trapezoidal_Map(const std::vector<Segment>& trajectory_segments, const unsigned int seed = 0, const bool randomized_construction = true);
+
 
     Trapezoidal_Leaf_Node* query_point(const Vec2& point);
 

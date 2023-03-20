@@ -627,7 +627,6 @@ namespace TestTrajectoryHotspots
 
         TEST_METHOD(left_right_trace_in_trapezoid)
         {
-
             const std::vector<Vec2> trajectory_points
             {
                 Vec2(4.f, 4.f),
@@ -770,6 +769,74 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[4], *right_segment);
         }
 
+        TEST_METHOD(Construction_Bug_Right)
+        {
+            //Check for construction bug where the bottom right wasnt properly set when adding a segment with an overlapping top point
+            const std::vector<Vec2> trajectory_points
+            {
+                Vec2(4.f, 4.f),
+                Vec2(6.f, 8.f),
+                Vec2(8.f, 7.f),
+                Vec2(10.f, 5.f),
+                Vec2(12.f, 6.f),
+                Vec2(16.f, 2.f)
+            };
 
+            Trajectory trajectory(trajectory_points);
+
+            Trapezoidal_Map trapezoidal_map(trajectory.get_ordered_trajectory_segments(), 3);
+        }
+
+        TEST_METHOD(Construction_Bug_Left)
+        {
+            //Check for construction bug where the bottom left wasnt properly set when adding a segment with an overlapping top point
+            const std::vector<Vec2> trajectory_points
+            {
+                Vec2(16.f, 4.f),
+                Vec2(14.f, 8.f),
+                Vec2(12.f, 7.f),
+                Vec2(10.f, 5.f),
+                Vec2(8.f, 6.f),
+                Vec2(4.f, 2.f)
+            };
+
+            Trajectory trajectory(trajectory_points);
+
+            Trapezoidal_Map trapezoidal_map(trajectory.get_ordered_trajectory_segments(), 3);
+        }
+
+        TEST_METHOD(Trace_Bug)
+        {
+            const std::vector<Vec2> trajectory_points
+            {
+                Vec2(4.f, 4.f),
+                Vec2(6.f, 8.f),
+                Vec2(8.f, 3.f),
+                Vec2(10.f, 6.f),
+                Vec2(12.f, 2.f),
+                Vec2(16.f, 9.f)
+            };
+
+            Trajectory trajectory(trajectory_points);
+
+            std::vector<Segment> bugged_segment_order;
+            bugged_segment_order.push_back(trajectory.get_ordered_trajectory_segments()[4]);
+            bugged_segment_order.push_back(trajectory.get_ordered_trajectory_segments()[0]);
+            bugged_segment_order.push_back(trajectory.get_ordered_trajectory_segments()[1]);
+            bugged_segment_order.push_back(trajectory.get_ordered_trajectory_segments()[2]);
+            bugged_segment_order.push_back(trajectory.get_ordered_trajectory_segments()[3]);
+
+            Trapezoidal_Map trapezoidal_map(bugged_segment_order, 0, false);
+
+            const Vec2 trace_point = Vec2(10.f, 4.f);
+
+
+            const Segment* left_segment = nullptr;
+            const Segment* right_segment = nullptr;
+            trapezoidal_map.trace_left_right(trace_point, true, left_segment, right_segment);
+
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[2], *left_segment);
+            Assert::AreEqual(trajectory.get_ordered_trajectory_segments()[3], *right_segment);
+        }
     };
 }
