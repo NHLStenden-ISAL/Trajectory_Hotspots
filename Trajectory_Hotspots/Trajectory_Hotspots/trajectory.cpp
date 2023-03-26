@@ -48,6 +48,26 @@ AABB Trajectory::get_hotspot_fixed_length(Float length) const
 
 AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
 {
+    //Setup trapezoidal maps for x and y coördinates
+    std::vector<Segment> x_segments;
+    std::vector<Segment> y_segments;
+
+    for (auto& trajectory_segment : trajectory_segments)
+    {
+        x_segments.emplace_back(Vec2(trajectory_segment.start_t, trajectory_segment.start.x), Vec2(trajectory_segment.end_t, trajectory_segment.end.x));
+        y_segments.emplace_back(Vec2(trajectory_segment.start_t, trajectory_segment.start.y), Vec2(trajectory_segment.end_t, trajectory_segment.end.y));
+    }
+
+    Trapezoidal_Map trapezoidal_map_x(x_segments);
+    Trapezoidal_Map trapezoidal_map_y(y_segments);
+
+    //Setup segment search tree
+    Segment_Search_Tree segment_tree(trajectory_segments);
+
+    //Loop through all vertices and query trapezoidal maps and the segment search tree
+
+
+
     return AABB();
 }
 

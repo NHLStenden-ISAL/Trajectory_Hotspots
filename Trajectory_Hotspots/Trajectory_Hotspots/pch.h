@@ -15,5 +15,6 @@
 #include "aabb.h"
 #include "segment.h"
 #include "segment_search_tree.h"
+#include "trapezoidal_map.h"
 
 //TODO: Axis enum
