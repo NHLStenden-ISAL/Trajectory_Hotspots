@@ -41,12 +41,14 @@ public:
     Segment_Search_Tree(const std::vector<Segment>& ordered_segments);
 
     //Query tree, returns bounding box from start_t to end_t
+    [[nodiscard]]
     AABB query(const Float start_t, const Float end_t) const
     {
         return root.query(start_t, end_t);
     }
 
     //Query tree, returns segment index that contains t (or first/last when before/after range)
+    [[nodiscard]]
     int query(const Float t) const
     {
         return root.query(t);
