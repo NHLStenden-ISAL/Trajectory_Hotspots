@@ -14,7 +14,7 @@ public:
     {
     public:
         Vec2 position;
-        DCEL_Half_Edge* incident_half_edge;
+        DCEL_Half_Edge* incident_half_edge; //One of the half-edges with the vertex as its origin
     };
 
     //Class representing a half-edge of the DCEL.
@@ -24,6 +24,9 @@ public:
     class DCEL_Half_Edge
     {
     public:
+
+        DCEL_Vertex* target() const { return twin->origin; };
+
         DCEL_Vertex* origin;
 
         DCEL_Face* incident_face;
@@ -53,10 +56,11 @@ private:
     std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;
     std::vector<std::unique_ptr<DCEL_Face>> faces;
 
-    void overlay_point_on_edge();
+    void overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point);
     void overlay_edge_on_edge();
     void overlay_point_on_point();
 
+    void find_adjacent_half_edges_around_point(DCEL::DCEL_Vertex* point, DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge);
 
 };
 

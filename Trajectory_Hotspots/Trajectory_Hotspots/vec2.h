@@ -41,6 +41,13 @@ public:
     Float x;
     Float y;
 
+    //Returns if a given vector a lies to the right (positive) or left (negative) of given vector b around a center vertex
+    [[nodiscard]]
+    static Float order_around_center(const Vec2& center, const Vec2& a, const Vec2& b)
+    {
+        return (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
+    };
+
 private:
 
 };
