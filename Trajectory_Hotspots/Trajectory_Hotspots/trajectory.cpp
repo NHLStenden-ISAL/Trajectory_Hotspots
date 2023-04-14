@@ -97,6 +97,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
     }
 
     //TODO: Don't forget last point? Or can we skip?
+    //TODO: Remove bool?
 
     return optimal_hotspot;
 }
@@ -122,7 +123,7 @@ void Trajectory::frc_test_between_lines(Trapezoidal_Map& trapezoidal_map, Vec2& 
 
 void Trajectory::frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trapezoidal_map, const Vec2& current_vert, const Vec2& vert_at_radius, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const
 {
-    //TODO: nullptr on left/right is everything before? -> Check for infinity points? -> Add is_infinite_edge function to trapezoidal_map?
+    //TODO: nullptr on left/right is everything before? -> Never nullptr? Check for infinity points? -> Add is_at_infinite_edge function to trapezoidal_map?
 
     const Segment* left_segment = nullptr;
     const Segment* right_segment = nullptr;
