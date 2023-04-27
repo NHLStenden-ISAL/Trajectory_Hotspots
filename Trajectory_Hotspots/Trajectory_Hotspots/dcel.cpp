@@ -1,6 +1,14 @@
 #include "pch.h"
 #include "dcel.h"
 
+void DCEL::overlay_dcel(const DCEL& other_dcel)
+{
+    //TODO:
+    //-Call sweepline algorithm
+    //For each intersection call appropriate overlay helper function
+    //Not sure if we want to just make a new DCEL..
+}
+
 void DCEL::overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
 {
     //Note: Technically there's some duplicate code here because the handling of the original half-edges is almost identical.

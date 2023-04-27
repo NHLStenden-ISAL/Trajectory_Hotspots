@@ -61,6 +61,8 @@ public:
     size_t half_edge_count() const { return half_edges.size(); };
     size_t face_count() const { return faces.size(); };
 
+    void overlay_dcel(const DCEL& other_dcel);
+
 private:
 
     std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
