@@ -65,6 +65,48 @@ const Vec2* Segment::get_right_point() const
     }
 }
 
+//Based on Real Time Rendering 4th edition, pages 987-989
+bool Segment::intersects(const Segment& other, Vec2& intersection_point) const
+{
+    Vec2 a = this->end - this->start;
+    Vec2 b = other.end - other.start;
+    Vec2 c = this->start - other.start;
+
+    //c dot perp(a) in book is same as -(c cross a) which is a cross c
+    Float d = b.cross(c); //s enumerator
+    Float e = c.cross(a); //t enumerator, book has this as b.cross(c) for some reason
+
+    Float f = a.cross(b); //s & t denominator
+
+    //If d and e are 0, the segments are colinear
+    //If (d == 0.f && e == 0.f)
+
+    //No intersection checks
+    if (f > 0.f)
+    {
+        if (d < 0.f || d > f || e < 0.f || e > f)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (d > 0.f || d < f || e > 0.f || e < f)
+        {
+            return false;
+        }
+    }
+
+    if (f == 0.f)
+    {
+        return false; //Parallel segments
+    }
+
+    intersection_point = this->start + (d / f * a);
+
+    return true;
+}
+
 bool Segment::is_horizontal() const
 {
     return start.y == end.y;

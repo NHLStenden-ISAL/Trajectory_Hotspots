@@ -13,6 +13,9 @@ public:
     class DCEL_Vertex
     {
     public:
+
+        DCEL_Vertex(const Vec2& position) : position(position) {}
+
         Vec2 position;
         DCEL_Half_Edge* incident_half_edge; //One of the half-edges with the vertex as its origin
     };
@@ -44,6 +47,8 @@ public:
     public:
         DCEL_Half_Edge* outer_component;
         std::vector<DCEL_Half_Edge*> inner_components;
+
+        std::vector<Vec2> get_vertices() const;
     };
 
     size_t vertex_count() const { return vertices.size(); };
@@ -57,7 +62,7 @@ private:
     std::vector<std::unique_ptr<DCEL_Face>> faces;
 
     void overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point);
-    void overlay_edge_on_edge();
+    void overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
     void overlay_point_on_point();
 
     void find_adjacent_half_edges_around_point(DCEL::DCEL_Vertex* point, DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge);

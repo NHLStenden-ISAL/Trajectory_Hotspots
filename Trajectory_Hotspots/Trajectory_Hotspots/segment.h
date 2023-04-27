@@ -62,6 +62,8 @@ public:
     const Vec2* get_left_point() const;
     const Vec2* get_right_point() const;
 
+    bool intersects(const Segment& other, Vec2& intersection_point) const;
+
     //Returns the orientation of a point vs the segment, <0 is left, >0 is right, 0 is on the segment
     Float point_direction(const Vec2& point) const;
 

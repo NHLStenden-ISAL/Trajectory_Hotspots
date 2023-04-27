@@ -6,6 +6,7 @@ Float Vec2::dot(const Vec2& other) const
     return x * other.x + y * other.y;
 }
 
+//Cross product of two dimensional vectors (aka perp dot)
 Float Vec2::cross(const Vec2& other) const
 {
     return (x * other.y) - (y * other.x);
