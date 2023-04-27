@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "dcel.h"
 
-void DCEL::overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point)
+void DCEL::overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
 {
     //Note: Technically there's some duplicate code here because the handling of the original half-edges is almost identical.
     //Splitting this up gives some trouble with overwriting the next pointers though.
@@ -14,9 +14,9 @@ void DCEL::overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point)
 
     DCEL_Half_Edge* twin = edge->twin;
 
-    //Old half_edges point to point, the new twins originate from it.
-    new_half_edge_1->origin = point;
-    new_half_edge_2->origin = point;
+    //Old half_edges point to vertex, the new twins originate from it.
+    new_half_edge_1->origin = vertex;
+    new_half_edge_2->origin = vertex;
 
     //Switch twins to new half-edges
     edge->twin = new_half_edge_1.get();
@@ -31,16 +31,16 @@ void DCEL::overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point)
     new_half_edge_1->next->prev = new_half_edge_1.get();
     new_half_edge_2->next->prev = new_half_edge_2.get();
 
-    //Update prev and next pointers around the point
-    //Find positions of new half-edges around the point and insert
+    //Update prev and next pointers around the vertex
+    //Find positions of new half-edges around the vertex and insert
 
-    DCEL_Half_Edge* CCW_half_edge = nullptr;
     DCEL_Half_Edge* CW_half_edge = nullptr;
+    DCEL_Half_Edge* CCW_half_edge = nullptr;
 
-    DCEL_Half_Edge* prev_half_edge = point->incident_half_edge;
-    DCEL_Half_Edge* current_half_edge = point->incident_half_edge->twin->next;
+    DCEL_Half_Edge* prev_half_edge = vertex->incident_half_edge;
+    DCEL_Half_Edge* current_half_edge = vertex->incident_half_edge->twin->next;
 
-    find_adjacent_half_edges_around_point(point, edge, current_half_edge, CCW_half_edge, CW_half_edge);
+    vertex->find_adjacent_half_edges(edge, current_half_edge, CW_half_edge, CCW_half_edge);
 
     //face is left of halfedge, so halfedge with vertex as origin has CCW halfedge as prev 
     new_half_edge_1->prev = CCW_half_edge;
@@ -50,42 +50,14 @@ void DCEL::overlay_point_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* point)
     edge->next = CW_half_edge;
     CW_half_edge->prev = edge;
 
-    //Find other side, start from previous end
-    find_adjacent_half_edges_around_point(point, twin, CW_half_edge, CCW_half_edge, CW_half_edge);
+    //Find other side, start from previous end (it is impossible for it to lie between the just added and CW half-edge)
+    vertex->find_adjacent_half_edges(twin, CW_half_edge, CW_half_edge, CCW_half_edge);
 
     new_half_edge_2->prev = CCW_half_edge;
     CCW_half_edge->next = new_half_edge_2.get();
 
     twin->next = CW_half_edge;
     CW_half_edge->prev = twin;
-}
-
-void DCEL::find_adjacent_half_edges_around_point(DCEL::DCEL_Vertex* point, DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge)
-{
-    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
-    DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
-
-    Float prev_order = Vec2::order_around_center(point->position, query_edge->origin->position, prev_half_edge->target()->position);
-
-    do
-    {
-        Float new_order = Vec2::order_around_center(point->position, query_edge->origin->position, current_half_edge->target()->position);
-
-        if (prev_order < 0.f && new_order > 0.f)
-        {
-            CCW_half_edge = prev_half_edge;
-            CW_half_edge = current_half_edge;
-            break;
-        }
-        else
-        {
-            prev_half_edge = current_half_edge;
-            prev_order = new_order;
-            current_half_edge = current_half_edge->twin->next;
-        }
-    } while (current_half_edge != starting_half_edge);
-
-    assert(false);
 }
 
 void DCEL::overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point)
@@ -116,24 +88,45 @@ void DCEL::overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, 
     edge_1_new_twin_1->next->prev = edge_1_new_twin_1.get();
 
     //Chain the four half-edges under edge_1 together
-    //so we can simply call the edge on point function for the second edge.
+    //so we can simply call the edge on vertex function for the second edge.
     edge_1_new_twin_1->prev = edge_1_old_twin;
     edge_1_old_twin->next = edge_1_new_twin_1.get();
 
     edge_1_new_twin_2->prev = edge_1;
     edge_1->next = edge_1_new_twin_2.get();
 
-    //Insert second edge using the overlay edge over point function
-    overlay_point_on_edge(edge_2, new_dcel_vertex.get());
+    //Insert second edge using the overlay edge over vertex function
+    overlay_vertex_on_edge(edge_2, new_dcel_vertex.get());
 }
 
-void DCEL::overlay_point_on_point()
+void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2)
 {
     //Gather half-edges around second vertex
-    //Set origins to first vertex
-    //Add half-edges one-by-one
+    //For each: Set origins to first vertex
+    //          and switch prev, prev->next,
+    //          twin->next, and twin->next->prev pointers
 
-    //TODO: Do we want to check if prev/next needs to change? Probably not, cost of checking is same or more of updating..
+    std::vector<DCEL_Half_Edge*> incident_half_edges_v2 = vertex_2->get_incident_half_edges();
+
+    DCEL_Half_Edge* CW_half_edge = nullptr;
+    DCEL_Half_Edge* CCW_half_edge = nullptr;
+
+    DCEL_Half_Edge* current_half_edge = vertex_1->incident_half_edge;
+
+    for (auto& incident_half_edge_v2 : incident_half_edges_v2)
+    {
+        incident_half_edge_v2->origin = vertex_1;
+
+        vertex_1->find_adjacent_half_edges(incident_half_edge_v2, current_half_edge, CW_half_edge, CCW_half_edge);
+
+        //We can prevent the two twin writes by checking if the CCW is the previous added half-edge
+        //but adding branching is probably slower
+        incident_half_edge_v2->next = CW_half_edge;
+        incident_half_edge_v2->twin->prev = CCW_half_edge;
+
+        CW_half_edge->prev = incident_half_edge_v2;
+        CCW_half_edge->next = incident_half_edge_v2->twin;
+    }
 }
 
 std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
@@ -147,7 +140,53 @@ std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
         //Report vertex and move to the next half-edge in the chain
         vertices.push_back(current_half_edge->origin->position);
         current_half_edge = current_half_edge->next;
+
     } while (current_half_edge != starting_half_edge);
 
     return vertices;
+}
+
+void DCEL::DCEL_Vertex::find_adjacent_half_edges(DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+{
+    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
+    DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
+
+    Float prev_order = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
+
+    do
+    {
+        Float new_order = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
+
+        if (prev_order < 0.f && new_order > 0.f)
+        {
+            CW_half_edge = current_half_edge;
+            CCW_half_edge = prev_half_edge;
+            break;
+        }
+        else
+        {
+            prev_half_edge = current_half_edge;
+            prev_order = new_order;
+            current_half_edge = current_half_edge->twin->next;
+        }
+    } while (current_half_edge != starting_half_edge);
+
+    assert(false);
+}
+
+std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+{
+    DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
+
+    std::vector<DCEL_Half_Edge*> incident_half_edges;
+
+    do
+    {
+        incident_half_edges.emplace_back(current_half_edge);
+        current_half_edge = current_half_edge->twin->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return incident_half_edges;
 }
