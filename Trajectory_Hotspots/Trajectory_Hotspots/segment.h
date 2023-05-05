@@ -3,6 +3,8 @@
 class Vec2;
 class AABB;
 
+//TODO: Wrapper class for trajectory? Make segment member
+
 class Segment
 {
 public:
@@ -61,6 +63,8 @@ public:
     const Vec2* get_top_point() const;
     const Vec2* get_left_point() const;
     const Vec2* get_right_point() const;
+
+    Vec2 to_vector() const;
 
     bool intersects(const Segment& other, Vec2& intersection_point) const;
 

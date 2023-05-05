@@ -65,6 +65,11 @@ const Vec2* Segment::get_right_point() const
     }
 }
 
+Vec2 Segment::to_vector() const
+{
+    return Vec2(end - start);
+}
+
 //Based on Real Time Rendering 4th edition, pages 987-989
 bool Segment::intersects(const Segment& other, Vec2& intersection_point) const
 {

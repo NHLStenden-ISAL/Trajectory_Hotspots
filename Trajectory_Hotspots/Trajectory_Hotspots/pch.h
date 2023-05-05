@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <stdint.h>
 #include <limits>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <vector>
 #include <random>
 #include <numeric>
+#include <map>
 
 #include <cassert>
 

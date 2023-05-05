@@ -33,7 +33,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_with_fsanitize|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -139,8 +139,10 @@
     </ClCompile>
     <ClCompile Include="test_float.cpp" />
     <ClCompile Include="test_segment.cpp" />
+    <ClCompile Include="test_segment_intersection.cpp" />
     <ClCompile Include="test_segment_search_tree.cpp" />
     <ClCompile Include="test_trajectory.cpp" />
+    <ClCompile Include="test_sweep_line_status_structure.cpp" />
     <ClCompile Include="test_trajectory_hotspots.cpp" />
     <ClCompile Include="test_trapezoidal_map.cpp" />
     <ClCompile Include="test_vec2.cpp" />
