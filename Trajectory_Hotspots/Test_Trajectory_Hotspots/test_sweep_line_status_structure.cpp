@@ -39,17 +39,17 @@ namespace TestTrajectoryHotspots
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node= -1;
                 int right_node= -1;
-                status_structure.insert(test_segments ,i,left_node,right_node);
+                status_structure.insert(test_segments,i,left_node,right_node);
 
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
@@ -70,7 +70,7 @@ namespace TestTrajectoryHotspots
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
@@ -79,7 +79,7 @@ namespace TestTrajectoryHotspots
             }
             int left_segment = -1;
             int right_segment = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.remove(test_segments, i,left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
@@ -96,14 +96,14 @@ namespace TestTrajectoryHotspots
             
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 int left_node;
                 int right_node;
                 status_structure.insert(test_segments, i,left_node,right_node);
             }
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
             }
@@ -131,7 +131,7 @@ namespace TestTrajectoryHotspots
             
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
 
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node = -1;
@@ -164,7 +164,7 @@ namespace TestTrajectoryHotspots
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             int left_node = -1;
             int right_node = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 
@@ -185,7 +185,7 @@ namespace TestTrajectoryHotspots
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             int left_node = -1;
             int right_node = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
 
@@ -202,17 +202,17 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(get_left_neighbour_case_1)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(3.2, 5.28), Vec2(4.43, 8.73)); //g
-            test_segments.emplace_back(Vec2(9.2, 4.35), Vec2(8.01, 8.22)); //h
-            test_segments.emplace_back(Vec2(12, 4.44), Vec2(11.29, 8.39)); //i
-            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6)); //j
-            test_segments.emplace_back(Vec2(6, 6), Vec2(6, 2)); //f
+            test_segments.emplace_back(Vec2(3.2f, 5.28f), Vec2(4.43f, 8.73f)); //g
+            test_segments.emplace_back(Vec2(9.2f, 4.35f), Vec2(8.01f, 8.22f)); //h
+            test_segments.emplace_back(Vec2(12.f, 4.44f), Vec2(11.29f, 8.39f)); //i
+            test_segments.emplace_back(Vec2(1.f, 4.f), Vec2(2.f, 6.f)); //j
+            test_segments.emplace_back(Vec2(6.f, 6.f), Vec2(6.f, 2.f)); //f
 
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             int left_node = -1;
             int right_node = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
 
@@ -227,17 +227,17 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(get_left_and_right_neighbour_case_1)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(3.2, 5.28), Vec2(4.43, 8.73)); //g
-            test_segments.emplace_back(Vec2(9.2, 4.35), Vec2(8.01, 8.22)); //h
-            test_segments.emplace_back(Vec2(12, 4.44), Vec2(11.29, 8.39)); //i
-            test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6)); //j
-            test_segments.emplace_back(Vec2(6, 6), Vec2(6, 2)); //f
+            test_segments.emplace_back(Vec2(3.2f, 5.28f), Vec2(4.43f, 8.73f)); //g
+            test_segments.emplace_back(Vec2(9.2f, 4.35f), Vec2(8.01f, 8.22f)); //h
+            test_segments.emplace_back(Vec2(12.f, 4.44f), Vec2(11.29f, 8.39f)); //i
+            test_segments.emplace_back(Vec2(1.f, 4.f), Vec2(2, 6)); //j
+            test_segments.emplace_back(Vec2(6.f, 6.f), Vec2(6, 2)); //f
 
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             int left_node = -1;
             int right_node = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
 
@@ -254,17 +254,17 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(get_left_and_right_neighbour_case_2)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(5, 5), Vec2(6, 10)); //f
-            test_segments.emplace_back(Vec2(7, 3), Vec2(7, 8)); //h
-            test_segments.emplace_back(Vec2(3.04, 3.13), Vec2(3, 8)); //i
-            test_segments.emplace_back(Vec2(12, 10), Vec2(14, 5)); //j
-            test_segments.emplace_back(Vec2(9, 8), Vec2(10, 3)); //g
+            test_segments.emplace_back(Vec2(5.f, 5.f), Vec2(6.f, 10.f)); //f
+            test_segments.emplace_back(Vec2(7.f, 3.f), Vec2(7.f, 8.f)); //h
+            test_segments.emplace_back(Vec2(3.04f, 3.13f), Vec2(3.f, 8.f)); //i
+            test_segments.emplace_back(Vec2(12.f, 10.f), Vec2(14.f, 5.f)); //j
+            test_segments.emplace_back(Vec2(9.f, 8.f), Vec2(10.f, 3.f)); //g
 
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
             int left_node = -1;
             int right_node = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
 
@@ -285,7 +285,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(3, 3), Vec2(5, 6));
             test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
@@ -296,7 +296,7 @@ namespace TestTrajectoryHotspots
             }
             int left_segment = -1;
             int right_segment = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.remove(test_segments ,i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments , &test_segments.at(i)));
@@ -311,7 +311,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
             test_segments.emplace_back(Vec2(12, 2), Vec2(10, 5));
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
@@ -322,7 +322,7 @@ namespace TestTrajectoryHotspots
             }
             int left_segment = -1;
             int right_segment = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments , &test_segments.at(i)));
@@ -337,7 +337,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(7, 2), Vec2(8, 6));
             test_segments.emplace_back(Vec2(1, 4), Vec2(2, 6));
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.set_line_position(test_segments.at(i).get_top_point()->y);
                 int left_node;
@@ -348,7 +348,7 @@ namespace TestTrajectoryHotspots
             }
             int left_segment = -1;
             int right_segment = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
@@ -371,7 +371,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(6.42f, 3.87f), Vec2(5.5f, 2.49f)); //q
 
             Sweep_Line_Status_structure status_structure(test_segments.at(0).get_top_point()->y);
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 int left_node;
                 int right_node;
@@ -381,7 +381,7 @@ namespace TestTrajectoryHotspots
             }
             int left_segment = -1;
             int right_segment = -1;
-            for (size_t i = 0; i < test_segments.size(); i++)
+            for (int i = 0; i < test_segments.size(); i++)
             {
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
