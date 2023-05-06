@@ -43,6 +43,26 @@ namespace TestTrajectoryHotspots
 
         }
 
+        TEST_METHOD(no_intersection)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(9.f, 6.f), Vec2(-5.0f, 2.0f)); //f
+            test_segments.emplace_back(Vec2(9.f, 4.f), Vec2(9.3f, 9.f)); //g
+            Vec2 intersection(0.f, 0.f);
+            Assert::IsFalse(test_segments.at(0).intersects(test_segments.at(1), intersection));
+            Assert::AreEqual(intersection, Vec2(0.f, 0.f));
+        }
+
+        TEST_METHOD(intersection_parallel)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-9.0f, -7.0f), Vec2(6.0f, 2.0f)); //f
+            test_segments.emplace_back(Vec2(0.f, 0.f), Vec2(15.f, 9.f)); //g
+            Vec2 intersection(0.f, 0.f);
+            Assert::IsFalse(test_segments.at(0).intersects(test_segments.at(1), intersection));
+            Assert::AreEqual(intersection, Vec2(0.f, 0.f));
+        }
+
         TEST_METHOD(x_intersect)
         {
             Vec2 start_point(1.f, 0.5f);
