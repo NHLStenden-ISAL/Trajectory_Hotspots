@@ -57,7 +57,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     int most_left_segment = -1;
     int most_right_segment = -1;
 
-    float line_pos = event_point.y;
+    Float line_pos = event_point.y;
     status_structure.set_line_position(line_pos);
 
     //Get all nodes containing segments that intersect this event point
@@ -160,7 +160,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         if (left_neighbour != -1 && right_neighbour != -1)
         {
             Vec2 intersection;
-            if (Segment::intersection_two_segments(&segments.at(left_neighbour), &segments.at(right_neighbour), intersection))
+            if (segments.at(left_neighbour).intersects(segments.at(right_neighbour), intersection))
             {
                 //Check if the intersection is in the future, intersections above the sweepline should've been reported already
                 if (intersection < event_point)
@@ -176,7 +176,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         Vec2 intersection;
         if (left_neighbour != -1)
         {
-            if (Segment::intersection_two_segments(&segments.at(most_left_segment), &segments.at(left_neighbour), intersection))
+            if (segments.at(most_left_segment).intersects(segments.at(left_neighbour), intersection))
             {
                 if (intersection < event_point)
                 {
@@ -187,7 +187,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
 
         if (right_neighbour != -1)
         {
-            if (Segment::intersection_two_segments(&segments.at(most_right_segment), &segments.at(right_neighbour), intersection))
+            if (segments.at(most_right_segment).intersects(segments.at(right_neighbour), intersection))
             {
                 if (intersection < event_point)
                 {

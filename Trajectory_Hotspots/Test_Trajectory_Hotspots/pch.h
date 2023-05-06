@@ -14,6 +14,15 @@
 #include <iostream>
 #include <vector>
 
+#include "CppUnitTest.h"
+
+#include "../Trajectory_Hotspots/pch.h"
+#include "../Trajectory_Hotspots/float.h"
+#include "../Trajectory_Hotspots/vec2.h"
+#include "../Trajectory_Hotspots/segment.h"
+#include "../Trajectory_Hotspots/trapezoidal_map.h"
+
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Microsoft
@@ -33,14 +42,6 @@ namespace Microsoft
 		}
 	}
 }
-
-#include "CppUnitTest.h"
-
-#include "../Trajectory_Hotspots/pch.h"
-#include "../Trajectory_Hotspots/float.h"
-#include "../Trajectory_Hotspots/vec2.h"
-#include "../Trajectory_Hotspots/segment.h"
-#include "../Trajectory_Hotspots/trapezoidal_map.h"
 
 //namespace Microsoft
 //{

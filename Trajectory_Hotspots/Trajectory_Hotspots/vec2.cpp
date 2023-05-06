@@ -55,9 +55,9 @@ bool Vec2::operator!=(const Vec2& operand) const { return !(*this == operand); }
 //Returns true if y is lower than y of operand, if y is equal, returns true if x is lower than operand x.
 bool Vec2::operator<(const Vec2& operand) const
 {
-    if (nearly_equal(y, operand.y))
+    if (y == operand.y)
     {
-        if (nearly_equal(x, operand.x))
+        if (x == operand.x)
         {
             return false;
         }
