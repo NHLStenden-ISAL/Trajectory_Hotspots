@@ -122,7 +122,7 @@ namespace TestTrajectoryHotspots
         {
 
         }
-        //TODO: Crashes if index get increased.
+
         TEST_METHOD(get_left_neighbour_crash_case)
         {
             std::vector<Segment> test_segments;
@@ -154,6 +154,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(test12,left_node);
             
         }
+
         TEST_METHOD(get_left_neighbour)
         {
             std::vector<Segment> test_segments;
@@ -176,6 +177,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(first_element, left_node);
 
         }
+
         TEST_METHOD(get_right_neighbour_is_empty)
         {
             std::vector<Segment> test_segments;
@@ -198,7 +200,6 @@ namespace TestTrajectoryHotspots
 
         }
         
-
         TEST_METHOD(get_left_neighbour_case_1)
         {
             std::vector<Segment> test_segments;
@@ -224,6 +225,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(left_element, left_node);
        
         }
+
         TEST_METHOD(get_left_and_right_neighbour_case_1)
         {
             std::vector<Segment> test_segments;
@@ -251,6 +253,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(right_element, right_node);
 
         }
+
         TEST_METHOD(get_left_and_right_neighbour_case_2)
         {
             std::vector<Segment> test_segments;
@@ -278,6 +281,7 @@ namespace TestTrajectoryHotspots
             Assert::AreEqual(right_element, right_node);
 
         }
+
         //make a tree with root having only one left node
         TEST_METHOD(remove_root_one_left_node)
         {
@@ -303,6 +307,7 @@ namespace TestTrajectoryHotspots
             }
             Assert::IsNull(status_structure.root.get());
         }
+
         // make a tree with root having one left node and one right node
         TEST_METHOD(remove_with_one_left_one_right)
         {
@@ -329,6 +334,7 @@ namespace TestTrajectoryHotspots
             }
             Assert::IsNull(status_structure.root.get());
         }
+
         //make a tree with root adding to left node of root
         TEST_METHOD(remove_with_one_left_and_one_left)
         {
@@ -355,6 +361,7 @@ namespace TestTrajectoryHotspots
             }
             Assert::IsNull(status_structure.root.get());
         }
+
         TEST_METHOD(remove_large_tree)
         {
             std::vector<Segment> test_segments;
@@ -390,5 +397,7 @@ namespace TestTrajectoryHotspots
         }
 
         //TODO: There is probably still a bug with rounding errors we need to check. Make a test that has multiple intersection types on top of eachother.
+        //TODO: Test horizontal segment is last
+        //TODO: Test flip after insert
     };
 }

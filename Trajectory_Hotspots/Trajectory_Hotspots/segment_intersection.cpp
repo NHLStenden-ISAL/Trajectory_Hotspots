@@ -65,10 +65,11 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     int most_right_intersecting_segment = -1;
     status_structure.get_all_nodes_on_point(segments, event_point, intersection_segments, bottom_segments, most_left_intersecting_segment, most_right_intersecting_segment, left_neighbour, right_neighbour);
 
-    //The intersecting segments swap after the event point
+    //The intersecting segments swap after the event point so we swap the outer indices
     most_left_segment = most_right_intersecting_segment;
     most_right_segment = most_left_intersecting_segment;
 
+    //Report all segments that intersect this point
     if (top_segments.size() + bottom_segments.size() + intersection_segments.size() > 1)
     {
         for (int segment : top_segments)
@@ -85,11 +86,12 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         {
             result_segments.push_back(segments.at(segment));
         }
-        //TODO return intersection + segments, check later if from same dcel
+        //TODO: return intersection + segments, check later if from same dcel
         //add to result
     }
 
-    // after the final remove we have the right and left neighbour of all intersecting segments
+    //Remove the segment that intersect with the bottom endpoint and internally
+    //After the final remove we have the right and left neighbour of all intersecting segments
     //TODO: Do we need neighbours here if we get them from get_all_nodes_on???? Follow up: No, new TODO: Remove those parameters from remove..
     for (int segment : bottom_segments)
     {
@@ -103,11 +105,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         status_structure.remove(segments, segment, l, r);
     }
 
-    //delete lower and intersection
-    // set_lineposition 
-
-
-
+    //Reinsert the segments that intersect internally on this point
     for (int segment : intersection_segments)
     {
         int l, r;
@@ -117,6 +115,8 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     //If we only have top segments we did not find the neighbouring nodes yet
     bool neighbours_found = !bottom_segments.empty() || !intersection_segments.empty();
 
+    //Insert the segments that intersect this event point with their top point,
+    //finding the outer neighbours if we didn't already.
     int new_left_neighbour = -1;
     int new_right_neighbour = -1;
     for (int segment : top_segments)
@@ -146,29 +146,13 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
 
     //TODO: Might be better to just do a left and right inorder tree walk to get most left and right segment instead.
 
-    //If top+intersection+bottom > 1 
-    //report intersection + segments
-
-    //Delete bottom segments from status_structure
-    //Swap intersection segments
-    //Insert top segments
-
     //Check if there are new intersection events between the outer segments and their outer neighbours
-    if (top_segments.size() + intersection_segments.size() == 0)
+    if (top_segments.empty() && intersection_segments.empty())
     {
         //Only bottom segments on this point, after their removal we need to check if their neighbours intersect in the future
         if (left_neighbour != -1 && right_neighbour != -1)
         {
-            Vec2 intersection_point;
-            Segment::Intersection_Type intersection_type = segments.at(left_neighbour).intersects(segments.at(right_neighbour), intersection_point);
-            if (intersection_type == Segment::Intersection_Type::point)
-            {
-                //Check if the intersection is in the future, intersections above the sweepline should've been reported already
-                if (intersection_point < event_point)
-                {
-                    auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
-                }
-            }
+            test_for_intersection(segments, left_neighbour, right_neighbour, event_point, event_queue);
         }
     }
     else
@@ -177,34 +161,26 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         Vec2 intersection_point;
         if (left_neighbour != -1)
         {
-            Segment::Intersection_Type intersection_type = segments.at(most_left_segment).intersects(segments.at(left_neighbour), intersection_point);
-            if (intersection_type == Segment::Intersection_Type::point)
-            {
-                if (intersection_point < event_point)
-                {
-                    auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
-                }
-            }
+            test_for_intersection(segments, left_neighbour, most_left_segment, event_point, event_queue);
         }
 
         if (right_neighbour != -1)
         {
-            Segment::Intersection_Type intersection_type = segments.at(most_right_segment).intersects(segments.at(right_neighbour), intersection_point);
-            if (intersection_type == Segment::Intersection_Type::point)
-            {
-                if (intersection_point < event_point)
-                {
-                    auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
-                }
-            }
+            test_for_intersection(segments, most_right_segment, right_neighbour, event_point, event_queue);
         }
+    }
+}
 
-        // never intersects if theres only 1 neighbour
-
-
-        //Else if upper + intersection == 0
-        //Remove bottom, check neighbours, add new events when needed (bellow or to the right of current event_point
-
-
+void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Segment>& segments, const int left_segment, const int right_segment, const Vec2& event_point, Segment_Intersection_Sweep_Line::map& event_queue)
+{
+    Vec2 intersection_point;
+    Segment::Intersection_Type intersection_type = segments.at(left_segment).intersects(segments.at(right_segment), intersection_point);
+    if (intersection_type == Segment::Intersection_Type::point)
+    {
+        //Check if the intersection is in the future, intersections above the sweepline (and left of this point) should've been reported already
+        if (intersection_point < event_point)
+        {
+            auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
+        }
     }
 }
