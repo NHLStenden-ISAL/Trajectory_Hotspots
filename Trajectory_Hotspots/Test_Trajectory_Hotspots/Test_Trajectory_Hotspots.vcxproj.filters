@@ -36,6 +36,15 @@
     <ClCompile Include="test_segment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_trajectory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_float.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_vec2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

@@ -109,6 +109,58 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(c.x == 2381.4367f);
             Assert::IsTrue(c.y == 832.23260f);
         }
+
+        TEST_METHOD(vector_between_upwards)
+        {
+            Vec2 A = Vec2(-4.0f, -1.0f);
+            Vec2 B = Vec2(2.0f, 3.0f);
+            Vec2 C = Vec2(-1.f, 1.f);
+            Vec2 D = Vec2(5.f, 5.f);
+
+            Assert::IsFalse(A.between(C, D));
+            Assert::IsTrue(B.between(C, D));
+            Assert::IsTrue(C.between(A, B));
+            Assert::IsFalse(D.between(A, B));
+        }
+
+        TEST_METHOD(vector_between_downwards)
+        {
+            Vec2 A = Vec2(-3.0f, 6.0f);
+            Vec2 B = Vec2(1.0f, 2.0f);
+            Vec2 C = Vec2(-1.f, 4.f);
+            Vec2 D = Vec2(3.f, 0.f);
+
+            Assert::IsFalse(A.between(C, D));
+            Assert::IsTrue(B.between(C, D));
+            Assert::IsTrue(C.between(A, B));
+            Assert::IsFalse(D.between(A, B));
+        }
+
+        TEST_METHOD(vector_between_vertical)
+        {
+            Vec2 A = Vec2(3.0f, -2.0f);
+            Vec2 B = Vec2(3.f, 4.f);
+            Vec2 C = Vec2(3.0f, 3.0f);
+            Vec2 D = Vec2(3.f, 6.f);
+
+            Assert::IsFalse(A.between(C, D));
+            Assert::IsTrue(B.between(C, D));
+            Assert::IsTrue(C.between(A, B));
+            Assert::IsFalse(D.between(A, B));
+        }
+
+        TEST_METHOD(vector_between_horizontal)
+        {
+            Vec2 A = Vec2(-3.0f, 2.0f);
+            Vec2 B = Vec2(7.f, 2.f);
+            Vec2 C = Vec2(1.0f, 2.0f);
+            Vec2 D = Vec2(8.f, 2.f);
+
+            Assert::IsFalse(A.between(C, D));
+            Assert::IsTrue(B.between(C, D));
+            Assert::IsTrue(C.between(A, B));
+            Assert::IsFalse(D.between(A, B));
+        }
     };
 
 

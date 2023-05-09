@@ -34,8 +34,8 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(intersection)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(9.0f, 7.0f), Vec2(6.0f, 2.0f)); //f
-            test_segments.emplace_back(Vec2(9.2f, 4.35f), Vec2(8.01f, 8.22f)); //g
+            test_segments.emplace_back(Vec2(9.0f, 7.0f), Vec2(6.0f, 2.0f));
+            test_segments.emplace_back(Vec2(9.2f, 4.35f), Vec2(8.01f, 8.22f));
             Vec2 intersection;
             test_segments.at(0).intersects(test_segments.at(1), intersection);
             Vec2 correct;
@@ -47,8 +47,8 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(no_intersection)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(9.f, 6.f), Vec2(-5.0f, 2.0f)); //f
-            test_segments.emplace_back(Vec2(9.f, 4.f), Vec2(9.3f, 9.f)); //g
+            test_segments.emplace_back(Vec2(9.f, 6.f), Vec2(-5.0f, 2.0f));
+            test_segments.emplace_back(Vec2(9.f, 4.f), Vec2(9.3f, 9.f));
             Vec2 intersection(0.f, 0.f);
             Assert::AreEqual(test_segments.at(0).intersects(test_segments.at(1), intersection), Segment::Intersection_Type::none);
             Assert::AreEqual(intersection, Vec2(0.f, 0.f));
@@ -57,13 +57,96 @@ namespace TestTrajectoryHotspots
         TEST_METHOD(intersection_parallel)
         {
             std::vector<Segment> test_segments;
-            test_segments.emplace_back(Vec2(-9.0f, -7.0f), Vec2(6.0f, 2.0f)); //f
-            test_segments.emplace_back(Vec2(0.f, 0.f), Vec2(15.f, 9.f)); //g
+            test_segments.emplace_back(Vec2(-9.0f, -7.0f), Vec2(6.0f, 2.0f));
+            test_segments.emplace_back(Vec2(0.f, 0.f), Vec2(15.f, 9.f));
             Vec2 intersection(0.f, 0.f);
             Assert::AreEqual(test_segments.at(0).intersects(test_segments.at(1), intersection), Segment::Intersection_Type::parallel);
             Assert::AreEqual(intersection, Vec2(0.f, 0.f));
         }
 
+        TEST_METHOD(intersection_collinear)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-4.0f, -1.0f), Vec2(2.0f, 3.0f));
+            test_segments.emplace_back(Vec2(-1.f, 1.f), Vec2(5.f, 5.f));
+            Vec2 intersection(0.f, 0.f);
+            Assert::AreEqual(test_segments.at(0).intersects(test_segments.at(1), intersection), Segment::Intersection_Type::collinear);
+        }
+
+        TEST_METHOD(segment_collinear_overlap_downwards)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-3.0f, 6.0f), Vec2(1.0f, 2.0f));
+            test_segments.emplace_back(Vec2(-1.f, 4.f), Vec2(3.f, 0.f));
+
+            Vec2 overlap_start(0.f, 0.f);
+            Vec2 overlap_end(0.f, 0.f);
+
+            collinear_overlap(test_segments[0], test_segments[1], overlap_start, overlap_end);
+
+            Assert::AreEqual(overlap_start, test_segments[0].end);
+            Assert::AreEqual(overlap_end, test_segments[1].start);
+        }
+
+        TEST_METHOD(segment_collinear_overlap_upwards)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-4.0f, -1.0f), Vec2(2.0f, 3.0f));
+            test_segments.emplace_back(Vec2(-1.f, 1.f), Vec2(5.f, 5.f));
+
+            Vec2 overlap_start(0.f, 0.f);
+            Vec2 overlap_end(0.f, 0.f);
+
+            collinear_overlap(test_segments[0], test_segments[1], overlap_start, overlap_end);
+
+            Assert::AreEqual(overlap_start, test_segments[1].start);
+            Assert::AreEqual(overlap_end, test_segments[0].end);
+        }
+
+        TEST_METHOD(segment_collinear_overlap_horizontal)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-3.0f, 2.0f), Vec2(7.0f, 2.0f));
+            test_segments.emplace_back(Vec2(1.f, 2.f), Vec2(8.f, 2.f));
+
+            Vec2 overlap_start(0.f, 0.f);
+            Vec2 overlap_end(0.f, 0.f);
+
+            collinear_overlap(test_segments[0], test_segments[1], overlap_start, overlap_end);
+
+            Assert::AreEqual(overlap_start, test_segments[1].start);
+            Assert::AreEqual(overlap_end, test_segments[0].end);
+        }
+
+        TEST_METHOD(segment_collinear_overlap_vertical)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(3.0f, -2.0f), Vec2(3.0f, 4.0f));
+            test_segments.emplace_back(Vec2(3.f, 3.f), Vec2(3.f, 6.f));
+
+            Vec2 overlap_start(0.f, 0.f);
+            Vec2 overlap_end(0.f, 0.f);
+
+            collinear_overlap(test_segments[0], test_segments[1], overlap_start, overlap_end);
+
+            Assert::AreEqual(overlap_start, test_segments[1].start);
+            Assert::AreEqual(overlap_end, test_segments[0].end);
+        }
+        //
+        TEST_METHOD(segment_collinear_overlap_embedded)
+        {
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(-3.0f, 6.0f), Vec2(1.0f, 2.0f));
+            test_segments.emplace_back(Vec2(-1.f, 4.f), Vec2(3.f, 0.f));
+
+            Vec2 overlap_start(0.f, 0.f);
+            Vec2 overlap_end(0.f, 0.f);
+
+            collinear_overlap(test_segments[0], test_segments[1], overlap_start, overlap_end);
+
+            Assert::AreEqual(overlap_start, test_segments[0].end);
+            Assert::AreEqual(overlap_end, test_segments[1].start);
+        }
         TEST_METHOD(x_intersect)
         {
             Vec2 start_point(1.f, 0.5f);

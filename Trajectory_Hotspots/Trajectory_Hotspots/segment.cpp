@@ -344,13 +344,13 @@ bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& o
 
     if (segment1.start < segment1.end)
     {
-        Vec2 segment1_min = segment1.start;
-        Vec2 segment1_max = segment1.end;
+        segment1_min = segment1.start;
+        segment1_max = segment1.end;
     }
     else
     {
-        Vec2 segment1_min = segment1.end;
-        Vec2 segment1_max = segment1.start;
+        segment1_min = segment1.end;
+        segment1_max = segment1.start;
     }
 
     Vec2 segment2_min;
@@ -358,13 +358,13 @@ bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& o
 
     if (segment2.start < segment2.end)
     {
-        Vec2 segment2_min = segment2.start;
-        Vec2 segment2_max = segment2.end;
+        segment2_min = segment2.start;
+        segment2_max = segment2.end;
     }
     else
     {
-        Vec2 segment2_min = segment2.end;
-        Vec2 segment2_max = segment2.start;
+        segment2_min = segment2.end;
+        segment2_max = segment2.start;
     }
 
     if (segment1_min.between(segment2_min, segment2_max))
