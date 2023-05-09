@@ -71,7 +71,7 @@ Vec2 Segment::to_vector() const
 }
 
 //Based on Real Time Rendering 4th edition, pages 987-989
-bool Segment::intersects(const Segment& other, Vec2& intersection_point) const
+Segment::Intersection_Type Segment::intersects(const Segment& other, Vec2& intersection_point) const
 {
     Vec2 a = other.end - other.start;
     Vec2 b = this->end - this->start;
@@ -83,31 +83,39 @@ bool Segment::intersects(const Segment& other, Vec2& intersection_point) const
 
     Float f = b.cross(a); //s & t denominator
 
+    //Parallel/collinear segments
     if (f == 0.f)
     {
-        return false; //Parallel/collinear segments
+        //Check if d or e is 0 for collinearity
+        if (d == 0.f)
+        {
+            return Intersection_Type::collinear;
+        }
+        else
+        {
+            return Intersection_Type::parallel;
+        }
     }
 
-    //No intersection checks
+    //No intersection checks (s & t have to be between 0 and 1)
     if (f > 0.f)
     {
         if (d < 0.f || d > f || e < 0.f || e > f)
         {
-            return false;
+            return Intersection_Type::none;
         }
     }
     else
     {
         if (d > 0.f || d < f || e > 0.f || e < f)
         {
-            return false;
+            return Intersection_Type::none;
         }
     }
 
-
     intersection_point = this->start + (d / f * b);
 
-    return true;
+    return Intersection_Type::point;
 }
 
 bool Segment::is_horizontal() const
@@ -325,6 +333,73 @@ Float Segment::point_direction(const Vec2& point) const
 bool point_right_of_segment(const Segment& segment, const Vec2& point)
 {
     return segment.point_direction(point) < 0 ? false : true;
+}
+
+//Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
+bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& overlap_start, Vec2& overlap_end)
+{
+    //TODO: More efficient collinear overlap? use slope?
+    Vec2 segment1_min;
+    Vec2 segment1_max;
+
+    if (segment1.start < segment1.end)
+    {
+        Vec2 segment1_min = segment1.start;
+        Vec2 segment1_max = segment1.end;
+    }
+    else
+    {
+        Vec2 segment1_min = segment1.end;
+        Vec2 segment1_max = segment1.start;
+    }
+
+    Vec2 segment2_min;
+    Vec2 segment2_max;
+
+    if (segment2.start < segment2.end)
+    {
+        Vec2 segment2_min = segment2.start;
+        Vec2 segment2_max = segment2.end;
+    }
+    else
+    {
+        Vec2 segment2_min = segment2.end;
+        Vec2 segment2_max = segment2.start;
+    }
+
+    if (segment1_min.between(segment2_min, segment2_max))
+    {
+        if (segment1_max.between(segment2_min, segment2_max))
+        {
+            overlap_start = segment1_min;
+            overlap_end = segment1_max;
+            return true;
+        }
+        else if (segment2_max.between(segment2_min, segment1_max))
+        {
+            overlap_start = segment1_min;
+            overlap_end = segment2_max;
+            return true;
+        }
+    }
+
+    if (segment2_min.between(segment1_min, segment1_max))
+    {
+        if (segment2_max.between(segment1_min, segment1_max))
+        {
+            overlap_start = segment2_min;
+            overlap_end = segment2_max;
+            return true;
+        }
+        else if (segment1_max.between(segment1_min, segment2_max))
+        {
+            overlap_start = segment2_min;
+            overlap_end = segment1_max;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool Segment::operator==(const Segment& operand) const

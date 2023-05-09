@@ -66,7 +66,15 @@ public:
 
     Vec2 to_vector() const;
 
-    bool intersects(const Segment& other, Vec2& intersection_point) const;
+    enum class Intersection_Type
+    {
+        none,
+        point,
+        parallel,
+        collinear
+    };
+
+    Intersection_Type intersects(const Segment& other, Vec2& intersection_point) const;
 
     //Returns the orientation of a point vs the segment, <0 is left, >0 is right, 0 is on the segment
     Float point_direction(const Vec2& point) const;
@@ -94,3 +102,6 @@ public:
 //Determine if a point lies to the left or right of a segment, oriented from start to end
 //If the point lies on the segment this function will return true (right)
 bool point_right_of_segment(const Segment& segment, const Vec2& point);
+
+//Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
+bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& overlap_start, Vec2& overlap_end);

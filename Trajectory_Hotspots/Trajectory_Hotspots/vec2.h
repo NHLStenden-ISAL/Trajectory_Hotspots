@@ -41,6 +41,10 @@ public:
     bool operator<(const Vec2& operand) const;
     bool operator>(const Vec2& operand) const;
 
+    //Checks if this point lies between two given points
+    //Assumes the three points are collinear
+    bool between(const Vec2& first, const Vec2& second) const;
+
     Float x;
     Float y;
 

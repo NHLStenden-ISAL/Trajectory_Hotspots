@@ -73,5 +73,19 @@ bool Vec2::operator>(const Vec2& operand) const
     return !(*this == operand) && !(*this < operand);
 }
 
+bool Vec2::between(const Vec2& first, const Vec2& second) const
+{
+    if (first.x != second.x)
+    {
+        return ((first.x <= x) && (x <= second.x)) ||
+            ((first.x >= x) && (x >= second.x));
+    }
+    else
+    {
+        return ((first.y <= y) && (y <= second.y)) ||
+            ((first.y >= y) && (y >= second.y));
+    }
+}
+
 Vec2 operator*(const Float& scalar, const Vec2& vec) { return Vec2(vec.x * scalar, vec.y * scalar); }
 Vec2 operator/(const Float& scalar, const Vec2& vec) { return Vec2(vec.x / scalar, vec.y / scalar); }

@@ -16,6 +16,7 @@ namespace Microsoft
         {
             template<> static std::wstring ToString<Float>(class Float* t) { return L"Float"; }
             template<> static std::wstring ToString<Float>(const class Float& t) { return L"Float"; }
+            template<> static std::wstring ToString<Segment::Intersection_Type>(const Segment::Intersection_Type& t) { return L"Segment::Intersection_Type"; }
         }
     }
 }
@@ -49,7 +50,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(9.f, 6.f), Vec2(-5.0f, 2.0f)); //f
             test_segments.emplace_back(Vec2(9.f, 4.f), Vec2(9.3f, 9.f)); //g
             Vec2 intersection(0.f, 0.f);
-            Assert::IsFalse(test_segments.at(0).intersects(test_segments.at(1), intersection));
+            Assert::AreEqual(test_segments.at(0).intersects(test_segments.at(1), intersection), Segment::Intersection_Type::none);
             Assert::AreEqual(intersection, Vec2(0.f, 0.f));
         }
 
@@ -59,7 +60,7 @@ namespace TestTrajectoryHotspots
             test_segments.emplace_back(Vec2(-9.0f, -7.0f), Vec2(6.0f, 2.0f)); //f
             test_segments.emplace_back(Vec2(0.f, 0.f), Vec2(15.f, 9.f)); //g
             Vec2 intersection(0.f, 0.f);
-            Assert::IsFalse(test_segments.at(0).intersects(test_segments.at(1), intersection));
+            Assert::AreEqual(test_segments.at(0).intersects(test_segments.at(1), intersection), Segment::Intersection_Type::parallel);
             Assert::AreEqual(intersection, Vec2(0.f, 0.f));
         }
 
