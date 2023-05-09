@@ -171,6 +171,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     }
 }
 
+//Check if two potentially intersecting segments intersect. Add the event to the event_queue if they do and the intersection point is in the future.
 void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Segment>& segments, const int left_segment, const int right_segment, const Vec2& event_point, Segment_Intersection_Sweep_Line::map& event_queue)
 {
     Vec2 intersection_point;
