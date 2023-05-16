@@ -2,7 +2,6 @@
 
 namespace Segment_Intersection_Sweep_Line
 {
-
     class Sweep_Line_Status_structure
     {
     public:
@@ -36,8 +35,9 @@ namespace Segment_Intersection_Sweep_Line
                 int& most_left_intersecting_segment, int& most_right_intersecting_segment,
                 int& left_neighbour, int& right_neighbour) const;
 
-            bool get_right_neighbours(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const;
-            bool get_left_neighbours(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, std::vector<const Node*>& left_nodes) const;
+            bool get_intersecting_left_to_right(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const;
+            bool get_intersecting_right_to_left(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, std::vector<const Node*>& left_nodes) const;
+
 
             void print_tree(Node* root, int spacing, std::string& tree_string) const;
         };
@@ -61,16 +61,19 @@ namespace Segment_Intersection_Sweep_Line
             int& left_neighbour,
             int& right_neighbour) const;
 
-        Node* get_node(const std::vector<Segment>& segments, const Vec2& event_point) const;
+        Node* get_node(const std::vector<Segment>& segments, const Float& x_position) const;
 
         std::string print_tree() const;
 
         std::unique_ptr<Node> root;
 
     private:
-        //TODO: Segment* vector here
+        //TODO: Segment* vector here, ref?
+
 
         Float line_position;
+
+        bool test_order_left_right(const std::vector<Segment>& segments, const int& new_segment, const std::unique_ptr<Node>& new_root) const;
 
         std::unique_ptr<Node> insert(std::unique_ptr<Node>&& node, const std::vector<Segment>& segments, const int new_segment, const Node*& added_node);
         std::unique_ptr<Node> add_to_subtree(std::unique_ptr<Node>&& root, const std::vector<Segment>& segments, const int new_segment, const Node*& added_node, const Node* parent);

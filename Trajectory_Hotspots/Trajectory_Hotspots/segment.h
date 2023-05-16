@@ -68,10 +68,10 @@ public:
 
     enum class Intersection_Type
     {
-        none,
         point,
+        collinear,
         parallel,
-        collinear
+        none
     };
 
     Intersection_Type intersects(const Segment& other, Vec2& intersection_point) const;

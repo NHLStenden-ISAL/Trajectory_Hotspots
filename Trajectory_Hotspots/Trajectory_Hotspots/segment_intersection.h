@@ -2,11 +2,19 @@
 
 namespace Segment_Intersection_Sweep_Line
 {
-    class Sweep_Line_Status_structure;
+    class Sweep_Line_Status_structure; //forward declaration
+
+    struct Intersection_Info
+    {
+        std::unordered_set<int> edges; //Segments that have the intersection point in the middle.
+        std::vector<int> top_points; //Segments that intersect at the top point.
+        std::vector<int> bottom_points; //Segments that intersect at the bottom point.
+        std::vector<int> collinear_edges; //List of collinear edges at this point, every two indices are a pair that overlap.
+    };
 
     //Event queue sorted on point, values are a segment list where the event point is the top point of the segment
-    typedef std::map<const Vec2, std::vector<int>, std::greater<Vec2>> map;
-    
+    typedef std::map<const Vec2, Intersection_Info, std::greater<Vec2>> map;
+
 
     std::vector<Vec2> find_segment_intersections(const std::vector<Segment>& segments);
 

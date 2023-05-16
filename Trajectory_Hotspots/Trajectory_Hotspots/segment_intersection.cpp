@@ -13,10 +13,11 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
     for (int i = 0; i < segments.size(); i++)
     {
         //TODO: There is a copy of Vec2 here, reference instead?
-        auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), std::vector<int>());
-        event_pair.first->second.push_back(i);
+        auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), Intersection_Info());
+        event_pair.first->second.top_points.push_back(i);
 
-        event_pair = event_queue.emplace(*segments.at(i).get_bottom_point(), std::vector<int>());
+        event_pair = event_queue.emplace(*segments.at(i).get_bottom_point(), Intersection_Info());
+        event_pair.first->second.bottom_points.push_back(i);
     }
 
     //Initialize status structure with the highest event point
@@ -28,7 +29,7 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 
     while (!event_queue.empty())
     {
-        Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second, result);
+        Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second.top_points, result);
 
         if (result.size() > 0)
         {
@@ -86,8 +87,6 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
         {
             result_segments.push_back(segments.at(segment));
         }
-        //TODO: return intersection + segments, check later if from same dcel
-        //add to result
     }
 
     //Remove the segment that intersect with the bottom endpoint and internally
@@ -171,17 +170,64 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     }
 }
 
-//Check if two potentially intersecting segments intersect. Add the event to the event_queue if they do and the intersection point is in the future.
+//Check if two potentially intersecting segments intersect. If they intersect, add the event to the event_queue if the intersection point is in the future.
 void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Segment>& segments, const int left_segment, const int right_segment, const Vec2& event_point, Segment_Intersection_Sweep_Line::map& event_queue)
 {
     Vec2 intersection_point;
     Segment::Intersection_Type intersection_type = segments.at(left_segment).intersects(segments.at(right_segment), intersection_point);
-    if (intersection_type == Segment::Intersection_Type::point)
+
+    //Report the intersection if the intersection is in the future, 
+    //intersections above the sweepline (and left of this point) have been reported already
+    switch (intersection_type)
     {
-        //Check if the intersection is in the future, intersections above the sweepline (and left of this point) should've been reported already
+
+    case Segment::Intersection_Type::point:
+    {
         if (intersection_point < event_point)
         {
-            auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
+            auto event_pair = event_queue.emplace(intersection_point, Intersection_Info());
+
+            //Add segments if the intersection point lies on their interior, the end points have already been reported.
+            if (segments.at(left_segment).start != intersection_point && segments.at(left_segment).end != intersection_point)
+            {
+                event_pair.first->second.edges.insert(left_segment);
+            }
+
+            if (segments.at(right_segment).start != intersection_point && segments.at(right_segment).end != intersection_point)
+            {
+                event_pair.first->second.edges.insert(right_segment);
+            }
         }
+
+        break;
     }
+    case Segment::Intersection_Type::collinear:
+    {
+        //TODO: Implement. Note: Find event points with the overlap function.
+        //Vec2 overlap_start;
+        //Vec2 overlap_end;
+
+        //if (collinear_overlap(segments.at(left_segment), segments.at(right_segment), overlap_start, overlap_start))
+        //{
+
+        //}
+        //else
+        //{
+        //    assert(false); //This should never happen
+        //}
+
+        break;
+    }
+    case Segment::Intersection_Type::parallel:
+    case Segment::Intersection_Type::none:
+    {
+        break;
+    }
+    }
+
+    if (intersection_type == Segment::Intersection_Type::point)
+    {
+
+    }
+    //Remember: Only add if bottom points, or rather if not top point
 }
