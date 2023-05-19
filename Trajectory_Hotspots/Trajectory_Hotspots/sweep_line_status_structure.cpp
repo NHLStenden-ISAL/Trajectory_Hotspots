@@ -623,46 +623,6 @@ namespace Segment_Intersection_Sweep_Line
         return true;
     }
 
-    void Sweep_Line_Status_structure::swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment)
-    {
-        //TODO: test this with left/right neighbour function
-        Node* node1 = find_node(segments, segment_index_1);
-        Node* node2 = find_node(segments, segment_index_2);
-        node1->segment = segment_index_2;
-        node2->segment = segment_index_1;
-
-        right_segment = node1->get_right_neighbour(segments, line_position);
-        left_segment = node2->get_left_neighbour(segments, line_position);
-
-
-    }
-
-    //TODO: returns true if another segment intersect at the same point.
-    Sweep_Line_Status_structure::Node* Sweep_Line_Status_structure::find_node(const std::vector<Segment>& segments, int segment_index)
-    {
-        Node* node = root.get();
-
-        Float current_x_position = segments.at(segment_index).y_intersect(line_position);
-
-        while (node != nullptr)
-        {
-            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
-            {
-                node = node->left.get();
-            }
-            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
-            {
-                node = node->right.get();
-            }
-            else
-            {
-                return node;
-            }
-        }
-
-        return nullptr;
-    }
-
     void Sweep_Line_Status_structure::get_all_nodes_on_point(
         const std::vector<Segment> segments,
         const Vec2& event_point,

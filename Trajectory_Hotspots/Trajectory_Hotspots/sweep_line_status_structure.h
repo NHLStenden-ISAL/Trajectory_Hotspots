@@ -49,7 +49,6 @@ namespace Segment_Intersection_Sweep_Line
         bool contains(const std::vector<Segment>& segments, const Segment* search_segment);
 
         void set_line_position(const Float new_position) { line_position = new_position; };
-        void swap_elements(const std::vector<Segment>& segments, int segment_index_1, int segment_index_2, int& left_segment, int& right_segment);
 
         void get_all_nodes_on_point(
             const std::vector<Segment> segments,
@@ -70,7 +69,6 @@ namespace Segment_Intersection_Sweep_Line
     private:
         //TODO: Segment* vector here, ref?
 
-
         Float line_position;
 
         bool test_order_left_right(const std::vector<Segment>& segments, const int& new_segment, const std::unique_ptr<Node>& new_root) const;
@@ -85,9 +83,6 @@ namespace Segment_Intersection_Sweep_Line
         std::unique_ptr<Node> rotate_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_left_right(std::unique_ptr<Node>&& old_root);
         std::unique_ptr<Node> rotate_right_left(std::unique_ptr<Node>&& old_root);
-
-        Node* find_node(const std::vector<Segment>& segments, int segment_index);
-        //get node
 
         void print_tree(Node* root, int spacing, std::string& tree_string) const;
     };

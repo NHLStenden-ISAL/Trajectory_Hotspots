@@ -2,10 +2,8 @@
 #include "sweep_line_status_structure.h"
 #include "segment_intersection.h"
 
-
-#include <functional>
-
 using namespace Segment_Intersection_Sweep_Line;
+
 std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(const std::vector<Segment>& segments)
 {
     map event_queue;
