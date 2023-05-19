@@ -3,11 +3,7 @@
 
 namespace Segment_Intersection_Sweep_Line
 {
-    /// <summary>
-    /// Inserts a new node into the tree, rebalancing when needed.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="segment"></param>
+    // Inserts a new node into the tree, rebalancing when needed.
     void Sweep_Line_Status_structure::insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node)
     {
         if (root != nullptr)

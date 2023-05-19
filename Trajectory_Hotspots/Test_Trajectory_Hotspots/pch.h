@@ -36,9 +36,9 @@ namespace Microsoft
 			template<> static std::wstring ToString<std::vector<Vec2>>(const class std::vector<Vec2>& t) { return L"Vec2"; }
 			template<> static std::wstring ToString<std::vector<Vec2>>(const class std::vector<Vec2>* t) { return L"Vec2"; }
 			template<> static std::wstring ToString<Segment>(class Segment* t) { return L"Segment"; }
-			template<> static std::wstring ToString<Vec2>(const class Vec2& t) { return L"Vec2"; }
+			template<> static std::wstring ToString<Vec2>(const class Vec2& t) { return L"(" + std::to_wstring(t.x.get_value()) + L", " + std::to_wstring(t.y.get_value()) + L")"; }
 			template<> static std::wstring ToString<Vec2>(const class Vec2* t) { return L"Vec2"; }
-			template<> static std::wstring ToString<Vec2>(class Vec2* t) { return L"Vec2"; }
+			template<> static std::wstring ToString<Vec2>(class Vec2* t) { return L"(" + std::to_wstring(t->x.get_value()) + L", " + std::to_wstring(t->y.get_value()) + L")"; }
 		}
 	}
 }
