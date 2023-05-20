@@ -194,17 +194,6 @@ void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Se
         if (comp(event_point, intersection_point))
         {
             auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
-
-            ////Add segments if the intersection point lies on their interior, the end points have already been reported.
-            //if (segments.at(left_segment).start != intersection_point && segments.at(left_segment).end != intersection_point)
-            //{
-            //    event_pair.first->second.interior_segments.insert(left_segment);
-            //}
-
-            //if (segments.at(right_segment).start != intersection_point && segments.at(right_segment).end != intersection_point)
-            //{
-            //    event_pair.first->second.interior_segments.insert(right_segment);
-            //}
         }
 
         break;
