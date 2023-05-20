@@ -27,12 +27,9 @@ namespace Segment_Intersection_Sweep_Line
             const int get_right_neighbour(const std::vector<Segment>& segments, const Float line_position) const;
             const int get_left_neighbour(const std::vector<Segment>& segments, const Float line_position) const;
 
-            void get_all_neighbours(const std::vector<Segment>& segments,
+            std::vector<int> get_all_neighbours(const std::vector<Segment>& segments,
                 const Float line_position,
                 const Vec2& event_point,
-                std::vector<int>& intersections,
-                std::vector<int>& bottom_segments,
-                int& most_left_intersecting_segment, int& most_right_intersecting_segment,
                 int& left_neighbour, int& right_neighbour) const;
 
             bool get_intersecting_left_to_right(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, std::vector<const Node*>& right_nodes) const;
@@ -50,13 +47,9 @@ namespace Segment_Intersection_Sweep_Line
 
         void set_line_position(const Float new_position) { line_position = new_position; };
 
-        void get_all_nodes_on_point(
+        std::vector<int> get_all_nodes_on_point(
             const std::vector<Segment> segments,
             const Vec2& event_point,
-            std::vector<int>& intersections,
-            std::vector<int>& bottom_segments,
-            int& most_left_intersecting_segment,
-            int& most_right_intersecting_segment,
             int& left_neighbour,
             int& right_neighbour) const;
 

@@ -21,9 +21,13 @@ const Vec2* Segment::get_bottom_point() const
     {
         return &end;
     }
-    else
+    else if (start.y < end.y)
     {
         return &start;
+    }
+    else
+    {
+        return get_right_point();
     }
 
 }
@@ -34,9 +38,13 @@ const Vec2* Segment::get_top_point() const
     {
         return &start;
     }
-    else
+    else if (start.y < end.y)
     {
         return &end;
+    }
+    else
+    {
+        return get_left_point();
     }
 
 }

@@ -11,29 +11,26 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
     for (int i = 0; i < segments.size(); i++)
     {
         //TODO: There is a copy of Vec2 here, reference instead?
-        auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), Intersection_Info());
-        event_pair.first->second.top_points.push_back(i);
+        auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), std::vector<int>());
+        event_pair.first->second.push_back(i);
 
-        event_pair = event_queue.emplace(*segments.at(i).get_bottom_point(), Intersection_Info());
-        event_pair.first->second.bottom_points.push_back(i);
+        event_pair = event_queue.emplace(*segments.at(i).get_bottom_point(), std::vector<int>());
     }
 
     //Initialize status structure with the highest event point
     Sweep_Line_Status_structure status_structure(event_queue.begin()->first.y);
 
-    std::vector<Segment> result;
-
     std::vector<Vec2> intersections;
 
     while (!event_queue.empty())
     {
-        Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second.top_points, result);
+        Intersection_Info intersection_results = Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second);
 
-        if (result.size() > 0)
+        if (intersection_results.segment_count() > 1)
         {
             intersections.push_back(event_queue.begin()->first);
-            result.clear();
         }
+
         event_queue.erase(event_queue.begin());
     }
 
@@ -41,50 +38,60 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 }
 
 
-void Segment_Intersection_Sweep_Line::Handle_Event(
+Intersection_Info Segment_Intersection_Sweep_Line::Handle_Event(
     Sweep_Line_Status_structure& status_structure,
     map& event_queue,
     const std::vector<Segment>& segments,
     const Vec2& event_point,
-    const std::vector<int>& top_segments,
-    std::vector<Segment>& result_segments)
+    const std::vector<int>& top_segments)
 {
+    Intersection_Info intersection_info;
+
+    //TODO: Remove?
     std::vector<int> intersection_segments;
     std::vector<int> bottom_segments;
-    int left_neighbour = -1;
-    int right_neighbour = -1;
-    int most_left_segment = -1;
-    int most_right_segment = -1;
 
     Float line_pos = event_point.y;
     status_structure.set_line_position(line_pos);
 
-    //Get all nodes containing segments that intersect this event point
-    int most_left_intersecting_segment = -1;
-    int most_right_intersecting_segment = -1;
-    status_structure.get_all_nodes_on_point(segments, event_point, intersection_segments, bottom_segments, most_left_intersecting_segment, most_right_intersecting_segment, left_neighbour, right_neighbour);
+    int left_neighbour = -1;
+    int right_neighbour = -1;
 
-    //The intersecting segments swap after the event point so we swap the outer indices
-    most_left_segment = most_right_intersecting_segment;
-    most_right_segment = most_left_intersecting_segment;
+    //Get all nodes containing segments that intersect this event point
+    std::vector<int> ordered_intersecting_segments = status_structure.get_all_nodes_on_point(segments, event_point, left_neighbour, right_neighbour);
+
+    int most_left_segment = -1;
+    int most_right_segment = -1;
+
+    if (ordered_intersecting_segments.size() > 0)
+    {
+        //Split the intersecting segments in interior and bottom intersections
+        for (auto& segment_index : ordered_intersecting_segments)
+        {
+            if (*segments[segment_index].get_bottom_point() == event_point)
+            {
+                bottom_segments.push_back(segment_index);
+            }
+            else
+            {
+                intersection_segments.push_back(segment_index);
+            }
+        }
+
+        //The intersecting segments swap after the event point so we swap the outer indices
+        most_left_segment = ordered_intersecting_segments.back();
+        most_right_segment = ordered_intersecting_segments.front();
+    }
 
     //Report all segments that intersect this point
     if (top_segments.size() + bottom_segments.size() + intersection_segments.size() > 1)
     {
-        for (int segment : top_segments)
-        {
-            result_segments.push_back(segments.at(segment));
-        }
+        intersection_info.top_segments = top_segments;
+        intersection_info.interior_segments.insert(intersection_segments.begin(), intersection_segments.end());
+        intersection_info.bottom_segments = bottom_segments;
 
-        for (int segment : bottom_segments)
-        {
-            result_segments.push_back(segments.at(segment));
-        }
-
-        for (int segment : intersection_segments)
-        {
-            result_segments.push_back(segments.at(segment));
-        }
+        //TODO: We need to do a linear search through the segments to check for collinearity, they should be neighbours. (tops cant collinear with bottoms)
+        //TODO: Check if we need to report collinear with bottom intersections or if we can handle with top only?
     }
 
     //Remove the segment that intersect with the bottom endpoint and internally
@@ -110,7 +117,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
     }
 
     //If we only have top segments we did not find the neighbouring nodes yet
-    bool neighbours_found = !bottom_segments.empty() || !intersection_segments.empty();
+    bool neighbours_found = !ordered_intersecting_segments.empty();
 
     //Insert the segments that intersect this event point with their top point,
     //finding the outer neighbours if we didn't already.
@@ -129,7 +136,7 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
             neighbours_found = true;
         }
 
-        //If the neighbour of this inserted segment is the first non-intersecting segment, this top segment is the new outer segment
+        //If the neighbour of this inserted segment does not intersect the event point, this segment is the new outer segment.
         if (new_left_neighbour == left_neighbour || left_neighbour == -1)
         {
             most_left_segment = segment;
@@ -166,6 +173,8 @@ void Segment_Intersection_Sweep_Line::Handle_Event(
             test_for_intersection(segments, most_right_segment, right_neighbour, event_point, event_queue);
         }
     }
+
+    return intersection_info;
 }
 
 //Check if two potentially intersecting segments intersect. If they intersect, add the event to the event_queue if the intersection point is in the future.
@@ -181,38 +190,49 @@ void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Se
 
     case Segment::Intersection_Type::point:
     {
-        if (intersection_point < event_point)
+        Event_Point_Comparer comp;
+        if (comp(event_point, intersection_point))
         {
-            auto event_pair = event_queue.emplace(intersection_point, Intersection_Info());
+            auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
 
-            //Add segments if the intersection point lies on their interior, the end points have already been reported.
-            if (segments.at(left_segment).start != intersection_point && segments.at(left_segment).end != intersection_point)
-            {
-                event_pair.first->second.edges.insert(left_segment);
-            }
+            ////Add segments if the intersection point lies on their interior, the end points have already been reported.
+            //if (segments.at(left_segment).start != intersection_point && segments.at(left_segment).end != intersection_point)
+            //{
+            //    event_pair.first->second.interior_segments.insert(left_segment);
+            //}
 
-            if (segments.at(right_segment).start != intersection_point && segments.at(right_segment).end != intersection_point)
-            {
-                event_pair.first->second.edges.insert(right_segment);
-            }
+            //if (segments.at(right_segment).start != intersection_point && segments.at(right_segment).end != intersection_point)
+            //{
+            //    event_pair.first->second.interior_segments.insert(right_segment);
+            //}
         }
 
         break;
     }
     case Segment::Intersection_Type::collinear:
     {
-        //TODO: Implement. Note: Find event points with the overlap function.
-        //Vec2 overlap_start;
-        //Vec2 overlap_end;
+        //Collinear intersections are handled around the start and end of their overlap.
+        //If these points are in the future, add them to the event queue
+        Vec2 overlap_start;
+        Vec2 overlap_end;
 
-        //if (collinear_overlap(segments.at(left_segment), segments.at(right_segment), overlap_start, overlap_start))
-        //{
+        if (collinear_overlap(segments.at(left_segment), segments.at(right_segment), overlap_start, overlap_start))
+        {
+            Event_Point_Comparer comp;
+            if (comp(event_point, overlap_start))
+            {
+                auto event_pair = event_queue.emplace(overlap_start, std::vector<int>());
+            }
 
-        //}
-        //else
-        //{
-        //    assert(false); //This should never happen
-        //}
+            if (comp(event_point, overlap_end))
+            {
+                auto event_pair = event_queue.emplace(overlap_end, std::vector<int>());
+            }
+        }
+        else
+        {
+            assert(false); //Collinear but no overlap? Should never happen.
+        }
 
         break;
     }
@@ -222,10 +242,4 @@ void Segment_Intersection_Sweep_Line::test_for_intersection(const std::vector<Se
         break;
     }
     }
-
-    if (intersection_type == Segment::Intersection_Type::point)
-    {
-
-    }
-    //Remember: Only add if bottom points, or rather if not top point
 }
