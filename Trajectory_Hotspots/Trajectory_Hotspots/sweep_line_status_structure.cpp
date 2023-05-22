@@ -3,7 +3,22 @@
 
 namespace Segment_Intersection_Sweep_Line
 {
+
     // Inserts a new node into the tree, rebalancing when needed.
+    void Sweep_Line_Status_structure::insert(const std::vector<Segment>& segments, const int new_segment)
+    {
+        if (root != nullptr)
+        {
+            const Node* node = nullptr;
+            root = insert(std::move(root), segments, new_segment, node);
+        }
+        else
+        {
+            root = std::make_unique<Node>(new_segment);
+        }
+    }
+
+    // Inserts a new node into the tree, rebalancing when needed. Also finds the left and right neighbour of the newly inserted node.
     void Sweep_Line_Status_structure::insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node)
     {
         if (root != nullptr)
@@ -96,6 +111,20 @@ namespace Segment_Intersection_Sweep_Line
         }
     }
 
+    // Inserts a node from the tree, rebalancing when needed.
+    void Sweep_Line_Status_structure::remove(const std::vector<Segment>& segments, const int segment_to_remove)
+    {
+        if (root != nullptr)
+        {
+            root = remove(std::move(root), segments, segment_to_remove);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    // Inserts a node from the tree, rebalancing when needed. Also finds the left and right neighbour of the removed node.
     void Sweep_Line_Status_structure::remove(const std::vector<Segment>& segments, const int segment_to_remove, int& left_node, int& right_node)
     {
         if (root != nullptr)
@@ -378,7 +407,6 @@ namespace Segment_Intersection_Sweep_Line
         height += 1;
     }
 
-
     // Calculates the difference in height between a nodes left and right subtree
     int Sweep_Line_Status_structure::Node::height_difference()
     {
@@ -475,11 +503,7 @@ namespace Segment_Intersection_Sweep_Line
         return -1;
     }
 
-    std::vector<int> Sweep_Line_Status_structure::Node::get_all_neighbours(
-        const std::vector<Segment>& segments,
-        const Float line_position,
-        const Vec2& event_point,
-        int& left_neighbour, int& right_neighbour
+    std::vector<int> Sweep_Line_Status_structure::Node::get_all_neighbours(const std::vector<Segment>& segments, const Float line_position, const Vec2& event_point, int& left_neighbour, int& right_neighbour
     ) const
     {
         //TODO: Cleanup please, we can probably just do this left to right with an inorder walk from the found root node.
@@ -600,11 +624,7 @@ namespace Segment_Intersection_Sweep_Line
         return true;
     }
 
-    std::vector<int> Sweep_Line_Status_structure::get_all_nodes_on_point(
-        const std::vector<Segment> segments,
-        const Vec2& event_point,
-        int& left_neighbour,
-        int& right_neighbour) const
+    std::vector<int> Sweep_Line_Status_structure::get_all_nodes_on_point(const std::vector<Segment> segments, const Vec2& event_point, int& left_neighbour, int& right_neighbour) const
     {
         //Find the first root node containing a segment intersecting the given event point
         const Node* event_node = get_node(segments, event_point.x);
@@ -654,6 +674,5 @@ namespace Segment_Intersection_Sweep_Line
         tree_string += '\n';
 
         print_tree(root->left.get(), spacing, tree_string);
-
     }
 }

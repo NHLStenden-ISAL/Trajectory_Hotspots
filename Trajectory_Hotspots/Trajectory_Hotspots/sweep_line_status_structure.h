@@ -41,7 +41,9 @@ namespace Segment_Intersection_Sweep_Line
 
         Sweep_Line_Status_structure(Float line_position) : line_position(line_position) {};
 
+        void insert(const std::vector<Segment>& segments, const int new_segment);
         void insert(const std::vector<Segment>& segments, const int new_segment, int& left_node, int& right_node);
+        void remove(const std::vector<Segment>& segments, const int segment_to_remove);
         void remove(const std::vector<Segment>& segments, const int segment_to_remove, int& left_node, int& right_node);
         bool contains(const std::vector<Segment>& segments, const Segment* search_segment);
 

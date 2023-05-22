@@ -99,21 +99,18 @@ Intersection_Info Segment_Intersection_Sweep_Line::Handle_Event(
     //TODO: Do we need neighbours here if we get them from get_all_nodes_on???? Follow up: No, new TODO: Remove those parameters from remove..
     for (int segment : bottom_segments)
     {
-        int l, r;
-        status_structure.remove(segments, segment, l, r);
+        status_structure.remove(segments, segment);
     }
 
     for (int segment : intersection_segments)
     {
-        int l, r;
-        status_structure.remove(segments, segment, l, r);
+        status_structure.remove(segments, segment);
     }
 
     //Reinsert the segments that intersect internally on this point
     for (int segment : intersection_segments)
     {
-        int l, r;
-        status_structure.insert(segments, segment, l, r);
+        status_structure.insert(segments, segment);
     }
 
     //If we only have top segments we did not find the neighbouring nodes yet
