@@ -552,5 +552,24 @@ namespace TestTrajectoryHotspots
 
             Assert::IsFalse(result);
         }
+
+        TEST_METHOD(orientation_left_right_free_function)
+        {
+            Segment segment(Vec2(23.f, 400.f), Vec2(50.f, 213.f));
+
+            Assert::IsTrue(orientation_left_right(segment.start, segment.end));
+            Assert::IsFalse(orientation_left_right(segment.end, segment.start));
+
+            Segment vertical_segment(Vec2(34.f, 12.f), Vec2(34.f, 1.f));
+
+            Assert::IsTrue(orientation_left_right(vertical_segment.start, vertical_segment.end));
+            Assert::IsFalse(orientation_left_right(vertical_segment.end, vertical_segment.start));
+
+            Segment horizontal_segment(Vec2(-2.f, -10.f), Vec2(5.f, -10.f));
+
+            Assert::IsTrue(orientation_left_right(horizontal_segment.start, horizontal_segment.end));
+            Assert::IsFalse(orientation_left_right(horizontal_segment.end, horizontal_segment.start));
+
+        }
     };
 }

@@ -53,6 +53,8 @@ public:
     //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
     bool y_intersects(const Float y, Float& intersection_point_x) const;
 
+    bool is_left_right() const;
+
     Float get_time_at_x(const Float x) const;
     Float get_time_at_y(const Float y) const;
     Float get_time_at_point(const Vec2& point) const;
@@ -105,3 +107,5 @@ bool point_right_of_segment(const Segment& segment, const Vec2& point);
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
 bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& overlap_start, Vec2& overlap_end);
+
+bool orientation_left_right(const Vec2& vec1, const Vec2& vec2);

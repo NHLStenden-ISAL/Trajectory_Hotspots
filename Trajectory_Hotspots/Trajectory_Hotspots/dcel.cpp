@@ -1,12 +1,33 @@
 #include "pch.h"
 #include "dcel.h"
 
-void DCEL::overlay_dcel(const DCEL& other_dcel)
+void DCEL::overlay_dcel(DCEL& other_dcel)
 {
     //TODO:
     //-Call sweepline algorithm
     //For each intersection call appropriate overlay helper function
     //Not sure if we want to just make a new DCEL..
+
+    //Move all the half edges from the other dcel into this one.
+    this->half_edges.insert(this->half_edges.end(),
+        std::make_move_iterator(other_dcel.half_edges.begin()),
+        std::make_move_iterator(other_dcel.half_edges.end()));
+
+
+    //Construct the edges representing the half edge twins for use in the sweepline algorithm.
+    std::vector<DCEL_Overlay_Edge_Wrapper> DCEL_edges;
+    DCEL_edges.reserve(half_edge_count() / 2);
+
+    for (std::unique_ptr<DCEL_Half_Edge>& half_edge : half_edges)
+    {
+        if (half_edge->is_orientated_left_right())
+        {
+            DCEL_edges.emplace_back(half_edge);
+        }
+    }
+
+    //Call the sweepline algorithm handling overlay cases from top to bottom.
+
 }
 
 void DCEL::overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
@@ -197,4 +218,9 @@ std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() 
     } while (current_half_edge != starting_half_edge);
 
     return incident_half_edges;
+}
+
+bool DCEL::DCEL_Half_Edge::is_orientated_left_right() const
+{
+    return orientation_left_right(origin->position, twin->origin->position);
 }

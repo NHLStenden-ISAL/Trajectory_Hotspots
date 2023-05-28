@@ -10,7 +10,6 @@ std::vector<Vec2> Segment_Intersection_Sweep_Line::find_segment_intersections(co
 
     for (int i = 0; i < segments.size(); i++)
     {
-        //TODO: There is a copy of Vec2 here, reference instead?
         auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), std::vector<int>());
         event_pair.first->second.push_back(i);
 
@@ -96,7 +95,6 @@ Intersection_Info Segment_Intersection_Sweep_Line::Handle_Event(
 
     //Remove the segment that intersect with the bottom endpoint and internally
     //After the final remove we have the right and left neighbour of all intersecting segments
-    //TODO: Do we need neighbours here if we get them from get_all_nodes_on???? Follow up: No, new TODO: Remove those parameters from remove..
     for (int segment : bottom_segments)
     {
         status_structure.remove(segments, segment);

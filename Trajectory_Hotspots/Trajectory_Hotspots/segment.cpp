@@ -410,6 +410,26 @@ bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& o
     return false;
 }
 
+bool orientation_left_right(const Vec2& vec1, const Vec2& vec2)
+{
+    assert(vec1 != vec2);
+
+    //If vertical line, return true if line points down.
+    if (vec1.x == vec2.x)
+    {
+        return vec1.y > vec2.y;
+    }
+
+    if (vec1.x < vec2.x)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool Segment::operator==(const Segment& operand) const
 {
     return (start == operand.start && end == operand.end) || (end == operand.start && start == operand.end);

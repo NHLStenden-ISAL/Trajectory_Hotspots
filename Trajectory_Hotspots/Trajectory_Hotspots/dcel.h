@@ -43,7 +43,27 @@ public:
         DCEL_Half_Edge* twin = nullptr;
         DCEL_Half_Edge* next = nullptr;
         DCEL_Half_Edge* prev = nullptr;
+
+        bool is_orientated_left_right() const;
     };
+
+    //Wrapper class used for the overlay of two DCELs. Each instance represents an edge that overlaps with two twin half-edges.
+    class DCEL_Overlay_Edge_Wrapper
+    {
+    public:
+        DCEL_Overlay_Edge_Wrapper(DCEL_Half_Edge* underlying_half_edge, bool original_dcel) :
+            underlying_half_edge(underlying_half_edge),
+            edge_segment(underlying_half_edge->origin->position, underlying_half_edge->twin->origin->position),
+            original_dcel(original_dcel)
+        {};
+
+    private:
+        DCEL_Half_Edge* underlying_half_edge;
+        Segment edge_segment;
+        bool original_dcel;
+
+    };
+
 
     //Class representing a face of the DCEL, surrounded by half-edges.
     //It stores a pointer to one of the half-edges on its boundary
@@ -61,7 +81,7 @@ public:
     size_t half_edge_count() const { return half_edges.size(); };
     size_t face_count() const { return faces.size(); };
 
-    void overlay_dcel(const DCEL& other_dcel);
+    void overlay_dcel(DCEL& other_dcel);
 
 private:
 
