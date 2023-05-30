@@ -57,11 +57,17 @@ public:
             original_dcel(original_dcel)
         {};
 
-    private:
+        //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
+        Float y_intersect(Float y) const;
+
+        const Vec2* get_top_point() const;
+        const Vec2* get_bottom_point() const;
+
+        Segment::Intersection_Type intersects(const DCEL_Overlay_Edge_Wrapper& other, Vec2& intersection_point) const;
+
         DCEL_Half_Edge* underlying_half_edge;
         Segment edge_segment;
         bool original_dcel;
-
     };
 
 
@@ -94,3 +100,5 @@ private:
     void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2);
 };
 
+//Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
+bool collinear_overlap(const DCEL::DCEL_Overlay_Edge_Wrapper& segment1, const DCEL::DCEL_Overlay_Edge_Wrapper& segment2, Vec2& overlap_start, Vec2& overlap_end);
