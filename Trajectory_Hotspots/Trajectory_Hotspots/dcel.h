@@ -1,5 +1,10 @@
 #pragma once
 
+namespace Segment_Intersection_Sweep_Line
+{
+    struct Intersection_Info;
+}
+
 class DCEL
 {
 public:
@@ -63,6 +68,9 @@ public:
         const Vec2* get_top_point() const;
         const Vec2* get_bottom_point() const;
 
+        DCEL_Vertex* get_top_dcel_vertex();
+        DCEL_Vertex* get_bottom_dcel_vertex();
+
         Segment::Intersection_Type intersects(const DCEL_Overlay_Edge_Wrapper& other, Vec2& intersection_point) const;
 
         DCEL_Half_Edge* underlying_half_edge;
@@ -91,13 +99,17 @@ public:
 
 private:
 
+    void resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges);
+
+    void handle_overlay_event(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results);
+
+    void overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
+    DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
+    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2);
+
     std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
     std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;
     std::vector<std::unique_ptr<DCEL_Face>> faces;
-
-    void overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
-    void overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
-    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2);
 };
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
