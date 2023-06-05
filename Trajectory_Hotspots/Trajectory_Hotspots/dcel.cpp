@@ -325,15 +325,18 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         return;
     }
 
-    bool original_dcel = false;
-    bool overlaying_dcel = false;
-
-
-
-
-    ////Check if both DCELs contribute -> get event DCEL_Vertex*?
+    ////Check if both DCELs contribute -> get/create event DCEL_Vertex*?
     //    //If top and bottom empty -> Create point at intersection
     //    //Else call handlers
+
+    if (!overlay_event_contains_both_dcels(DCEL_edges, intersection_results))
+    {
+        //Only one dcel contributes, no records need to be updated.
+        return;
+    }
+
+
+
 
     //if (intersection_results.bottom_segments.empty() && intersection_results.top_segments.empty())
     //{
@@ -383,4 +386,40 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
 
     //TODO: Handle collinear
+}
+
+bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const
+{
+    bool original_dcel = false;
+    bool overlaying_dcel = false;
+
+    check_dcel_versions(DCEL_edges, intersection_results.interior_segments.begin(), intersection_results.interior_segments.end(), original_dcel, overlaying_dcel);
+
+    if (original_dcel && overlaying_dcel)
+    {
+        return true;
+    }
+
+    check_dcel_versions(DCEL_edges, intersection_results.top_segments.begin(), intersection_results.top_segments.end(), original_dcel, overlaying_dcel);
+
+    if (original_dcel && overlaying_dcel)
+    {
+        return true;
+    }
+
+    check_dcel_versions(DCEL_edges, intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), original_dcel, overlaying_dcel);
+
+    if (original_dcel && overlaying_dcel)
+    {
+        return true;
+    }
+
+    check_dcel_versions(DCEL_edges, intersection_results.collinear_segments.begin(), intersection_results.collinear_segments.end(), original_dcel, overlaying_dcel);
+
+    if (original_dcel && overlaying_dcel)
+    {
+        return true;
+    }
+
+    return false;
 }
