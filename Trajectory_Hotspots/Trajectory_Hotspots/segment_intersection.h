@@ -268,32 +268,32 @@ namespace Segment_Intersection_Sweep_Line
     std::vector<Vec2> find_segment_intersections(const std::vector<SegmentT>& segments)
     {
         map event_queue;
-    
+
         for (int i = 0; i < segments.size(); i++)
         {
             auto event_pair = event_queue.emplace(*segments.at(i).get_top_point(), std::vector<int>());
             event_pair.first->second.push_back(i);
-    
+
             event_pair = event_queue.emplace(*segments.at(i).get_bottom_point(), std::vector<int>());
         }
-    
+
         //Initialize status structure with the highest event point
         Sweep_Line_Status_structure<SegmentT> status_structure(event_queue.begin()->first.y);
-    
+
         std::vector<Vec2> intersections;
-    
+
         while (!event_queue.empty())
         {
             Intersection_Info intersection_results = Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second);
-    
+
             if (intersection_results.segment_count() > 1)
             {
                 intersections.push_back(event_queue.begin()->first);
             }
-    
+
             event_queue.erase(event_queue.begin());
         }
-    
+
         return intersections;
     }
 }

@@ -67,6 +67,8 @@ public:
 
         const Vec2* get_top_point() const;
         const Vec2* get_bottom_point() const;
+        const Vec2* get_left_point() const;
+        const Vec2* get_right_point() const;
 
         DCEL_Vertex* get_top_dcel_vertex();
         DCEL_Vertex* get_bottom_dcel_vertex();

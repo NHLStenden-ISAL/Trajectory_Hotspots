@@ -110,11 +110,11 @@ namespace TestTrajectoryHotspots
 
             std::vector<Segment> contain_segment;
             contain_segment.emplace_back(Vec2(3, 8), Vec2(7, 3));
-            std::vector<Segment> notcontain_segment;
-            notcontain_segment.emplace_back(Vec2(1, 8), Vec2(7, 3));
+            std::vector<Segment> not_contained_segment;
+            not_contained_segment.emplace_back(Vec2(1, 8), Vec2(7, 3));
 
             Assert::IsTrue(status_structure.contains(test_segments, &contain_segment.at(0)));
-            Assert::IsFalse(status_structure.contains(test_segments, &notcontain_segment.at(0)));
+            Assert::IsFalse(status_structure.contains(test_segments, &not_contained_segment.at(0)));
 
         }
 
@@ -396,8 +396,41 @@ namespace TestTrajectoryHotspots
             Assert::IsNull(status_structure.root.get());
         }
 
-        //TODO: There is probably still a bug with rounding errors we need to check. Make a test that has multiple intersection types on top of eachother.
-        //TODO: Test horizontal segment is last
+        TEST_METHOD(horizontal_last)
+        {
+            //All segments intersect on a point with one segment horizontal
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(12.f, 4.f), Vec2(4.f, 10.f));
+            test_segments.emplace_back(Vec2(4.f, 4.f), Vec2(12.f, 10.f));
+            test_segments.emplace_back(Vec2(12.f, 5.f), Vec2(4.f, 9.f));
+            test_segments.emplace_back(Vec2(11.f, 7.f), Vec2(2.f, 7.f)); //Horizontal
+
+            Sweep_Line_Status_structure<Segment> status_structure(test_segments[0].get_top_point()->y);
+
+            for (int i = 0; i < test_segments.size(); i++)
+            {
+                int left_node;
+                int right_node;
+
+                status_structure.set_line_position(test_segments[i].get_top_point()->y);
+
+                status_structure.insert(test_segments, i, left_node, right_node);
+
+                Assert::IsTrue(status_structure.contains(test_segments, &test_segments.at(i)));
+            }
+
+            status_structure.set_line_position(7.f);
+
+            int left_neighbour;
+            int right_neighbour;
+            std::vector<int> segments_on_point = status_structure.get_all_nodes_on_point(test_segments, Vec2(8.f, 7.f), left_neighbour, right_neighbour);
+
+            Assert::AreEqual(segments_on_point.size(), (size_t)4);
+            Assert::AreEqual(segments_on_point[3], 3);
+        }
+
+
+        //TODO: There is probably still a bug with rounding errors we need to check. Make a test that has multiple intersection types on top of each other.
         //TODO: Test flip after insert
     };
 }

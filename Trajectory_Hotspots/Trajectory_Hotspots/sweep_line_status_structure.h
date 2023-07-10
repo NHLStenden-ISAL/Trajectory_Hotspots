@@ -10,6 +10,8 @@ namespace Segment_Intersection_Sweep_Line
         {
         };
 
+        Sweep_Line_Status_structure(Float line_position) : line_position(line_position) {};
+
         class Node
         {
         public:
@@ -37,8 +39,6 @@ namespace Segment_Intersection_Sweep_Line
 
             void print_tree(Node* root, int spacing, std::string& tree_string) const;
         };
-
-        Sweep_Line_Status_structure(Float line_position) : line_position(line_position) {};
 
         void insert(const std::vector<SegmentT>& segments, const int new_segment);
         void insert(const std::vector<SegmentT>& segments, const int new_segment, int& left_node, int& right_node);
@@ -668,7 +668,12 @@ namespace Segment_Intersection_Sweep_Line
             }
         }
 
-        if (event_point.x == segments[segment].y_intersect(line_position))
+        //The segment should always intersect with the sweep line so we can simplify by checking the x-coordinate of the intersection
+        //In the edge-case that the segment lies horizontal (there are infinite intersections) we check if the event point lies on or in between the endpoints
+        if (Float y_intersect = segments[segment].y_intersect(line_position);
+            event_point.x == y_intersect ||
+            (y_intersect.is_inf() &&
+                (segments[segment].get_left_point()->x <= event_point.x && event_point.x <= segments[segment].get_right_point()->x)))
         {
             right_nodes.emplace_back(this);
         }
@@ -703,7 +708,12 @@ namespace Segment_Intersection_Sweep_Line
             }
         }
 
-        if (event_point.x == segments[segment].y_intersect(line_position))
+        //The segment should always intersect with the sweep line so we can simplify by checking the x-coordinate of the intersection
+        //In the edge-case that the segment lies horizontal (there are infinite intersections) we check if the event point lies on or in between the endpoints
+        if (Float y_intersect = segments[segment].y_intersect(line_position);
+            event_point.x == y_intersect ||
+            (y_intersect.is_inf() &&
+                (segments[segment].get_left_point()->x <= event_point.x && event_point.x <= segments[segment].get_right_point()->x)))
         {
             left_nodes.emplace_back(this);
         }

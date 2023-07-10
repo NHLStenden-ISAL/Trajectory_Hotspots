@@ -250,6 +250,16 @@ const Vec2* DCEL::DCEL_Overlay_Edge_Wrapper::get_bottom_point() const
     return edge_segment.get_bottom_point();
 }
 
+const Vec2* DCEL::DCEL_Overlay_Edge_Wrapper::get_left_point() const
+{
+    return edge_segment.get_left_point();
+}
+
+const Vec2* DCEL::DCEL_Overlay_Edge_Wrapper::get_right_point() const
+{
+    return edge_segment.get_right_point();
+}
+
 DCEL::DCEL_Vertex* DCEL::DCEL_Overlay_Edge_Wrapper::get_top_dcel_vertex()
 {
     const Vec2* top_point = edge_segment.get_top_point();
@@ -338,8 +348,6 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     if (intersection_results.bottom_segments.empty() && intersection_results.top_segments.empty())
     {
         //No bottom or top points at this event means we have to create a new DCEL_vertex using the first two segments.
-
-
         DCEL_Half_Edge* first_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
         ++interior_it;
         DCEL_Half_Edge* second_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;

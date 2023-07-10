@@ -135,5 +135,51 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual(test, correct);
         }
+
+        TEST_METHOD(four_segments_on_one_point_one_horizontal)
+        {
+            namespace Sweep = Segment_Intersection_Sweep_Line;
+
+            Sweep::map event_queue;
+
+            //All segments intersect on a point with one segment horizontal
+            std::vector<Segment> test_segments;
+            test_segments.emplace_back(Vec2(12.f, 4.f), Vec2(4.f, 10.f));
+            test_segments.emplace_back(Vec2(4.f, 4.f), Vec2(12.f, 10.f));
+            test_segments.emplace_back(Vec2(12.f, 5.f), Vec2(4.f, 9.f));
+            test_segments.emplace_back(Vec2(11.f, 7.f), Vec2(2.f, 7.f)); //Horizontal
+
+            for (int i = 0; i < test_segments.size(); i++)
+            {
+                std::vector<int>& top_event_segments = event_queue[*test_segments.at(i).get_top_point()];
+                top_event_segments.push_back(i);
+
+                //If it doesn't exist, create a bottom event
+                event_queue[*test_segments.at(i).get_bottom_point()];
+            }
+
+            Sweep::Sweep_Line_Status_structure<Segment> status_structure(event_queue.begin()->first.y);
+
+            int event_count = 0;
+            std::unordered_set<int> test;
+            while (!event_queue.empty())
+            {
+                Sweep::Intersection_Info intersection_results = Sweep::Handle_Event(status_structure, event_queue, test_segments, event_queue.begin()->first, event_queue.begin()->second);
+
+                ++event_count;
+
+                if (event_count == 5)
+                {
+                    test = intersection_results.interior_segments;
+
+                }
+
+                event_queue.erase(event_queue.begin());
+            }
+
+            std::unordered_set<int> correct { 0, 1, 2, 3 };
+            
+            Assert::IsTrue(test == correct);
+        }
     };
 }
