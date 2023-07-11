@@ -57,15 +57,34 @@ namespace TestTrajectoryHotspots
             test_dcel.insert_segment(new_segment);
             test_dcel.insert_segment(new_segment_2);
 
+            //Four endpoints plus the intersection point
             Assert::AreEqual((size_t)5, test_dcel.vertex_count());
+
+            //Every segment consists of two half-edges, 
+            //both segments split into two at the intersection point, doubling the amount of half-edge to 8
             Assert::AreEqual((size_t)8, test_dcel.half_edge_count());
 
+            //The last added vertex should be at the intersection point
             Vec2 intersection_point;
             new_segment.intersects(new_segment_2, intersection_point);
 
             Assert::AreEqual(intersection_point, test_dcel.vertices[4]->position);
 
-            //TODO: Test pointers
+            //Both segments get split into two, so there should be four incident half-edges around the vertex at the intersection point
+            std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges = test_dcel.vertices[4]->get_incident_half_edges();
+
+            Assert::AreEqual((size_t)4, incident_half_edges.size());
+
+            //All endpoints should show up once around the intersection vertex
+            std::vector<Vec2> incident_targets;
+            for (auto& incident_half_edge : incident_half_edges)
+            {
+                incident_targets.push_back(incident_half_edge->target()->position);
+            }
+
+            std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start, new_segment.end, new_segment_2.end};
+
+            Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()));
         }
 
     };

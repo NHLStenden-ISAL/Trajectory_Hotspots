@@ -60,7 +60,7 @@ public:
 
         DCEL_Half_Edge() = default;
 
-
+        //The origin of this half-edges twin
         DCEL_Vertex* target() const { return twin->origin; };
 
         DCEL_Vertex* origin = nullptr;

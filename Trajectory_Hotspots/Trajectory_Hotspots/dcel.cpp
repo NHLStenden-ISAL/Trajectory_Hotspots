@@ -123,8 +123,8 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
     vertex->find_adjacent_half_edges(edge, current_half_edge, CW_half_edge, CCW_half_edge);
 
     //face is left of halfedge, so halfedge with vertex as origin has CCW half-edge as prev 
-    new_half_edge_1->prev = CCW_half_edge;
-    CCW_half_edge->next = new_half_edge_1.get();
+    new_half_edge_1->prev = CCW_half_edge->twin;
+    CCW_half_edge->twin->next = new_half_edge_1.get();
 
     //and halfedge with vertex as target has CW half-edge as next
     edge->next = CW_half_edge;
@@ -133,8 +133,8 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
     //Find the other side, start from the end of the previous rotation (it is impossible for it to lie between the just added and CW half-edge)
     vertex->find_adjacent_half_edges(twin, CW_half_edge, CW_half_edge, CCW_half_edge);
 
-    new_half_edge_2->prev = CCW_half_edge;
-    CCW_half_edge->next = new_half_edge_2.get();
+    new_half_edge_2->prev = CCW_half_edge->twin;
+    CCW_half_edge->twin->next = new_half_edge_2.get();
 
     twin->next = CW_half_edge;
     CW_half_edge->prev = twin;
@@ -236,13 +236,17 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
     DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
     DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
 
+    //Keep rotating clockwise until we find the first half-edges clock and counter-clockwise from the queried half-edge
+
     Float prev_order = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
 
     do
     {
         Float new_order = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
 
-        if (prev_order < 0.f && new_order > 0.f)
+        //A positive order is counterclockwise and negative is clockwise.
+        //When prev and next are CCW and CW respectively, the queried half-edge is in between these two.
+        if (prev_order > 0.f && new_order < 0.f)
         {
             CW_half_edge = current_half_edge;
             CCW_half_edge = prev_half_edge;
@@ -276,6 +280,8 @@ std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() 
     return incident_half_edges;
 }
 
+//Returns if the half-edges origin lies to the left of its destination, 
+//if they share an x axis it returns true if its origin is above its destination.
 bool DCEL::DCEL_Half_Edge::is_orientated_left_right() const
 {
     return orientation_left_right(origin->position, twin->origin->position);
