@@ -19,16 +19,25 @@ public:
     {
     public:
 
-        DCEL_Vertex(const Vec2& position) : position(position) {}
+        DCEL_Vertex() = default;
+
+        explicit DCEL_Vertex(const Vec2& position) : position(position) {}
+
+        DCEL_Vertex(const Vec2& position, DCEL_Half_Edge* incident_half_edge)
+            : position(position), incident_half_edge(incident_half_edge)
+        {
+        }
 
         //Returns the incident (outgoing) half-edges in clockwise order
         std::vector<DCEL_Half_Edge*> get_incident_half_edges() const;
 
         //Search around the given vertex in clockwise order for the first clockwise and counter-clockwise half-edges adjacent to the given half-edge
-        void find_adjacent_half_edges(DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
+        void find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
 
         Vec2 position;
         DCEL_Half_Edge* incident_half_edge = nullptr; //One of the half-edges with the vertex as its origin
+
+
     };
 
     //Class representing a half-edge of the DCEL.
@@ -38,6 +47,19 @@ public:
     class DCEL_Half_Edge
     {
     public:
+
+        DCEL_Half_Edge(DCEL_Vertex* origin, DCEL_Face* incident_face, DCEL_Half_Edge* twin, DCEL_Half_Edge* next, DCEL_Half_Edge* prev)
+            : origin(origin), incident_face(incident_face), twin(twin), next(next), prev(prev)
+        {
+        }
+
+        explicit DCEL_Half_Edge(DCEL_Vertex* origin) : origin(origin)
+        {
+        }
+
+
+        DCEL_Half_Edge() = default;
+
 
         DCEL_Vertex* target() const { return twin->origin; };
 
@@ -99,25 +121,27 @@ public:
 
     void overlay_dcel(DCEL& other_dcel);
 
+    void insert_segment(const Segment& segment);
+
+    std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
+    std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;
+    std::vector<std::unique_ptr<DCEL_Face>> faces;
+
 private:
 
     void resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges);
 
     void handle_overlay_event(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results, const Vec2& event_point);
 
-
     bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const;
 
     template <typename Iter>
     void check_dcel_versions(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Iter it, Iter end, bool& original_dcel, bool& overlaying_dcel) const;
 
-    void overlay_vertex_on_edge(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
+    void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
-    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2);
+    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* vertex_2)  const;
 
-    std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
-    std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;
-    std::vector<std::unique_ptr<DCEL_Face>> faces;
 };
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
