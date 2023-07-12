@@ -9,12 +9,15 @@ namespace Segment_Intersection_Sweep_Line
 
     struct Intersection_Info
     {
+        Intersection_Info() = default;
+        Intersection_Info(Intersection_Info&& other) noexcept = default;
+
         std::unordered_set<int> interior_segments; //Segments that have an internal intersection with the event point.
         std::vector<int> top_segments; //Segments that intersect at the top point.
         std::vector<int> bottom_segments; //Segments that intersect at the bottom point.
         std::vector<int> collinear_segments; //List of collinear segments at this point, every two indices are a pair that overlap.
 
-        size_t segment_count() { return interior_segments.size() + top_segments.size() + bottom_segments.size() + collinear_segments.size(); };
+        size_t segment_count() const { return interior_segments.size() + top_segments.size() + bottom_segments.size() + collinear_segments.size(); };
     };
 
     struct Event_Point_Comparer
@@ -38,7 +41,7 @@ namespace Segment_Intersection_Sweep_Line
     };
 
     //Event queue sorted on point, values are a segment list where the event point is the top point of the segment
-    typedef std::map<const Vec2, std::vector<int>, Event_Point_Comparer> map;
+    using map = std::map<const Vec2, std::vector<int>, Event_Point_Comparer>;
 
     template<typename SegmentT>
     std::vector<Vec2> find_segment_intersections(const std::vector<SegmentT>& segments);
@@ -97,10 +100,10 @@ namespace Segment_Intersection_Sweep_Line
         int most_left_segment = -1;
         int most_right_segment = -1;
 
-        if (ordered_intersecting_segments.size() > 0)
+        if (!ordered_intersecting_segments.empty())
         {
             //Split the intersecting segments in interior and bottom intersections
-            for (auto& segment_index : ordered_intersecting_segments)
+            for (const auto& segment_index : ordered_intersecting_segments)
             {
                 if (*segments[segment_index].get_bottom_point() == event_point)
                 {
@@ -146,7 +149,7 @@ namespace Segment_Intersection_Sweep_Line
             status_structure.insert(segments, segment);
         }
 
-        //If we only have top segments we did not find the neighbouring nodes yet
+        //If we only have top segments we did not find the neighboring nodes yet
         bool neighbours_found = !ordered_intersecting_segments.empty();
 
         //Insert the segments that intersect this event point with their top point,
@@ -221,10 +224,9 @@ namespace Segment_Intersection_Sweep_Line
 
         case Segment::Intersection_Type::point:
         {
-            Event_Point_Comparer comp;
-            if (comp(event_point, intersection_point))
+            if (Event_Point_Comparer comp; comp(event_point, intersection_point))
             {
-                auto event_pair = event_queue.emplace(intersection_point, std::vector<int>());
+                auto [event_point_key, event_top_segments] = event_queue.try_emplace(intersection_point);
             }
 
             break;
@@ -241,12 +243,12 @@ namespace Segment_Intersection_Sweep_Line
                 Event_Point_Comparer comp;
                 if (comp(event_point, overlap_start))
                 {
-                    auto event_pair = event_queue.emplace(overlap_start, std::vector<int>());
+                    auto [event_point_key, event_top_segments] = event_queue.try_emplace(overlap_start);
                 }
 
                 if (comp(event_point, overlap_end))
                 {
-                    auto event_pair = event_queue.emplace(overlap_end, std::vector<int>());
+                    auto [event_point_key, event_top_segments] = event_queue.try_emplace(overlap_end);
                 }
             }
             else
