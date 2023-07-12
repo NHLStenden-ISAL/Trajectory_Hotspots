@@ -10,12 +10,12 @@ namespace Segment_Intersection_Sweep_Line
         {
         };
 
-        Sweep_Line_Status_structure(Float line_position) : line_position(line_position) {};
+        explicit Sweep_Line_Status_structure(Float line_position) : line_position(line_position) {};
 
         class Node
         {
         public:
-            Node(const int segment) : segment(segment) {};
+            explicit Node(const int segment) : segment(segment) {};
 
             int segment; //index
             int height = 0;
@@ -59,10 +59,12 @@ namespace Segment_Intersection_Sweep_Line
 
         std::string print_tree() const;
 
-        std::unique_ptr<Node> root;
+        bool empty() const { return root == nullptr; };
 
     private:
         //TODO: SegmentT* vector here, ref?
+
+        std::unique_ptr<Node> root;
 
         Float line_position;
 

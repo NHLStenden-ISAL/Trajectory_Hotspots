@@ -22,7 +22,7 @@ namespace TestTrajectoryHotspots
         {
             Sweep_Line_Status_structure<Segment> sweep_line(100.0f);
 
-            Assert::IsNull(sweep_line.root.get());
+            Assert::IsTrue(sweep_line.empty());
         }
 
         TEST_METHOD(insert_non_intersecting_segments)
@@ -85,7 +85,7 @@ namespace TestTrajectoryHotspots
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
 
-            Assert::IsNull(status_structure.root.get());
+            Assert::IsTrue(status_structure.empty());
         }
 
         TEST_METHOD(contains)
@@ -305,7 +305,8 @@ namespace TestTrajectoryHotspots
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
-            Assert::IsNull(status_structure.root.get());
+
+            Assert::IsTrue(status_structure.empty());
         }
 
         // make a tree with root having one left node and one right node
@@ -332,7 +333,8 @@ namespace TestTrajectoryHotspots
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
-            Assert::IsNull(status_structure.root.get());
+
+            Assert::IsTrue(status_structure.empty());
         }
 
         //make a tree with root adding to left node of root
@@ -359,7 +361,8 @@ namespace TestTrajectoryHotspots
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
-            Assert::IsNull(status_structure.root.get());
+
+            Assert::IsTrue(status_structure.empty());
         }
 
         TEST_METHOD(remove_large_tree)
@@ -393,7 +396,8 @@ namespace TestTrajectoryHotspots
                 status_structure.remove(test_segments, i, left_segment, right_segment);
                 Assert::IsFalse(status_structure.contains(test_segments, &test_segments.at(i)));
             }
-            Assert::IsNull(status_structure.root.get());
+
+            Assert::IsTrue(status_structure.empty());
         }
 
         TEST_METHOD(horizontal_last)

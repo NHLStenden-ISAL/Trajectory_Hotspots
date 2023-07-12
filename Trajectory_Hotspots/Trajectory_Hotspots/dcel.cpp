@@ -71,7 +71,9 @@ void DCEL::insert_segment(const Segment& segment)
         switch (segment_intersection_type)
         {
         case Segment::Intersection_Type::point:
+
             overlay_edge_on_edge(half_edges[0].get(), new_half_edge_1.get(), intersection_point);
+
             break;
         case Segment::Intersection_Type::collinear:
             break;
@@ -265,7 +267,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
 
 std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
 {
-    DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
     DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
 
     std::vector<DCEL_Half_Edge*> incident_half_edges;
@@ -361,10 +363,10 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
     for (int i = 0; i < DCEL_edges.size(); i++)
     {
-        auto event_pair = event_queue.emplace(*DCEL_edges.at(i).get_top_point(), std::vector<int>());
+        auto event_pair = event_queue.try_emplace(*DCEL_edges.at(i).get_top_point());
         event_pair.first->second.push_back(i);
 
-        event_pair = event_queue.emplace(*DCEL_edges.at(i).get_bottom_point(), std::vector<int>());
+        event_pair = event_queue.try_emplace(*DCEL_edges.at(i).get_bottom_point());
     }
 
     //Initialize status structure with the highest event point
@@ -393,7 +395,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         return;
     }
 
-    std::unordered_set<int>::iterator interior_it = intersection_results.interior_segments.begin();
+    auto interior_it = intersection_results.interior_segments.begin();
     DCEL_Vertex* dcel_vertex_at_event_point = nullptr;
 
     //Get or create the DCEL_Vertex at this event point so we can correct the records around it.
@@ -434,7 +436,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
     for (int bottom_segment_index : intersection_results.bottom_segments)
     {
-        DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();
+        const DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();
 
         if (dcel_vertex_at_event_point != next_dcel_vertex)
         {
@@ -446,7 +448,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
     for (int top_segment_index : intersection_results.top_segments)
     {
-        DCEL_Vertex* next_dcel_vertex = DCEL_edges[top_segment_index].get_top_dcel_vertex();
+        const DCEL_Vertex* next_dcel_vertex = DCEL_edges[top_segment_index].get_top_dcel_vertex();
 
         if (dcel_vertex_at_event_point != next_dcel_vertex)
         {
