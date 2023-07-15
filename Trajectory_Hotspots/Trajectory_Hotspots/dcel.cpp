@@ -71,9 +71,7 @@ void DCEL::insert_segment(const Segment& segment)
         switch (segment_intersection_type)
         {
         case Segment::Intersection_Type::point:
-
-            overlay_edge_on_edge(half_edges[0].get(), new_half_edge_1.get(), intersection_point);
-
+            handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge_1.get());
             break;
         case Segment::Intersection_Type::collinear:
             break;
@@ -82,6 +80,71 @@ void DCEL::insert_segment(const Segment& segment)
             return;
             break;
         }
+    }
+}
+
+void DCEL::handle_point_intersection(const Vec2& intersection_point, DCEL::DCEL_Half_Edge* old_half_edge, DCEL::DCEL_Half_Edge* new_half_edge)
+{
+    DCEL_Vertex* old_dcel_endpoint = nullptr;
+    DCEL_Vertex* new_dcel_endpoint = nullptr;
+    intersection_on_endpoint(intersection_point, old_half_edge, new_half_edge, old_dcel_endpoint, new_dcel_endpoint);
+
+    if (old_dcel_endpoint || new_dcel_endpoint)
+    {
+        if (old_dcel_endpoint && new_dcel_endpoint)
+        {
+            overlay_vertex_on_vertex(old_dcel_endpoint, new_dcel_endpoint);
+
+            //Overlay_vertex_on_vertex makes one of the newly added vertices redundant, so we can delete it.
+            if (new_dcel_endpoint == new_half_edge->origin)
+            {
+                vertices.erase(vertices.end() - 2);
+            }
+            else
+            {
+                vertices.pop_back();
+            }
+        }
+        else if (new_dcel_endpoint)
+        {
+            overlay_edge_on_vertex(old_half_edge, new_dcel_endpoint);
+        }
+        else if (old_dcel_endpoint)
+        {
+            overlay_edge_on_vertex(new_half_edge, old_dcel_endpoint);
+        }
+    }
+    else
+    {
+        overlay_edge_on_edge(old_half_edge, new_half_edge, intersection_point);
+    }
+}
+
+void DCEL::intersection_on_endpoint(
+    const Vec2& intersection_point,
+    const DCEL::DCEL_Half_Edge* old_half_edge,
+    const DCEL::DCEL_Half_Edge* new_half_edge,
+    DCEL_Vertex*& old_overlapping_vertex,
+    DCEL_Vertex*& new_overlapping_vertex) const
+{
+    //Check if the intersection point lies on one of the endpoints of either segment.
+
+    if (intersection_point == new_half_edge->origin->position)
+    {
+        new_overlapping_vertex = new_half_edge->origin;
+    }
+    else if (intersection_point == new_half_edge->target()->position)
+    {
+        new_overlapping_vertex = new_half_edge->target();
+    }
+
+    if (intersection_point == old_half_edge->origin->position)
+    {
+        old_overlapping_vertex = old_half_edge->origin;
+    }
+    else if (intersection_point == old_half_edge->target()->position)
+    {
+        old_overlapping_vertex = old_half_edge->target();
     }
 }
 
@@ -204,7 +267,7 @@ void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* ve
     {
         incident_half_edge_v2->origin = vertex_1;
 
-        vertex_1->find_adjacent_half_edges(incident_half_edge_v2, current_half_edge, CW_half_edge, CCW_half_edge);
+        vertex_1->find_adjacent_half_edges(incident_half_edge_v2->twin, current_half_edge, CW_half_edge, CCW_half_edge);
 
         //We can prevent the two twin writes by checking if the CCW is the previous added half-edge
         //but adding branching is probably slower
@@ -261,6 +324,13 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
             current_half_edge = current_half_edge->twin->next;
         }
     } while (current_half_edge != starting_half_edge);
+
+    if (current_half_edge == prev_half_edge)
+    {
+        CW_half_edge = current_half_edge;
+        CCW_half_edge = prev_half_edge;
+        return;
+    }
 
     assert(false);
 }
@@ -410,7 +480,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     }
     else
     {
-        //If this event contains top or bottom point, just retrieve the DCEL_vertex at these points.
+        //If this event contains a top or bottom point, just retrieve the DCEL_vertex at these points.
 
         if (!intersection_results.bottom_segments.empty())
         {
@@ -425,15 +495,15 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
     assert(dcel_vertex_at_event_point != nullptr);
 
-    //If there are more intersecting segments we can add them one by one with overlay_edge_on_vertex.
+    //If there are more internal intersecting segments we can add them one by one with overlay_edge_on_vertex.
     for (; interior_it != intersection_results.interior_segments.end(); ++interior_it)
     {
         DCEL_Half_Edge* intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
         overlay_edge_on_vertex(intersecting_half_edge, dcel_vertex_at_event_point);
     }
 
-    //The overlay_vertex_on_vertex function fuses the records of both dcel_vertices so we just need to call it once with the two different vertices.
-
+    //The overlay_vertex_on_vertex function fuses the records of both dcel_vertices so we just need to call it once with the two different vertices,
+    //Hence the return statement.
     for (int bottom_segment_index : intersection_results.bottom_segments)
     {
         const DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();

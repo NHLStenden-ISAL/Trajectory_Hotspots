@@ -123,11 +123,21 @@ public:
 
     void insert_segment(const Segment& segment);
 
+
+
     std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
     std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;
     std::vector<std::unique_ptr<DCEL_Face>> faces;
 
 private:
+
+    void intersection_on_endpoint(const Vec2& intersection_point,
+        const DCEL::DCEL_Half_Edge* old_half_edge,
+        const DCEL::DCEL_Half_Edge* new_half_edge,
+        DCEL_Vertex*& old_overlapping_vertex,
+        DCEL_Vertex*& new_overlapping_vertex) const;
+
+    void handle_point_intersection(const Vec2& intersection_point, DCEL::DCEL_Half_Edge* old_half_edge, DCEL::DCEL_Half_Edge* new_half_edge);
 
     void resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges);
 

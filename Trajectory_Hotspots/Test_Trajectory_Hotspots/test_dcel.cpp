@@ -87,5 +87,19 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()));
         }
 
+        TEST_METHOD(DCEL_Construction_two_segments_intersecting_at_endpoints)
+        {
+            DCEL test_dcel;
+
+            const Segment new_segment(Vec2(6.f, 6.f), Vec2(20.f, 20.f));
+            const Segment new_segment_2(Vec2(4.f, 20.f), Vec2(20.f, 20.f));
+
+            test_dcel.insert_segment(new_segment);
+            test_dcel.insert_segment(new_segment_2);
+
+            Assert::AreEqual((size_t)3, test_dcel.vertex_count());
+
+
+        }
     };
 }
