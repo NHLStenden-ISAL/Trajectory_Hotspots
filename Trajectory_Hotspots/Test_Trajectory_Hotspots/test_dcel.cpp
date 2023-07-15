@@ -99,6 +99,62 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual((size_t)3, test_dcel.vertex_count());
 
+            //The targets of the incident half-edge of the middle vertex should be the other two endpoints
+
+            const DCEL::DCEL_Vertex* middle_vert = nullptr;
+            for (const auto& vert : test_dcel.vertices)
+            {
+                if (vert->position == new_segment.end)
+                {
+                    middle_vert = vert.get();
+                }
+            }
+
+            if (middle_vert != nullptr)
+            {
+                std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges_middle = middle_vert->get_incident_half_edges();
+
+                std::vector<Vec2> incident_targets;
+                for (auto& incident_half_edge : incident_half_edges_middle)
+                {
+                    incident_targets.push_back(incident_half_edge->target()->position);
+                }
+
+                std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start};
+
+                Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()));
+            }
+            else
+            {
+                Assert::Fail(L"middle_vert was not present");
+            }
+
+            //The half-edge loop should contain four unique half-edges and contain all four half-edges in the current dcel
+
+            const DCEL::DCEL_Half_Edge* he0_next = test_dcel.half_edges[0].get();
+            const DCEL::DCEL_Half_Edge* he0_prev = test_dcel.half_edges[0].get();
+
+            std::vector<const DCEL::DCEL_Half_Edge*> half_edge_chain_next;
+            std::vector<const DCEL::DCEL_Half_Edge*> half_edge_chain_prev;
+
+            for (size_t i = 0; i < 4; i++)
+            {
+                half_edge_chain_next.emplace_back(he0_next->next);
+                half_edge_chain_prev.emplace_back(he0_prev->prev);
+
+                he0_next = he0_next->next;
+                he0_prev = he0_prev->prev;
+            }
+
+            std::vector<const DCEL::DCEL_Half_Edge*> all_half_edges;
+            for (const auto& he : test_dcel.half_edges)
+            {
+                all_half_edges.emplace_back(he.get());
+            }
+
+            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), half_edge_chain_prev.begin()));
+            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), all_half_edges.begin()));
+
 
         }
     };

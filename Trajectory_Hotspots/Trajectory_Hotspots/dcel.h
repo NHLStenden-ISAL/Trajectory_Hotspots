@@ -31,7 +31,7 @@ public:
         //Returns the incident (outgoing) half-edges in clockwise order
         std::vector<DCEL_Half_Edge*> get_incident_half_edges() const;
 
-        //Search around the given vertex in clockwise order for the first clockwise and counter-clockwise half-edges adjacent to the given half-edge
+        //Search around the given vertex in clockwise order for the first clockwise and counter-clockwise half-edges adjacent to the given half-edge (pointing outwards)
         void find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
 
         Vec2 position;

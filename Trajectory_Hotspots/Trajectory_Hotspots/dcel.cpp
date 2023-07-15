@@ -269,13 +269,18 @@ void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* ve
 
         vertex_1->find_adjacent_half_edges(incident_half_edge_v2->twin, current_half_edge, CW_half_edge, CCW_half_edge);
 
-        //We can prevent the two twin writes by checking if the CCW is the previous added half-edge
-        //but adding branching is probably slower
-        incident_half_edge_v2->next = CW_half_edge;
-        incident_half_edge_v2->twin->prev = CCW_half_edge;
+        //half-edges chain counter clockwise and adjacent half-edges point outward
+        //so: CW half-edge is just the CW adjacent
+        //    and CCW half-edge is the twin of CCW adjacent
 
-        CW_half_edge->prev = incident_half_edge_v2;
-        CCW_half_edge->next = incident_half_edge_v2->twin;
+        //(We can prevent the two twin writes by checking if the CCW is the previous added half-edge
+        //but adding branching is probably slower)
+
+        incident_half_edge_v2->twin->next = CW_half_edge;
+        CW_half_edge->prev = incident_half_edge_v2->twin;
+
+        incident_half_edge_v2->prev = CCW_half_edge->twin;
+        CCW_half_edge->twin->next = incident_half_edge_v2;
     }
 }
 
