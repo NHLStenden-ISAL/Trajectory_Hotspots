@@ -154,6 +154,8 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
     //Splitting this up gives some trouble with overwriting the next pointers though.
     //Also, this way we can start the search for the second adjacent half-edges where the first ended.
 
+    //Shorten old half-edges to vertex and create new twins for them.
+
     half_edges.reserve(half_edges.size() + 2); //Reserve two extra spots to prevent invalidating the first reference when exceeding space on the second emplace_back
     const std::unique_ptr<DCEL_Half_Edge>& new_half_edge_1 = half_edges.emplace_back(std::make_unique<DCEL_Half_Edge>()); //new twin of edge
     const std::unique_ptr<DCEL_Half_Edge>& new_half_edge_2 = half_edges.emplace_back(std::make_unique<DCEL_Half_Edge>()); //new twin of edge->twin
@@ -187,11 +189,11 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
 
     vertex->find_adjacent_half_edges(edge, current_half_edge, CW_half_edge, CCW_half_edge);
 
-    //face is left of halfedge, so halfedge with vertex as origin has CCW half-edge as prev 
+    //face is left of half-edge, so half-edge with vertex as origin has CCW half-edge as prev 
     new_half_edge_1->prev = CCW_half_edge->twin;
     CCW_half_edge->twin->next = new_half_edge_1.get();
 
-    //and halfedge with vertex as target has CW half-edge as next
+    //and half-edge with vertex as target has CW half-edge as next
     edge->next = CW_half_edge;
     CW_half_edge->prev = edge;
 
@@ -316,7 +318,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
 
         //A positive order is counter clockwise and negative is clockwise.
         //When prev and next are CCW and CW respectively, the queried half-edge is in between these two.
-        if (prev_order > 0.f && new_order < 0.f)
+        if (prev_order >= 0.f && new_order <= 0.f)
         {
             CW_half_edge = current_half_edge;
             CCW_half_edge = prev_half_edge;
@@ -330,6 +332,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
         }
     } while (current_half_edge != starting_half_edge);
 
+    //If there is only one edge the above loop fails, assign to both CW and CCW
     if (current_half_edge == prev_half_edge)
     {
         CW_half_edge = current_half_edge;
