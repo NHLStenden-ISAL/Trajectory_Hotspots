@@ -314,7 +314,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
     {
         Float new_order = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
 
-        //A positive order is counterclockwise and negative is clockwise.
+        //A positive order is counter clockwise and negative is clockwise.
         //When prev and next are CCW and CW respectively, the queried half-edge is in between these two.
         if (prev_order > 0.f && new_order < 0.f)
         {

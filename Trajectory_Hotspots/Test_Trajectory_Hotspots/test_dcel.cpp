@@ -58,22 +58,22 @@ namespace TestTrajectoryHotspots
             test_dcel.insert_segment(new_segment_2);
 
             //Four endpoints plus the intersection point
-            Assert::AreEqual((size_t)5, test_dcel.vertex_count());
+            Assert::AreEqual((size_t)5, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
 
             //Every segment consists of two half-edges, 
             //both segments split into two at the intersection point, doubling the amount of half-edge to 8
-            Assert::AreEqual((size_t)8, test_dcel.half_edge_count());
+            Assert::AreEqual((size_t)8, test_dcel.half_edge_count(), L"Incorrect amount of total DCEL half-edges.");
 
             //The last added vertex should be at the intersection point
             Vec2 intersection_point;
             new_segment.intersects(new_segment_2, intersection_point);
 
-            Assert::AreEqual(intersection_point, test_dcel.vertices[4]->position);
+            Assert::AreEqual(intersection_point, test_dcel.vertices[4]->position, L"Added (last) intersection point at incorrect position.");
 
             //Both segments get split into two, so there should be four incident half-edges around the vertex at the intersection point
             std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges = test_dcel.vertices[4]->get_incident_half_edges();
 
-            Assert::AreEqual((size_t)4, incident_half_edges.size());
+            Assert::AreEqual((size_t)4, incident_half_edges.size(), L"Incorrect amount of incident half-edges.");
 
             //All endpoints should show up once around the intersection vertex
             std::vector<Vec2> incident_targets;
@@ -84,7 +84,7 @@ namespace TestTrajectoryHotspots
 
             std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start, new_segment.end, new_segment_2.end};
 
-            Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()));
+            Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()), L"Incorrect endpoints around vertex.");
         }
 
         TEST_METHOD(DCEL_Construction_two_segments_intersecting_at_endpoints)
@@ -97,7 +97,7 @@ namespace TestTrajectoryHotspots
             test_dcel.insert_segment(new_segment);
             test_dcel.insert_segment(new_segment_2);
 
-            Assert::AreEqual((size_t)3, test_dcel.vertex_count());
+            Assert::AreEqual((size_t)3, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
 
             //The targets of the incident half-edge of the middle vertex should be the other two endpoints
 
@@ -122,7 +122,7 @@ namespace TestTrajectoryHotspots
 
                 std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start};
 
-                Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()));
+                Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()), L"Incorrect endpoints around vertex.");
             }
             else
             {
@@ -152,10 +152,22 @@ namespace TestTrajectoryHotspots
                 all_half_edges.emplace_back(he.get());
             }
 
-            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), half_edge_chain_prev.begin()));
-            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), all_half_edges.begin()));
+            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), half_edge_chain_prev.begin()), L"Half-edge chain next is not equal to the prev chain.");
+            Assert::IsTrue(std::is_permutation(half_edge_chain_next.begin(), half_edge_chain_next.end(), all_half_edges.begin()), L"Half-edge chain is incorrect.");
+        }
 
+        TEST_METHOD(DCEL_Construction_two_segments_intersecting_vertex_on_edge)
+        {
+            DCEL test_dcel;
 
+            const Segment new_segment(Vec2(6.f, 20.f), Vec2(20.f, 20.f));
+            const Segment new_segment_2(Vec2(12.f, 20.f), Vec2(12.f, 0.f));
+
+            test_dcel.insert_segment(new_segment);
+            test_dcel.insert_segment(new_segment_2);
+
+            //Four endpoints with one being the intersection point
+            Assert::AreEqual((size_t)4, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
         }
     };
 }
