@@ -169,5 +169,16 @@ namespace TestTrajectoryHotspots
             //Four endpoints with one being the intersection point
             Assert::AreEqual((size_t)4, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
         }
+
+        TEST_METHOD(DCEL_overlay_vertex_on_vertex_two_on_one_side)
+        {
+            //This tests if the clockwise and counterclockwise neighbours 
+            //are properly detected when they are both on the same side of the inserted segment. e.g:
+            // ./
+            // |\
+            // |
+
+
+        }
     };
 }
