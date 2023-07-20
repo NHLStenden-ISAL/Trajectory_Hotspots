@@ -261,3 +261,13 @@ Float operator/(const float& value, const Float& divider)
 {
     return Float(value / divider.get_value());
 }
+
+Float operator+(const float& value, const Float& other)
+{
+    return Float(value + other.get_value());
+}
+
+Float operator-(const float& value, const Float& other)
+{
+    return Float(value - other.get_value());
+}

@@ -83,3 +83,5 @@ private:
 };
 
 Float operator/(const float& value, const Float& divider);
+Float operator+(const float& value, const Float& other);
+Float operator-(const float& value, const Float& other);

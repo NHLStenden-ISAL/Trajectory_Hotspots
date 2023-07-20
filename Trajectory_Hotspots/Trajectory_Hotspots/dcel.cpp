@@ -308,17 +308,17 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
     DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
     DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
 
-    //Keep rotating clockwise until we find the first half-edges clock and counter-clockwise from the queried half-edge
-
-    Float prev_order = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
+    //Keep rotating counterclockwise until we find the first half-edges clock and counter-clockwise from the queried half-edge
+    
+    Float prev_angle = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
 
     do
     {
-        Float new_order = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
+        Float new_angle = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
 
-        //A positive order is counter clockwise and negative is clockwise.
-        //When prev and next are CCW and CW respectively, the queried half-edge is in between these two.
-        if (prev_order >= 0.f && new_order <= 0.f)
+        //Keep rotating until the current half-edge has a lower counter-clockwise angle than the previous, relative to the queried half-edge
+        //(this means we passed the queried half-edges angle)
+        if (new_angle < prev_angle)
         {
             CW_half_edge = current_half_edge;
             CCW_half_edge = prev_half_edge;
@@ -327,7 +327,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
         else
         {
             prev_half_edge = current_half_edge;
-            prev_order = new_order;
+            prev_angle = new_angle;
             current_half_edge = current_half_edge->twin->next;
         }
     } while (current_half_edge != starting_half_edge);
