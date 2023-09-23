@@ -123,6 +123,8 @@ public:
 
     void insert_segment(const Segment& segment);
 
+    DCEL::DCEL_Half_Edge* create_new_segment_records(const Segment& segment);
+
 
 
     std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
@@ -145,9 +147,6 @@ private:
 
     bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const;
 
-    template <typename Iter>
-    void check_dcel_versions(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Iter it, Iter end, bool& original_dcel, bool& overlaying_dcel) const;
-
     void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
     void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* vertex_2)  const;
@@ -156,24 +155,3 @@ private:
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
 bool collinear_overlap(const DCEL::DCEL_Overlay_Edge_Wrapper& segment1, const DCEL::DCEL_Overlay_Edge_Wrapper& segment2, Vec2& overlap_start, Vec2& overlap_end);
-
-template<typename Iter>
-inline void DCEL::check_dcel_versions(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Iter it, Iter end, bool& original_dcel, bool& overlaying_dcel) const
-{
-    while (it != end)
-    {
-        if (DCEL_edges[*it].original_dcel)
-        {
-            original_dcel = true;
-        }
-        else
-        {
-            overlaying_dcel = true;
-        }
-
-        if (original_dcel && overlaying_dcel)
-        {
-            return;
-        }
-    }
-}

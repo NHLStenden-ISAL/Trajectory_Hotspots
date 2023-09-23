@@ -40,7 +40,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
     }
 }
 
-//Query tree, reutrns bounding box from start_t to end_t
+//Query tree, returns bounding box from start_t to end_t
 AABB Segment_Search_Tree_Node::query(const Float start_t, const Float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?

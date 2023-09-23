@@ -172,13 +172,28 @@ namespace TestTrajectoryHotspots
 
         TEST_METHOD(DCEL_overlay_vertex_on_vertex_two_on_one_side)
         {
-            //This tests if the clockwise and counterclockwise neighbours 
+            //This tests if the clockwise and counter clockwise neighbours 
             //are properly detected when they are both on the same side of the inserted segment. e.g:
             // ./
             // |\
             // |
 
+            DCEL test_dcel;
 
+            const Segment segment_1(Vec2(6.f, 6.f), Vec2(8.f, 6.f));
+            const Segment segment_2(Vec2(6.f, 4.f), Vec2(6.f, 6.f));
+
+            test_dcel.insert_segment(segment_1);
+            test_dcel.insert_segment(segment_2);
+
+
+            const Segment new_segment(Vec2(4.f, 4.f), Vec2(6.f, 6.f));
+
+            test_dcel.insert_segment(new_segment);
+
+            Assert::AreEqual((size_t)4, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
+
+            //TODO: Add new vertex and fix next/prev chain.
         }
     };
 }

@@ -40,8 +40,49 @@ void DCEL::overlay_dcel(DCEL& other_dcel)
 
 void DCEL::insert_segment(const Segment& segment)
 {
-    //Create the records for a single segment
-    //The two half edges are each others twin, prev, and next
+
+    if (half_edges.empty())
+    {
+        create_new_segment_records(segment);
+        return;
+    }
+    else if (half_edges.size() == 2)
+    {
+        DCEL::DCEL_Half_Edge* new_half_edge = create_new_segment_records(segment);
+
+        Segment other_segment(half_edges[0]->origin->position, half_edges[1]->origin->position);
+
+        Vec2 intersection_point;
+        Segment::Intersection_Type segment_intersection_type = segment.intersects(other_segment, intersection_point);
+
+        switch (segment_intersection_type)
+        {
+        case Segment::Intersection_Type::point:
+            handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge);
+            break;
+        case Segment::Intersection_Type::collinear:
+            break;
+        case Segment::Intersection_Type::parallel:
+        case Segment::Intersection_Type::none:
+            return;
+        }
+
+        return;
+    }
+    else
+    {
+        DCEL dcel_with_single_segment;
+        dcel_with_single_segment.insert_segment(segment);
+
+        overlay_dcel(dcel_with_single_segment);
+    }
+}
+
+//Creates two new half-edges and two new vertices based on the given segment.
+//The two half edges are each others twin, prev, and next.
+//Returns a pointer to one of the new half-edges.
+DCEL::DCEL_Half_Edge* DCEL::create_new_segment_records(const Segment& segment)
+{
     vertices.reserve(vertices.size() + 2);
     const auto& start_vertex = vertices.emplace_back(std::make_unique<DCEL_Vertex>(segment.start));
     const auto& end_vertex = vertices.emplace_back(std::make_unique<DCEL_Vertex>(segment.end));
@@ -57,30 +98,7 @@ void DCEL::insert_segment(const Segment& segment)
     start_vertex->incident_half_edge = new_half_edge_1.get();
     end_vertex->incident_half_edge = new_half_edge_2.get();
 
-    if (half_edges.size() == 2)
-    {
-        return;
-    }
-    else if (half_edges.size() == 4)
-    {
-        Segment other_segment(half_edges[0]->origin->position, half_edges[1]->origin->position);
-
-        Vec2 intersection_point;
-        Segment::Intersection_Type segment_intersection_type = segment.intersects(other_segment, intersection_point);
-
-        switch (segment_intersection_type)
-        {
-        case Segment::Intersection_Type::point:
-            handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge_1.get());
-            break;
-        case Segment::Intersection_Type::collinear:
-            break;
-        case Segment::Intersection_Type::parallel:
-        case Segment::Intersection_Type::none:
-            return;
-            break;
-        }
-    }
+    return new_half_edge_1.get();
 }
 
 void DCEL::handle_point_intersection(const Vec2& intersection_point, DCEL::DCEL_Half_Edge* old_half_edge, DCEL::DCEL_Half_Edge* new_half_edge)
@@ -308,15 +326,15 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
     DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
     DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
 
-    //Keep rotating counterclockwise until we find the first half-edges clock and counter-clockwise from the queried half-edge
-    
+    //Keep rotating counterclockwise until we find the first half-edges clock and counterclockwise from the queried half-edge
+
     Float prev_angle = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
 
     do
     {
         Float new_angle = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
 
-        //Keep rotating until the current half-edge has a lower counter-clockwise angle than the previous, relative to the queried half-edge
+        //Keep rotating until the current half-edge has a lower counterclockwise angle than the previous, relative to the queried half-edge
         //(this means we passed the queried half-edges angle)
         if (new_angle < prev_angle)
         {
@@ -539,35 +557,57 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     //TODO: Handle collinear
 }
 
+//Checks if the given event contains elements from multiple DCELs
 bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const
 {
-    bool original_dcel = false;
-    bool overlaying_dcel = false;
+    bool first_dcel;
 
-    check_dcel_versions(DCEL_edges, intersection_results.interior_segments.begin(), intersection_results.interior_segments.end(), original_dcel, overlaying_dcel);
+    if (!intersection_results.interior_segments.empty())
+    {
+        first_dcel = DCEL_edges[*intersection_results.interior_segments.begin()].original_dcel;
+    }
+    else if (!intersection_results.top_segments.empty())
+    {
+        first_dcel = DCEL_edges[*intersection_results.top_segments.begin()].original_dcel;
+    }
+    else if (!intersection_results.bottom_segments.empty())
+    {
+        first_dcel = DCEL_edges[*intersection_results.bottom_segments.begin()].original_dcel;
+    }
+    else if (!intersection_results.collinear_segments.empty())
+    {
+        first_dcel = DCEL_edges[*intersection_results.collinear_segments.begin()].original_dcel;
+    }
+    else
+    {
+        //Empty event?
+        return false;
+    }
 
-    if (original_dcel && overlaying_dcel)
+    //Define lambda function that checks for the given element if it belongs to a different DCEL
+    auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
+    {
+        return  DCEL_edges[segment_index].original_dcel != first_dcel;
+    };
+
+    //Check for each type of overlapping segment if it contains a segment from a different DCEL
+
+    if (std::any_of(intersection_results.interior_segments.begin(), intersection_results.interior_segments.end(), different_dcels))
     {
         return true;
     }
 
-    check_dcel_versions(DCEL_edges, intersection_results.top_segments.begin(), intersection_results.top_segments.end(), original_dcel, overlaying_dcel);
-
-    if (original_dcel && overlaying_dcel)
+    if (std::any_of(intersection_results.top_segments.begin(), intersection_results.top_segments.end(), different_dcels))
     {
         return true;
     }
 
-    check_dcel_versions(DCEL_edges, intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), original_dcel, overlaying_dcel);
-
-    if (original_dcel && overlaying_dcel)
+    if (std::any_of(intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), different_dcels))
     {
         return true;
     }
 
-    check_dcel_versions(DCEL_edges, intersection_results.collinear_segments.begin(), intersection_results.collinear_segments.end(), original_dcel, overlaying_dcel);
-
-    if (original_dcel && overlaying_dcel)
+    if (std::any_of(intersection_results.collinear_segments.begin(), intersection_results.collinear_segments.end(), different_dcels))
     {
         return true;
     }

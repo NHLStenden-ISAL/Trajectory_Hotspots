@@ -18,7 +18,9 @@ int32_t Float::ulps_distance(const float a, const float b) const
     // If one's infinite and they're not equal, max distance.
     if (isinf(a) || isinf(b)) return max;
 
-    int32_t ia, ib;
+    int32_t ia;
+    int32_t ib;
+
     memcpy(&ia, &a, sizeof(float));
     memcpy(&ib, &b, sizeof(float));
 
@@ -37,8 +39,8 @@ int32_t Float::ulps_distance(const float a, const float b) const
 bool Float::nearly_equal(const float a, const float b, const float fixedEpsilon, const int ulpsEpsilon) const
 {
     // Handle the near-zero case.
-    const float difference = fabs(a - b);
-    if (difference <= fixedEpsilon) return true;
+    if (const float difference = fabs(a - b);
+        difference <= fixedEpsilon) return true;
 
     return ulps_distance(a, b) <= ulpsEpsilon;
 }
