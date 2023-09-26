@@ -14,8 +14,6 @@ namespace Microsoft
     {
         namespace CppUnitTestFramework
         {
-            template<> static std::wstring ToString<Float>(class Float* t) { return L"Float"; }
-            template<> static std::wstring ToString<Float>(const class Float& t) { return L"Float"; }
             template<> static std::wstring ToString<Segment::Intersection_Type>(const Segment::Intersection_Type& t) { return L"Segment::Intersection_Type"; }
         }
     }

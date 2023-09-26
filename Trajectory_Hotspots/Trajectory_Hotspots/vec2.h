@@ -48,7 +48,7 @@ public:
     Float x;
     Float y;
 
-    //Returns the pseudo angle rotating from given vertices a to b, around a given center.
+    //Returns the pseudo angle rotating counter clockwise from given vertices a to b, around a given center.
     [[nodiscard]]
     static Float order_around_center(const Vec2& center, const Vec2& a, const Vec2& b)
     {

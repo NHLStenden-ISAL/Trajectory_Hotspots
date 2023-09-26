@@ -161,6 +161,82 @@ namespace TestTrajectoryHotspots
             Assert::IsTrue(C.between(A, B));
             Assert::IsFalse(D.between(A, B));
         }
+
+        TEST_METHOD(pseudo_angle)
+        {
+            //North
+            Vec2 C = Vec2(3.f, 1.f);
+            Vec2 A = Vec2(3.f, 2.f);
+
+            Float pa = Vec2::pseudo_angle(C, A);
+
+            Assert::AreEqual(Float(2.f), pa);
+
+            //East
+            C = Vec2(15.f, 3.f);
+            A = Vec2(18.f, 3.f);
+
+            pa = Vec2::pseudo_angle(C, A);
+
+            Assert::AreEqual(Float(1.f), pa);
+
+            //South
+            C = Vec2(13.f, 1.f);
+            A = Vec2(13.f, 0.f);
+
+            pa = Vec2::pseudo_angle(C, A);
+
+            Assert::AreEqual(Float(0.f), pa);
+
+            //West
+            C = Vec2(4.f, 5.f);
+            A = Vec2(0.f, 5.f);
+
+            pa = Vec2::pseudo_angle(C, A);
+
+            Assert::AreEqual(Float(3.f), pa);
+
+        }
+
+        TEST_METHOD(pseudo_angle_ordering)
+        {
+            Vec2 C = Vec2(3.f, 5.f);
+            Vec2 A = Vec2(3.f, 7.f);
+            Vec2 B = Vec2(2.f, 2.f);
+
+            Float ca = Vec2::pseudo_angle(C, A);
+            Float cb = Vec2::pseudo_angle(C, B);
+
+            Assert::IsTrue(ca < cb);
+
+            C = Vec2(15.f, 3.f);
+            A = Vec2(18.f, 3.f);
+            B = Vec2(17.f, 2.f);
+
+            ca = Vec2::pseudo_angle(C, A);
+            cb = Vec2::pseudo_angle(C, B);
+
+            Assert::IsTrue(ca > cb);
+
+            C = Vec2(13.f, 1.f);
+            A = Vec2(13.f, 0.f);
+            B = Vec2(13.f, 0.f);
+
+            ca = Vec2::pseudo_angle(C, A);
+            cb = Vec2::pseudo_angle(C, B);
+
+            Assert::IsTrue(ca == cb);
+
+            C = Vec2(4.f, 5.f);
+            A = Vec2(4.f, 4.f);
+            B = Vec2(3.8410f, 4.0504f);
+
+            ca = Vec2::pseudo_angle(C, A);
+            cb = Vec2::pseudo_angle(C, B);
+
+            Assert::IsTrue(ca < cb);
+
+        }
     };
 
 
