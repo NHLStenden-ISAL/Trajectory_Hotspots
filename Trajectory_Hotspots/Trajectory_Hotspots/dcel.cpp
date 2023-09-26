@@ -4,6 +4,8 @@
 #include "segment.h"
 #include "segment_intersection.h"
 
+//Overlay the given DCEL over this DCEL, creating new vertices at the intersection points.
+//Warning: This overlay function destroys the given DCEL.
 void DCEL::overlay_dcel(DCEL& other_dcel)
 {
     //TODO:
@@ -36,6 +38,8 @@ void DCEL::overlay_dcel(DCEL& other_dcel)
     //Segment_Intersection_Sweep_Line::find_segment_intersections(DCEL_edges);
 
     resolve_edge_intersections(DCEL_edges);
+
+    other_dcel.clear();
 }
 
 void DCEL::insert_segment(const Segment& segment)
@@ -321,6 +325,23 @@ std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
     return boundary_vertices;
 }
 
+std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+{
+    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
+
+    std::vector<DCEL_Half_Edge*> incident_half_edges;
+
+    do
+    {
+        incident_half_edges.emplace_back(current_half_edge);
+        current_half_edge = current_half_edge->twin->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return incident_half_edges;
+}
+
 void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
 {
     DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
@@ -361,21 +382,13 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
     assert(false);
 }
 
-std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+void DCEL::DCEL_Vertex::set_all_origins_to_this()
 {
-    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
-    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
-
-    std::vector<DCEL_Half_Edge*> incident_half_edges;
-
-    do
+    std::vector<DCEL_Half_Edge*> incident_half_edges = get_incident_half_edges();
+    for (auto& incident_half_edge : incident_half_edges)
     {
-        incident_half_edges.emplace_back(current_half_edge);
-        current_half_edge = current_half_edge->twin->next;
-
-    } while (current_half_edge != starting_half_edge);
-
-    return incident_half_edges;
+        incident_half_edge->origin = this;
+    }
 }
 
 //Returns if the half-edges origin lies to the left of its destination, 
@@ -480,14 +493,36 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
 void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results, const Vec2& event_point)
 {
-    if (intersection_results.segment_count() < 2)
-    {
-        return;
-    }
 
     if (!overlay_event_contains_both_dcels(DCEL_edges, intersection_results))
     {
+        if (int first_event_segment = intersection_results.get_first_segment(); !DCEL_edges[first_event_segment].original_dcel)
+        {
+            //If this event point is unique to the overlayed DCEL and doesnt intersect the original DCEL
+            //we still need to copy it over into the original DCEL and re-assign its incident edges.
+
+            DCEL_Vertex* old_vertex = nullptr;
+            if (DCEL_edges[first_event_segment].underlying_half_edge->origin->position == event_point)
+            {
+                old_vertex = DCEL_edges[first_event_segment].underlying_half_edge->origin;
+            }
+            else
+            {
+                old_vertex = DCEL_edges[first_event_segment].underlying_half_edge->target();
+            }
+
+            const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*old_vertex));
+            new_vertex->set_all_origins_to_this();
+
+            return;
+        }
+
         //Only one dcel contributes, no records need to be updated.
+        return;
+    }
+
+    if (intersection_results.segment_count() < 2)
+    {
         return;
     }
 
@@ -560,6 +595,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 //Checks if the given event contains elements from multiple DCELs
 bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const
 {
+    //TODO: Add this function to intersection_info? Template classes complicate it but check it anyway.
     bool first_dcel;
 
     if (!intersection_results.interior_segments.empty())

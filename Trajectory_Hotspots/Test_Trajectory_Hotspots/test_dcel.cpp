@@ -186,14 +186,13 @@ namespace TestTrajectoryHotspots
             test_dcel.insert_segment(segment_1);
             test_dcel.insert_segment(segment_2);
 
-
             const Segment new_segment(Vec2(4.f, 4.f), Vec2(6.f, 6.f));
 
             test_dcel.insert_segment(new_segment);
 
-            Assert::AreEqual((size_t)4, test_dcel.vertex_count(), L"Incorrect amount of total DCEL vertices.");
+            size_t vertex_count = test_dcel.vertex_count();
 
-            //TODO: Add new vertex and fix next/prev chain.
+            Assert::AreEqual((size_t)4, vertex_count, L"Incorrect amount of total DCEL vertices.");
         }
     };
 }

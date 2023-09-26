@@ -12,12 +12,22 @@ namespace Segment_Intersection_Sweep_Line
         Intersection_Info() = default;
         Intersection_Info(Intersection_Info&& other) noexcept = default;
 
-        std::unordered_set<int> interior_segments; //Segments that have an internal intersection with the event point.
         std::vector<int> top_segments; //Segments that intersect at the top point.
         std::vector<int> bottom_segments; //Segments that intersect at the bottom point.
+        std::unordered_set<int> interior_segments; //Segments that have an internal intersection with the event point.
         std::vector<int> collinear_segments; //List of collinear segments at this point, every two indices are a pair that overlap.
 
+        //TODO: Add reference to segment vector here.. prevent all the passing in the DCEL functions..
+
         size_t segment_count() const { return interior_segments.size() + top_segments.size() + bottom_segments.size() + collinear_segments.size(); };
+
+        int get_first_segment() const
+        {
+            if (!top_segments.empty()) { return top_segments[0]; }
+            else if (!bottom_segments.empty()) { return bottom_segments[0]; }
+            else if (!interior_segments.empty()) { return *interior_segments.begin(); }
+            else if (!collinear_segments.empty()) { return collinear_segments[0]; }
+        };
     };
 
     struct Event_Point_Comparer
@@ -121,7 +131,7 @@ namespace Segment_Intersection_Sweep_Line
         }
 
         //Report all segments that intersect this point
-        if (top_segments.size() + bottom_segments.size() + intersection_segments.size() > 1)
+        if (top_segments.size() + bottom_segments.size() + intersection_segments.size() > 0)
         {
             intersection_info.top_segments = top_segments;
             intersection_info.interior_segments.insert(intersection_segments.begin(), intersection_segments.end());

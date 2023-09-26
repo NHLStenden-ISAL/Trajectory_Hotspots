@@ -34,10 +34,11 @@ public:
         //Search around the given vertex in counter-clockwise order for the first clockwise and counter-clockwise half-edges adjacent to the given half-edge (pointing outwards)
         void find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
 
+        //Reassigns all the origin pointers of the incident half-edges to this vertex
+        void set_all_origins_to_this();
+
         Vec2 position;
         DCEL_Half_Edge* incident_half_edge = nullptr; //One of the half-edges with the vertex as its origin
-
-
     };
 
     //Class representing a half-edge of the DCEL.
@@ -125,7 +126,12 @@ public:
 
     DCEL::DCEL_Half_Edge* create_new_segment_records(const Segment& segment);
 
-
+    void clear()
+    {
+        vertices.clear();
+        half_edges.clear();
+        faces.clear();
+    };
 
     std::vector<std::unique_ptr<DCEL_Vertex>> vertices;
     std::vector<std::unique_ptr<DCEL_Half_Edge>> half_edges;

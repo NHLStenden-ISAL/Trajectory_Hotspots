@@ -334,11 +334,31 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (current_x_position < segments.at(node->segment).y_intersect(line_position))
+            Float y_intersect = segments[node->segment].y_intersect(line_position);
+
+            //TODO: Horizontal?
+            //if (y_intersect.is_inf())
+            //{
+            //    //If infinite, horizontal segment, check if query point lies on the segment.
+            //    if (current_x_position < segments[node->segment].get_left_point()->x)
+            //    {
+            //        node = node->left.get();
+            //    }
+            //    else if (current_x_position > segments[node->segment].get_right_point()->x)
+            //    {
+            //        node = node->right.get();
+            //    }
+            //    else
+            //    {
+            //        return node;
+            //    }
+            //}
+
+            if (current_x_position < y_intersect)
             {
                 node = node->left.get();
             }
-            else if (current_x_position > segments.at(node->segment).y_intersect(line_position))
+            else if (current_x_position > y_intersect)
             {
                 node = node->right.get();
             }
@@ -358,11 +378,30 @@ namespace Segment_Intersection_Sweep_Line
 
         while (node != nullptr)
         {
-            if (x_position < segments.at(node->segment).y_intersect(line_position))
+            Float y_intersect = segments[node->segment].y_intersect(line_position);
+
+            if (y_intersect.is_inf())
+            {
+                //If infinite, horizontal segment, check if event point lies on the segment.
+                if (x_position < segments[node->segment].get_left_point()->x)
+                {
+                    node = node->left.get();
+                }
+                else if (x_position > segments[node->segment].get_right_point()->x)
+                {
+                    node = node->right.get();
+                }
+                else
+                {
+                    return node;
+                }
+            }
+
+            if (x_position < y_intersect)
             {
                 node = node->left.get();
             }
-            else if (x_position > segments.at(node->segment).y_intersect(line_position))
+            else if (x_position > y_intersect)
             {
                 node = node->right.get();
             }
