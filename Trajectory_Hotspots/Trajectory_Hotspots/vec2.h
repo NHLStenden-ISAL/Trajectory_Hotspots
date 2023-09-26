@@ -72,7 +72,7 @@ public:
     static Float pseudo_angle(const Vec2& center, const Vec2& vec)
     {
         Vec2 angle_vec = vec - center;
-        Float p = (angle_vec.y / std::abs(angle_vec.x.get_value()) + std::abs(angle_vec.y.get_value())) + 1.f;
+        Float p = (angle_vec.y / (std::abs(angle_vec.x.get_value()) + std::abs(angle_vec.y.get_value()))) + 1.f;
 
         if (angle_vec.x < 0.f)
         {
