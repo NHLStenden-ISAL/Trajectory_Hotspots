@@ -129,7 +129,7 @@ namespace TestTrajectoryHotspots
                 Assert::Fail(L"middle_vert was not present");
             }
 
-            //The half-edge loop should contain four unique half-edges and contain all four half-edges in the current dcel
+            //The half-edge loop should contain four unique half-edges, all four half-edges in the current dcel
 
             const DCEL::DCEL_Half_Edge* he0_next = test_dcel.half_edges[0].get();
             const DCEL::DCEL_Half_Edge* he0_prev = test_dcel.half_edges[0].get();
@@ -176,7 +176,7 @@ namespace TestTrajectoryHotspots
             //are properly detected when they are both on the same side of the inserted segment. e.g:
             // ./
             // |\
-            // |
+            //   \ <-
 
             DCEL test_dcel;
 
@@ -193,6 +193,60 @@ namespace TestTrajectoryHotspots
             size_t vertex_count = test_dcel.vertex_count();
 
             Assert::AreEqual((size_t)4, vertex_count, L"Incorrect amount of total DCEL vertices.");
+
+            const DCEL::DCEL_Vertex* middle_vertex = nullptr;
+
+            //Check around the middle vertex:
+            for (const auto& v : test_dcel.vertices)
+            {
+                if (v->position == Vec2(6.f, 6.f))
+                {
+                    middle_vertex = v.get();
+                    break;
+                }
+            }
+
+            if (middle_vertex != nullptr)
+            {
+                std::vector<Vec2> correct_endpoints {segment_1.end, new_segment.start, segment_2.start};
+
+                //The target vertices of the adjacent half edges should include all other vertices
+                std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges_middle = middle_vertex->get_incident_half_edges();
+
+                size_t first_index = 0;
+                std::vector<Vec2> incident_targets;
+                for (size_t i = 0; i < incident_half_edges_middle.size(); i++)
+                {
+                    incident_targets.push_back(incident_half_edges_middle[i]->target()->position);
+
+                    if (incident_half_edges_middle[i]->target()->position == correct_endpoints[0])
+                    {
+                        first_index = i;
+                    }
+
+                }
+
+
+                Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), correct_endpoints.begin()), L"Incorrect endpoints around vertex.");
+
+                ;
+                //The origin vertex of the adjacent half edges should be the middle
+                for (auto& incident_half_edge : incident_half_edges_middle)
+                {
+                    Assert::AreEqual(middle_vertex->position, incident_half_edge->origin->position);
+                }
+
+                //Check if the ordering is also correct
+                std::rotate(incident_targets.begin(), incident_targets.begin(), incident_targets.end());
+
+                Assert::AreEqual(correct_endpoints, incident_targets);
+            }
+            else
+            {
+                Assert::Fail(L"middle_vert was not present");
+            }
+
+
         }
     };
 }
