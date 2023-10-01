@@ -108,4 +108,4 @@ bool point_right_of_segment(const Segment& segment, const Vec2& point);
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
 bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& overlap_start, Vec2& overlap_end);
 
-bool orientation_left_right(const Vec2& vec1, const Vec2& vec2);
+bool orientation_top_left(const Vec2& vec1, const Vec2& vec2);

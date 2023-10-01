@@ -410,18 +410,18 @@ bool collinear_overlap(const Segment& segment1, const Segment& segment2, Vec2& o
     return false;
 }
 
-//Returns if vec1 lies to the left of vec2, if they share an x axis it returns true if vec1 is above vec2.
-bool orientation_left_right(const Vec2& vec1, const Vec2& vec2)
+//Returns if vec2 lies to the left of vec1, if they share an x axis it returns true if vec2 is above vec1.
+bool orientation_top_left(const Vec2& vec1, const Vec2& vec2)
 {
     assert(vec1 != vec2);
 
-    //If vertical line, return true if line points down.
+    //If vertical line, return true if line points up.
     if (vec1.x == vec2.x)
     {
-        return vec1.y > vec2.y;
+        return vec2.y > vec1.y;
     }
 
-    if (vec1.x < vec2.x)
+    if (vec2.x < vec1.x)
     {
         return true;
     }

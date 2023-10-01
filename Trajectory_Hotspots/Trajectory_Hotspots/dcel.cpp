@@ -27,7 +27,7 @@ void DCEL::overlay_dcel(DCEL& other_dcel)
 
     for (size_t i = 0; i < this->half_edge_count(); i++)
     {
-        if (this->half_edges[i]->is_orientated_left_right())
+        if (this->half_edges[i]->is_orientated_top_left())
         {
             bool is_original_half_edge = i < original_half_edge_count;
             DCEL_edges.emplace_back(this->half_edges[i].get(), is_original_half_edge);
@@ -47,32 +47,32 @@ void DCEL::insert_segment(const Segment& segment)
 
     if (half_edges.empty())
     {
-        create_new_segment_records(segment);
+        create_free_segment_records(segment);
         return;
     }
-    else if (half_edges.size() == 2)
-    {
-        DCEL::DCEL_Half_Edge* new_half_edge = create_new_segment_records(segment);
-
-        Segment other_segment(half_edges[0]->origin->position, half_edges[1]->origin->position);
-
-        Vec2 intersection_point;
-        Segment::Intersection_Type segment_intersection_type = segment.intersects(other_segment, intersection_point);
-
-        switch (segment_intersection_type)
-        {
-        case Segment::Intersection_Type::point:
-            handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge);
-            break;
-        case Segment::Intersection_Type::collinear:
-            break;
-        case Segment::Intersection_Type::parallel:
-        case Segment::Intersection_Type::none:
-            return;
-        }
-
-        return;
-    }
+    //else if (half_edges.size() == 2)
+    //{
+    //    DCEL::DCEL_Half_Edge* new_half_edge = create_new_segment_records(segment);
+    //
+    //    Segment other_segment(half_edges[0]->origin->position, half_edges[1]->origin->position);
+    //
+    //    Vec2 intersection_point;
+    //    Segment::Intersection_Type segment_intersection_type = segment.intersects(other_segment, intersection_point);
+    //
+    //    switch (segment_intersection_type)
+    //    {
+    //    case Segment::Intersection_Type::point:
+    //        handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge);
+    //        break;
+    //    case Segment::Intersection_Type::collinear:
+    //        break;
+    //    case Segment::Intersection_Type::parallel:
+    //    case Segment::Intersection_Type::none:
+    //        return;
+    //    }
+    //
+    //    return;
+    //}
     else
     {
         DCEL dcel_with_single_segment;
@@ -85,7 +85,7 @@ void DCEL::insert_segment(const Segment& segment)
 //Creates two new half-edges and two new vertices based on the given segment.
 //The two half edges are each others twin, prev, and next.
 //Returns a pointer to one of the new half-edges.
-DCEL::DCEL_Half_Edge* DCEL::create_new_segment_records(const Segment& segment)
+DCEL::DCEL_Half_Edge* DCEL::create_free_segment_records(const Segment& segment)
 {
     vertices.reserve(vertices.size() + 2);
     const auto& start_vertex = vertices.emplace_back(std::make_unique<DCEL_Vertex>(segment.start));
@@ -105,6 +105,19 @@ DCEL::DCEL_Half_Edge* DCEL::create_new_segment_records(const Segment& segment)
     return new_half_edge_1.get();
 }
 
+DCEL::DCEL_Vertex* DCEL::get_vertex_at_position(const Vec2& position)
+{
+    for (const auto& vert : vertices)
+    {
+        if (vert->position == position)
+        {
+            return vert.get();
+        }
+    }
+
+    return nullptr;
+}
+
 void DCEL::handle_point_intersection(const Vec2& intersection_point, DCEL::DCEL_Half_Edge* old_half_edge, DCEL::DCEL_Half_Edge* new_half_edge)
 {
     DCEL_Vertex* old_dcel_endpoint = nullptr;
@@ -116,16 +129,6 @@ void DCEL::handle_point_intersection(const Vec2& intersection_point, DCEL::DCEL_
         if (old_dcel_endpoint && new_dcel_endpoint)
         {
             overlay_vertex_on_vertex(old_dcel_endpoint, new_dcel_endpoint);
-
-            //Overlay_vertex_on_vertex makes one of the newly added vertices redundant, so we can delete it.
-            if (new_dcel_endpoint == new_half_edge->origin)
-            {
-                vertices.erase(vertices.end() - 2);
-            }
-            else
-            {
-                vertices.pop_back();
-            }
         }
         else if (new_dcel_endpoint)
         {
@@ -220,7 +223,7 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
     CW_half_edge->prev = edge;
 
     //Find the other side, start from the end of the previous rotation (it is impossible for it to lie between the just added and CW half-edge)
-    vertex->find_adjacent_half_edges(twin, CW_half_edge, CW_half_edge, CCW_half_edge);
+    vertex->find_adjacent_half_edges(twin, CCW_half_edge, CW_half_edge, CCW_half_edge);
 
     new_half_edge_2->prev = CCW_half_edge->twin;
     CCW_half_edge->twin->next = new_half_edge_2.get();
@@ -344,7 +347,7 @@ std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() 
 
 void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
 {
-    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->prev->twin;
+    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->twin->next;
     DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
 
     //Keep rotating counterclockwise until we find the first half-edges clock and counterclockwise from the queried half-edge
@@ -359,15 +362,15 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
         //(this means we passed the queried half-edges angle)
         if (new_angle < prev_angle)
         {
-            CW_half_edge = current_half_edge;
-            CCW_half_edge = prev_half_edge;
+            CW_half_edge = prev_half_edge;
+            CCW_half_edge = current_half_edge;
             return;
         }
         else
         {
             prev_half_edge = current_half_edge;
             prev_angle = new_angle;
-            current_half_edge = current_half_edge->twin->next;
+            current_half_edge = current_half_edge->prev->twin;
         }
     } while (current_half_edge != starting_half_edge);
 
@@ -391,11 +394,11 @@ void DCEL::DCEL_Vertex::set_all_origins_to_this()
     }
 }
 
-//Returns if the half-edges origin lies to the left of its destination, 
-//if they share an x axis it returns true if its origin is above its destination.
-bool DCEL::DCEL_Half_Edge::is_orientated_left_right() const
+//Returns if the half-edges origin lies to the right of its destination, 
+//if they share an x axis it returns true if its origin is below its destination.
+bool DCEL::DCEL_Half_Edge::is_orientated_top_left() const
 {
-    return orientation_left_right(origin->position, twin->origin->position);
+    return orientation_top_left(origin->position, twin->origin->position);
 }
 
 Float DCEL::DCEL_Overlay_Edge_Wrapper::y_intersect(Float y) const
@@ -511,6 +514,8 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
                 old_vertex = DCEL_edges[first_event_segment].underlying_half_edge->target();
             }
 
+            assert(old_vertex->position == event_point);
+
             const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*old_vertex));
             new_vertex->set_all_origins_to_this();
 
@@ -536,6 +541,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         DCEL_Half_Edge* first_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
         ++interior_it;
         DCEL_Half_Edge* second_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
+        ++interior_it;
 
         dcel_vertex_at_event_point = overlay_edge_on_edge(first_intersecting_half_edge, second_intersecting_half_edge, event_point);
     }
@@ -552,6 +558,42 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
             dcel_vertex_at_event_point = DCEL_edges[intersection_results.top_segments[0]].get_top_dcel_vertex();
         }
 
+        bool first_dcel;
+        if (!intersection_results.top_segments.empty())
+        {
+            first_dcel = DCEL_edges[*intersection_results.top_segments.begin()].original_dcel;
+        }
+        else if (!intersection_results.bottom_segments.empty())
+        {
+            first_dcel = DCEL_edges[*intersection_results.bottom_segments.begin()].original_dcel;
+        }
+
+        //TODO:Clean this abomination up..
+
+        //Define lambda function that checks for the given element if it belongs to a different DCEL
+        auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
+        {
+            return  DCEL_edges[segment_index].original_dcel != first_dcel;
+        };
+
+        bool both_dcels = false;
+        if (std::any_of(intersection_results.top_segments.begin(), intersection_results.top_segments.end(), different_dcels))
+        {
+            both_dcels = true;
+        }
+
+        if (std::any_of(intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), different_dcels))
+        {
+            both_dcels = true;
+        }
+
+        if (!both_dcels)
+        {
+            const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*dcel_vertex_at_event_point));
+            new_vertex->set_all_origins_to_this();
+
+            dcel_vertex_at_event_point = new_vertex.get();
+        }
     }
 
     assert(dcel_vertex_at_event_point != nullptr);

@@ -72,7 +72,7 @@ public:
         DCEL_Half_Edge* next = nullptr;
         DCEL_Half_Edge* prev = nullptr;
 
-        bool is_orientated_left_right() const;
+        bool is_orientated_top_left() const;
     };
 
     //Wrapper class used for the overlay of two DCELs. Each instance represents an edge that overlaps with two twin half-edges.
@@ -124,7 +124,9 @@ public:
 
     void insert_segment(const Segment& segment);
 
-    DCEL::DCEL_Half_Edge* create_new_segment_records(const Segment& segment);
+    DCEL::DCEL_Half_Edge* create_free_segment_records(const Segment& segment);
+
+    DCEL_Vertex* get_vertex_at_position(const Vec2& position);
 
     void clear()
     {

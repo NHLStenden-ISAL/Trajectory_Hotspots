@@ -64,14 +64,17 @@ namespace TestTrajectoryHotspots
             //both segments split into two at the intersection point, doubling the amount of half-edge to 8
             Assert::AreEqual((size_t)8, test_dcel.half_edge_count(), L"Incorrect amount of total DCEL half-edges.");
 
-            //The last added vertex should be at the intersection point
+            //The intersection point should be a new vertex in the DCEL
             Vec2 intersection_point;
             new_segment.intersects(new_segment_2, intersection_point);
 
-            Assert::AreEqual(intersection_point, test_dcel.vertices[4]->position, L"Added (last) intersection point at incorrect position.");
+            Assert::IsTrue(std::find_if(test_dcel.vertices.begin(), test_dcel.vertices.end(), [&intersection_point](const std::unique_ptr<DCEL::DCEL_Vertex>& vert) { return vert->position == intersection_point; }) != test_dcel.vertices.end(), L"Intersection point not in DCEL.");
+
 
             //Both segments get split into two, so there should be four incident half-edges around the vertex at the intersection point
-            std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges = test_dcel.vertices[4]->get_incident_half_edges();
+            const DCEL::DCEL_Vertex* intersection_vertex = test_dcel.get_vertex_at_position(intersection_point);
+
+            std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges = intersection_vertex->get_incident_half_edges();
 
             Assert::AreEqual((size_t)4, incident_half_edges.size(), L"Incorrect amount of incident half-edges.");
 
@@ -208,7 +211,7 @@ namespace TestTrajectoryHotspots
 
             if (middle_vertex != nullptr)
             {
-                std::vector<Vec2> correct_endpoints {segment_1.end, new_segment.start, segment_2.start};
+                std::vector<Vec2> correct_endpoints {new_segment.start, segment_1.end, segment_2.start};
 
                 //The target vertices of the adjacent half edges should include all other vertices
                 std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges_middle = middle_vertex->get_incident_half_edges();
@@ -237,7 +240,7 @@ namespace TestTrajectoryHotspots
                 }
 
                 //Check if the ordering is also correct
-                std::rotate(incident_targets.begin(), incident_targets.begin(), incident_targets.end());
+                std::rotate(incident_targets.begin(), incident_targets.begin() + first_index, incident_targets.end());
 
                 Assert::AreEqual(correct_endpoints, incident_targets);
             }
@@ -245,6 +248,27 @@ namespace TestTrajectoryHotspots
             {
                 Assert::Fail(L"middle_vert was not present");
             }
+        }
+
+        TEST_METHOD(DCEL_overlay_diamond)
+        {
+            Vec2 north(10.f, 14.f);
+            Vec2 west(8.f, 10.f);
+            Vec2 south(10.f, 6.f);
+            Vec2 east(12.f, 10.f);
+
+            std::vector west_edges{Segment(north, west), Segment(west, south)};
+            std::vector east_edges{Segment(north, east), Segment(east, south)};
+
+            DCEL west_side;
+            west_side.insert_segment(west_edges[0]);
+            west_side.insert_segment(west_edges[1]);
+
+            DCEL east_side;
+            east_side.insert_segment(east_edges[0]);
+            east_side.insert_segment(east_edges[1]);
+
+            west_side.overlay_dcel(east_side);
 
 
         }
