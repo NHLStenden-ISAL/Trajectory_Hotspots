@@ -51,5 +51,10 @@ Vec2 Vec2::operator/=(const Float& scalar) const { return Vec2(x / scalar, y / s
 bool Vec2::operator==(const Vec2& operand) const { return x == operand.x && y == operand.y; }
 bool Vec2::operator!=(const Vec2& operand) const { return !(*this == operand); }
 
+bool Vec2::operator<(const Vec2& operand) const { return x < operand.x && y < operand.y; }
+bool Vec2::operator<=(const Vec2& operand) const { return x <= operand.x && y <= operand.y; }
+bool Vec2::operator>(const Vec2& operand) const { return x > operand.x && y > operand.y; }
+bool Vec2::operator>=(const Vec2& operand) const { return x >= operand.x && y >= operand.y; }
+
 Vec2 operator*(const Float& scalar, const Vec2& vec) { return Vec2(vec.x * scalar, vec.y * scalar); }
 Vec2 operator/(const Float& scalar, const Vec2& vec) { return Vec2(vec.x / scalar, vec.y / scalar); }

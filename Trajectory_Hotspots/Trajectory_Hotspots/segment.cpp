@@ -287,7 +287,9 @@ bool Segment::operator==(const Segment& operand) const
     return (start == operand.start && end == operand.end) || (end == operand.start && start == operand.end);
 }
 
-bool Segment::operator!=(const Segment& operand) const
-{
-    return !(*this == operand);;
-}
+bool Segment::operator!=(const Segment& operand) const { return !(*this == operand); }
+
+bool Segment::operator<(const Segment& operand) const { return start < operand.start && end < operand.end; }
+bool Segment::operator<=(const Segment& operand) const { return start <= operand.start && end <= operand.end; }
+bool Segment::operator>(const Segment& operand) const { return start > operand.start && end > operand.end; }
+bool Segment::operator>=(const Segment& operand) const { return start >= operand.start && end >= operand.end; }

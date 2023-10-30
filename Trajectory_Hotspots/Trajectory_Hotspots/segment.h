@@ -37,6 +37,11 @@ public:
 
     bool operator==(const Segment& operand) const;
     bool operator!=(const Segment& operand) const;
+    
+    bool operator<(const Segment& operand) const;
+    bool operator<=(const Segment& operand) const;
+    bool operator>(const Segment& operand) const;
+    bool operator>=(const Segment& operand) const;
 
     Float length() const;
     Float squared_length() const;
