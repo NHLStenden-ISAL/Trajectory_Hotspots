@@ -34,9 +34,14 @@ public:
     Vec2 operator-=(const Vec2& other) const;
     Vec2 operator*=(const Float& scalar) const;
     Vec2 operator/=(const Float& scalar) const;
-
+    
     bool operator==(const Vec2& operand) const;
     bool operator!=(const Vec2& operand) const;
+    
+    bool operator<(const Vec2& operand) const;
+    bool operator<=(const Vec2& operand) const;
+    bool operator>(const Vec2& operand) const;
+    bool operator>=(const Vec2& operand) const;
 
     Float x;
     Float y;

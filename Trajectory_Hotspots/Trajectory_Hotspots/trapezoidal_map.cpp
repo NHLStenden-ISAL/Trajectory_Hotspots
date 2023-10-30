@@ -829,7 +829,7 @@ void Trapezoidal_Map::add_overlapping_segment(const std::vector<Trapezoidal_Leaf
 //Returns the intersected trapezoids ordered from bottom to top
 std::vector<Trapezoidal_Leaf_Node*> Trapezoidal_Map::follow_segment(const Segment& query_segment)
 {
-    assert(query_segment.start.y < query_segment.end.y);
+    assert(query_segment.start.y <= query_segment.end.y);
 
     std::vector<Trapezoidal_Leaf_Node*> intersecting_trapezoids;
 
