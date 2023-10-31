@@ -18,7 +18,7 @@ public:
     {
     }
 
-    AABB(const Float min_x, const Float min_y, const Float max_x, const Float max_y) :
+    AABB(const Float& min_x, const Float& min_y, const Float& max_x, const Float& max_y) :
         min(min_x, min_y),
         max(max_x, max_y)
     {
@@ -44,11 +44,11 @@ public:
     //Combine two AABBs with each other by keeping the extremes in all four directions
     static AABB combine(const AABB& a, const AABB& b)
     {
-        Float min_x = std::min(a.min.x, b.min.x);
-        Float min_y = std::min(a.min.y, b.min.y);
+        const Float min_x = std::min(a.min.x, b.min.x);
+        const Float min_y = std::min(a.min.y, b.min.y);
 
-        Float max_x = std::max(a.max.x, b.max.x);
-        Float max_y = std::max(a.max.y, b.max.y);
+        const Float max_x = std::max(a.max.x, b.max.x);
+        const Float max_y = std::max(a.max.y, b.max.y);
 
         return AABB(Vec2(min_x, min_y), Vec2(max_x, max_y));
     }
@@ -101,6 +101,19 @@ public:
         return std::max(width(), height());
     }
 
+    AABB operator+(const AABB& other) const;
+    AABB operator-(const AABB& other) const;
+    AABB operator*(const Float& scalar) const;
+    AABB operator/(const Float& scalar) const;
+
+    AABB& operator+=(const AABB& other);
+    AABB& operator-=(const AABB& other);
+    AABB& operator*=(const Float& scalar);
+    AABB& operator/=(const Float& scalar);
+
+    AABB operator-() const;
+    
+    
     Vec2 min;
     Vec2 max;
 

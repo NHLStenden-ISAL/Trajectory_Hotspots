@@ -12,24 +12,24 @@ public:
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const Float start_t, const Float end_t) :
+    Segment(const Vec2& start, const Vec2& end, const Float& start_t, const Float& end_t) :
         start(start), end(end), start_t(start_t), end_t(end_t)
     {
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const Float start_t) :
+    Segment(const Vec2& start, const Vec2& end, const Float& start_t) :
         start(start), end(end), start_t(start_t)
     {
         end_t = start_t + this->length();
     }
 
-    Segment(const Vec2 start, const Vec2 end) :
+    Segment(const Vec2& start, const Vec2& end) :
         start(start), end(end), start_t(0.f), end_t(0.f)
     {
     }
 
-    Segment(const Float start_x, const Float start_y, const Float end_x, const Float end_y, const Float start_t, const Float end_t) :
+    Segment(const Float& start_x, const Float& start_y, const Float& end_x, const Float& end_y, const Float& start_t, const Float& end_t) :
         start(start_x, start_y), end(end_x, end_y), start_t(start_t), end_t(end_t)
     {
 
@@ -47,20 +47,20 @@ public:
     Float squared_length() const;
 
     //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
-    Float x_intersect(Float x) const;
+    Float x_intersect(const Float& x) const;
     //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
-    Float y_intersect(Float y) const;
+    Float y_intersect(const Float& y) const;
 
     //If the vertical line at position x intersects the segment, gets the y coordinate of the intersection
     bool x_intersects(const Float x, Float& intersection_point_y) const;
     //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
-    bool y_intersects(const Float y, Float& intersection_point_x) const;
+    bool y_intersects(const Float& y, Float& intersection_point_x) const;
 
-    Float get_time_at_x(const Float x) const;
-    Float get_time_at_y(const Float y) const;
+    Float get_time_at_x(const Float& x) const;
+    Float get_time_at_y(const Float& y) const;
     Float get_time_at_point(const Vec2& point) const;
 
-    Vec2 get_point_at_time(const Float time) const;
+    Vec2 get_point_at_time(const Float& time) const;
 
     const Vec2* get_bottom_point() const;
     const Vec2* get_top_point() const;

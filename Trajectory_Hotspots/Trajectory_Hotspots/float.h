@@ -4,12 +4,12 @@ class Float
 {
 public:
     Float() {};
-    Float(float value) : value(value) {};
+    Float(const float value) : value(value) {};
     Float(const Float& other) : value(other.value) {};
     ~Float() {};
 
     float get_value() const { return value; }
-    float set_value(float value) { this->value = value; }
+    float set_value(const float value) { this->value = value; }
 
     Float& operator=(const Float& other);
     Float& operator=(float value);

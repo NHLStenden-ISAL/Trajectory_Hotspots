@@ -5,13 +5,13 @@
 
 Float Segment::length() const
 {
-    Vec2 distance_vector = start - end;
+    const Vec2 distance_vector = start - end;
     return distance_vector.length();
 }
 
 Float Segment::squared_length() const
 {
-    Vec2 distance_vector = start - end;
+    const Vec2 distance_vector = start - end;
     return distance_vector.squared_length();
 }
 
@@ -38,7 +38,7 @@ const Vec2* Segment::get_top_point() const
     {
         return &end;
     }
-
+return start.y > end.y ? &start : &end;
 }
 
 const Vec2* Segment::get_left_point() const
@@ -128,8 +128,8 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
     const Float start_axis_difference = axis ? start_segment.end.x - start_segment.start.x : start_segment.end.y - start_segment.start.y;
     const Float end_axis_difference = axis ? end_segment.end.x - end_segment.start.x : end_segment.end.y - end_segment.start.y;
 
-    Float start_length = start_segment.length();
-    Float end_length = end_segment.length();
+    const Float start_length = start_segment.length();
+    const Float end_length = end_segment.length();
 
     const Float determinant = start_axis_difference * end_length - end_axis_difference * start_length;
 
@@ -162,9 +162,9 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
 }
 
 //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
-Float Segment::x_intersect(Float x) const
+Float Segment::x_intersect(const Float& x) const
 {
-    Float x_diff = end.x - start.x;
+    const Float x_diff = end.x - start.x;
 
     //Vertical segment, either no or infinite intersections
     if (x_diff == 0.f)
@@ -173,7 +173,7 @@ Float Segment::x_intersect(Float x) const
     }
     else
     {
-        Float segment_to_x = x - start.x;
+        const Float segment_to_x = x - start.x;
         Float intersection_y = start.y + ((segment_to_x / x_diff) * (end.y - start.y));
 
         return intersection_y;
@@ -181,9 +181,9 @@ Float Segment::x_intersect(Float x) const
 }
 
 //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
-Float Segment::y_intersect(Float y) const
+Float Segment::y_intersect(const Float& y) const
 {
-    Float y_diff = end.y - start.y;
+    const Float y_diff = end.y - start.y;
 
     //Horizontal segment, either no or infinite intersections
     if (y_diff == 0.f)
@@ -192,7 +192,7 @@ Float Segment::y_intersect(Float y) const
     }
     else
     {
-        Float segment_to_y = y - start.y;
+        const Float segment_to_y = y - start.y;
         Float intersection_x = start.x + ((segment_to_y / y_diff) * (end.x - start.x));
 
         return intersection_x;
@@ -219,7 +219,7 @@ bool Segment::x_intersects(const Float x, Float& intersection_point_y) const
 }
 
 //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
-bool Segment::y_intersects(const Float y, Float& intersection_point_x) const
+bool Segment::y_intersects(const Float& y, Float& intersection_point_x) const
 {
     //If the query line is above or below segment, return false
     if (y < start.y && y < end.y)
@@ -237,31 +237,31 @@ bool Segment::y_intersects(const Float y, Float& intersection_point_x) const
     return true;
 }
 
-Float Segment::get_time_at_x(const Float x) const
+Float Segment::get_time_at_x(const Float& x) const
 {
-    Float x_fraction = (x - start.x) / (end.x - start.x);
+    const Float x_fraction = (x - start.x) / (end.x - start.x);
     return start_t + (x_fraction * (end_t - start_t));
 }
 
-Float Segment::get_time_at_y(const Float y) const
+Float Segment::get_time_at_y(const Float& y) const
 {
-    Float y_fraction = (y - start.y) / (end.y - start.y);
+    const Float y_fraction = (y - start.y) / (end.y - start.y);
     return start_t + (y_fraction * (end_t - start_t));
 }
 
 Float Segment::get_time_at_point(const Vec2& point) const
 {
-    Vec2 start_to_point = point - start;
-    Float time_fraction = start_to_point.length() / length();
+    const Vec2 start_to_point = point - start;
+    const Float time_fraction = start_to_point.length() / length();
     return start_t + (time_fraction * (end_t - start_t));
 }
 
 //Returns the point on the segment at a given time
-Vec2 Segment::get_point_at_time(const Float time) const
+Vec2 Segment::get_point_at_time(const Float& time) const
 {
-    Float fraction = (time - start_t) / (end_t - start_t);
+    const Float fraction = (time - start_t) / (end_t - start_t);
 
-    Vec2 vector_to_point = (end - start) * fraction;
+    const Vec2 vector_to_point = (end - start) * fraction;
 
     return (start + vector_to_point);
 }
