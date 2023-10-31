@@ -38,7 +38,6 @@ const Vec2* Segment::get_top_point() const
     {
         return &end;
     }
-return start.y > end.y ? &start : &end;
 }
 
 const Vec2* Segment::get_left_point() const
