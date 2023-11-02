@@ -5,13 +5,13 @@
 //{
 //}
 
-//Build the tree bottom-up from a lsit of ordered segments
+//Build the tree bottom-up from a list of ordered segments
 Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& ordered_segments, const size_t start_index, const size_t end_index) : segment_list(ordered_segments)
 {
     if (end_index == start_index)
     {
         //Leaf node
-        segment_index = (int)start_index;
+        segment_index = static_cast<int>(start_index);
 
         const Segment& segment = segment_list.at(segment_index);
 
@@ -40,7 +40,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
     }
 }
 
-//Query tree, reutrns bounding box from start_t to end_t
+//Query tree, returns bounding box from start_t to end_t
 AABB Segment_Search_Tree_Node::query(const Float start_t, const Float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?
@@ -202,5 +202,4 @@ int Segment_Search_Tree_Node::query(const Float t) const
 
 Segment_Search_Tree::Segment_Search_Tree(const std::vector<Segment>& ordered_segments) : root(ordered_segments, 0, ordered_segments.size() - 1)
 {
-
 }

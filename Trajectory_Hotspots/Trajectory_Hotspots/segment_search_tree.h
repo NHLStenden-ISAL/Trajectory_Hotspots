@@ -40,7 +40,7 @@ public:
     //Build the tree bottom-up from a list of ordered segments
     Segment_Search_Tree(const std::vector<Segment>& ordered_segments);
 
-    //Query tree, reutrns bounding box from start_t to end_t
+    //Query tree, returns bounding box from start_t to end_t
     AABB query(const Float start_t, const Float end_t) const
     {
         return root.query(start_t, end_t);

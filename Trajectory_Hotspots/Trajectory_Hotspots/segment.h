@@ -12,19 +12,19 @@ public:
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const Float start_t, const Float end_t) :
+    Segment(const Vec2& start, const Vec2& end, const Float start_t, const Float end_t) :
         start(start), end(end), start_t(start_t), end_t(end_t)
     {
 
     }
 
-    Segment(const Vec2 start, const Vec2 end, const Float start_t) :
+    Segment(const Vec2& start, const Vec2& end, const Float start_t) :
         start(start), end(end), start_t(start_t)
     {
         end_t = start_t + this->length();
     }
 
-    Segment(const Vec2 start, const Vec2 end) :
+    Segment(const Vec2& start, const Vec2& end) :
         start(start), end(end), start_t(0.f), end_t(0.f)
     {
     }

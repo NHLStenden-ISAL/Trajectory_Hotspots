@@ -81,7 +81,7 @@ Float& Float::operator=(const Float& other)
     return *this;
 }
 
-Float& Float::operator=(float new_value)
+Float& Float::operator=(const float new_value)
 {
     this->value = new_value;
     return *this;
@@ -92,7 +92,7 @@ bool Float::operator==(const Float& other) const
     return nearly_equal(value, other.value);
 }
 
-bool Float::operator==(float value) const
+bool Float::operator==(const float value) const
 {
     return nearly_equal(this->value, value);
 }
@@ -102,7 +102,7 @@ bool Float::operator!=(const Float& other) const
     return !nearly_equal(this->value, other.value);
 }
 
-bool Float::operator!=(float value) const
+bool Float::operator!=(const float value) const
 {
     return !nearly_equal(this->value, value);
 }
@@ -112,10 +112,9 @@ bool Float::operator<(const Float& other) const
     return !nearly_greater_or_equal(value, other.value);
 }
 
-bool Float::operator<(float value) const
+bool Float::operator<(const float value) const
 {
     return !nearly_greater_or_equal(this->value, value);
-
 }
 
 bool Float::operator>(const Float& other) const
@@ -123,7 +122,7 @@ bool Float::operator>(const Float& other) const
     return nearly_greater(this->value, other.value);
 }
 
-bool Float::operator>(float value) const
+bool Float::operator>(const float value) const
 {
     return nearly_greater(this->value, value);
 }
@@ -133,10 +132,9 @@ bool Float::operator<=(const Float& other) const
     return nearly_less_or_equal(this->value, other.value);
 }
 
-bool Float::operator<=(float value) const
+bool Float::operator<=(const float value) const
 {
     return nearly_less_or_equal(this->value, value);
-
 }
 
 bool Float::operator>=(const Float& other) const
@@ -144,7 +142,7 @@ bool Float::operator>=(const Float& other) const
     return nearly_greater_or_equal(this->value, other.value);
 }
 
-bool Float::operator>=(float value) const
+bool Float::operator>=(const float value) const
 {
     return nearly_greater_or_equal(this->value, value);
 }
@@ -154,7 +152,7 @@ Float Float::operator+(const Float& other) const
     return Float(this->value + other.value);
 }
 
-Float Float::operator+(float value) const
+Float Float::operator+(const float value) const
 {
     return Float(this->value + value);
 }
@@ -164,7 +162,7 @@ Float Float::operator-(const Float& other) const
     return Float(this->value - other.value);
 }
 
-Float Float::operator-(float value) const
+Float Float::operator-(const float value) const
 {
     return Float(this->value - value);
 }
@@ -172,25 +170,21 @@ Float Float::operator-(float value) const
 Float Float::operator*(const Float& other) const
 {
     return Float(this->value * other.value);
-
 }
 
-Float Float::operator*(float value) const
+Float Float::operator*(const float value) const
 {
     return Float(this->value * value);
-
 }
 
 Float Float::operator/(const Float& other) const
 {
     return Float(this->value / other.value);
-
 }
 
-Float Float::operator/(float value) const
+Float Float::operator/(const float value) const
 {
     return Float(this->value / value);
-
 }
 
 Float& Float::operator+=(const Float& other)
@@ -199,9 +193,9 @@ Float& Float::operator+=(const Float& other)
     return *this;
 }
 
-Float& Float::operator+=(float value)
+Float& Float::operator+=(const float value)
 {
-    value += value;
+    this->value += value;
     return *this;
 }
 
@@ -211,9 +205,9 @@ Float& Float::operator-=(const Float& other)
     return *this;
 }
 
-Float& Float::operator-=(float value)
+Float& Float::operator-=(const float value)
 {
-    value -= value;
+    this->value -= value;
     return *this;
 }
 
@@ -223,9 +217,9 @@ Float& Float::operator*=(const Float& other)
     return *this;
 }
 
-Float& Float::operator*=(float value)
+Float& Float::operator*=(const float value)
 {
-    value *= value;
+    this->value *= value;
     return *this;
 }
 
@@ -235,9 +229,9 @@ Float& Float::operator/=(const Float& other)
     return *this;
 }
 
-Float& Float::operator/=(float value)
+Float& Float::operator/=(const float value)
 {
-    value /= value;
+    this->value /= value;
     return *this;
 }
 
