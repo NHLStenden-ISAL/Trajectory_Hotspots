@@ -18,7 +18,7 @@ public:
     {
     }
 
-    AABB(const Float& min_x, const Float& min_y, const Float& max_x, const Float& max_y) :
+    AABB(const Float min_x, const Float min_y, const Float max_x, const Float max_y) :
         min(min_x, min_y),
         max(max_x, max_y)
     {
@@ -103,13 +103,13 @@ public:
 
     AABB operator+(const AABB& other) const;
     AABB operator-(const AABB& other) const;
-    AABB operator*(const Float& scalar) const;
-    AABB operator/(const Float& scalar) const;
+    AABB operator*(const Float scalar) const;
+    AABB operator/(const Float scalar) const;
 
     AABB& operator+=(const AABB& other);
     AABB& operator-=(const AABB& other);
-    AABB& operator*=(const Float& scalar);
-    AABB& operator/=(const Float& scalar);
+    AABB& operator*=(const Float scalar);
+    AABB& operator/=(const Float scalar);
 
     AABB operator-() const;
     

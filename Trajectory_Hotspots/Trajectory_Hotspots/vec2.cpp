@@ -70,8 +70,8 @@ Vec2& Vec2::operator/=(const Float& scalar)
     {
         throw std::runtime_error("Can't divide by zero");
     }
-    x *= scalar;
-    y *= scalar;
+    x /= scalar;
+    y /= scalar;
     return *this;
 }
 bool Vec2::operator==(const Vec2& operand) const { return x == operand.x && y == operand.y; }

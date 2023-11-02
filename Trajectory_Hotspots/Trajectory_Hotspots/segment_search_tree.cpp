@@ -41,7 +41,7 @@ Segment_Search_Tree_Node::Segment_Search_Tree_Node(const std::vector<Segment>& o
 }
 
 //Query tree, returns bounding box from start_t to end_t
-AABB Segment_Search_Tree_Node::query(const Float& start_t, const Float& end_t) const
+AABB Segment_Search_Tree_Node::query(const Float start_t, const Float end_t) const
 {
     //TODO: Pass bounding box as ref to avoid construction?
     AABB bounding_box(std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::max() / 2.f, std::numeric_limits<float>::lowest() / 2.f, std::numeric_limits<float>::lowest() / 2.f);
@@ -90,7 +90,7 @@ AABB Segment_Search_Tree_Node::query(const Float& start_t, const Float& end_t) c
 }
 
 //Query tree, returns bounding box from start_t to the last point contained in the (sub)tree
-AABB Segment_Search_Tree_Node::query_left(const Float& start_t) const
+AABB Segment_Search_Tree_Node::query_left(const Float start_t) const
 {
     if (right != nullptr)
     {
@@ -132,7 +132,7 @@ AABB Segment_Search_Tree_Node::query_left(const Float& start_t) const
 }
 
 //Query tree, returns bounding box from the first point in the (sub)tree to end_t
-AABB Segment_Search_Tree_Node::query_right(const Float& end_t) const
+AABB Segment_Search_Tree_Node::query_right(const Float end_t) const
 {
     if (left != nullptr)
     {
@@ -172,7 +172,7 @@ AABB Segment_Search_Tree_Node::query_right(const Float& end_t) const
     return AABB(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 }
 
-int Segment_Search_Tree_Node::query(const Float& t) const
+int Segment_Search_Tree_Node::query(const Float t) const
 {
     if (left != nullptr)
     {

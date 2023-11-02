@@ -161,7 +161,7 @@ bool Segment::get_points_on_same_axis_with_distance_l(const Segment& start_segme
 }
 
 //Returns the y-coordinate of the intersection with the vertical line at x, or infinity if it lies on the segment
-Float Segment::x_intersect(const Float& x) const
+Float Segment::x_intersect(const Float x) const
 {
     const Float x_diff = end.x - start.x;
 
@@ -180,7 +180,7 @@ Float Segment::x_intersect(const Float& x) const
 }
 
 //Returns the x-coordinate of the intersection with the horizontal line at y, or infinity if it lies on the segment
-Float Segment::y_intersect(const Float& y) const
+Float Segment::y_intersect(const Float y) const
 {
     const Float y_diff = end.y - start.y;
 
@@ -218,7 +218,7 @@ bool Segment::x_intersects(const Float x, Float& intersection_point_y) const
 }
 
 //If the horizontal line at position y intersects the segment, gets the x coordinate of the intersection
-bool Segment::y_intersects(const Float& y, Float& intersection_point_x) const
+bool Segment::y_intersects(const Float y, Float& intersection_point_x) const
 {
     //If the query line is above or below segment, return false
     if (y < start.y && y < end.y)
@@ -236,13 +236,13 @@ bool Segment::y_intersects(const Float& y, Float& intersection_point_x) const
     return true;
 }
 
-Float Segment::get_time_at_x(const Float& x) const
+Float Segment::get_time_at_x(const Float x) const
 {
     const Float x_fraction = (x - start.x) / (end.x - start.x);
     return start_t + (x_fraction * (end_t - start_t));
 }
 
-Float Segment::get_time_at_y(const Float& y) const
+Float Segment::get_time_at_y(const Float y) const
 {
     const Float y_fraction = (y - start.y) / (end.y - start.y);
     return start_t + (y_fraction * (end_t - start_t));
@@ -256,7 +256,7 @@ Float Segment::get_time_at_point(const Vec2& point) const
 }
 
 //Returns the point on the segment at a given time
-Vec2 Segment::get_point_at_time(const Float& time) const
+Vec2 Segment::get_point_at_time(const Float time) const
 {
     const Float fraction = (time - start_t) / (end_t - start_t);
 
