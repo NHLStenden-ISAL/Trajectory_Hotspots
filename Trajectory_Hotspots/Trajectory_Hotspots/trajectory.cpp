@@ -48,7 +48,108 @@ AABB Trajectory::get_hotspot_fixed_length(Float length) const
 
 AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
 {
-    return AABB();
+    Float longest_valid_subtrajectory(0.f);
+    AABB optimal_hotspot;
+
+    //Setup trapezoidal maps representing the graphs with the x or y coördinates on the y-axis and time on the x-axis
+    std::vector<Segment> x_segments;
+    std::vector<Segment> y_segments;
+
+    for (auto& trajectory_segment : trajectory_segments)
+    {
+        x_segments.emplace_back(Vec2(trajectory_segment.start_t, trajectory_segment.start.x), Vec2(trajectory_segment.end_t, trajectory_segment.end.x));
+        y_segments.emplace_back(Vec2(trajectory_segment.start_t, trajectory_segment.start.y), Vec2(trajectory_segment.end_t, trajectory_segment.end.y));
+    }
+
+    Trapezoidal_Map trapezoidal_map_x(x_segments);
+    Trapezoidal_Map trapezoidal_map_y(y_segments);
+
+    //Setup segment search tree
+    Segment_Search_Tree segment_tree(trajectory_segments);
+
+    //Loop through all vertices and query trapezoidal maps and the segment search tree
+    for (size_t i = 0; i < trajectory_segments.size(); i++)
+    {
+        Vec2 current_x_vert = x_segments[i].start;
+        Vec2 current_y_vert = y_segments[i].start;
+
+        //We slightly diverge from the paper here by tracing left and right from both the vector and vector + or - radius and taking the shortest of both.
+        //instead of going up from the found point on the left and tracing back. 
+        //Because it gives the same answer and we remove a number of checks.
+
+        //Test vertical lines
+        //Test left
+        Vec2 vert_at_radius(current_x_vert.x, current_x_vert.y - radius);
+        frc_test_between_lines(trapezoidal_map_x, current_x_vert, vert_at_radius, false, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
+
+        //Test right
+        vert_at_radius = Vec2(current_x_vert.x, current_x_vert.y + radius);
+        frc_test_between_lines(trapezoidal_map_x, current_x_vert, vert_at_radius, true, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
+
+        //Test horizontal lines
+        //Test below
+        Vec2 vert_at_radius(current_y_vert.x, current_y_vert.y - radius);
+        frc_test_between_lines(trapezoidal_map_y, current_y_vert, vert_at_radius, false, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
+
+        //Test above
+        vert_at_radius = Vec2(current_y_vert.x, current_y_vert.y + radius);
+        frc_test_between_lines(trapezoidal_map_y, current_y_vert, vert_at_radius, true, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
+    }
+
+    //TODO: Don't forget last point? Or can we skip?
+    //TODO: Remove bool?
+
+    return optimal_hotspot;
+}
+
+void Trajectory::frc_test_between_lines(Trapezoidal_Map& trapezoidal_map, Vec2& current_vert, Vec2& vert_at_radius, bool above, Segment_Search_Tree& segment_tree, Float& radius, Float& longest_valid_subtrajectory, AABB& optimal_hotspot) const
+{
+    Float subtrajectory_start;
+    Float subtrajectory_end;
+
+    frc_get_subtrajectory_start_and_end(trapezoidal_map, current_vert, vert_at_radius, above, subtrajectory_start, subtrajectory_end);
+
+    if ((subtrajectory_end - subtrajectory_start) > longest_valid_subtrajectory)
+    {
+        AABB subtrajectory_bounding_box = segment_tree.query(subtrajectory_start, subtrajectory_end);
+
+        if (subtrajectory_bounding_box.max_size() <= radius)
+        {
+            longest_valid_subtrajectory = (subtrajectory_end - subtrajectory_start);
+            optimal_hotspot = subtrajectory_bounding_box;
+        }
+    }
+}
+
+void Trajectory::frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trapezoidal_map, const Vec2& current_vert, const Vec2& vert_at_radius, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const
+{
+    //TODO: nullptr on left/right is everything before? -> Never nullptr? Check for infinity points? -> Add is_at_infinite_edge function to trapezoidal_map?
+
+    const Segment* left_segment = nullptr;
+    const Segment* right_segment = nullptr;
+    trapezoidal_map.trace_left_right(current_vert, !above_point, left_segment, right_segment);
+
+    if (left_segment != nullptr && right_segment != nullptr)
+    {
+        Float start_t = left_segment->get_time_at_y(current_vert.y);
+        Float end_t = right_segment->get_time_at_y(current_vert.y);
+
+
+        //trace at radius
+        const Segment* left_segment_plus = nullptr;
+        const Segment* right_segment_plus = nullptr;
+
+        trapezoidal_map.trace_left_right(vert_at_radius, above_point, left_segment_plus, right_segment_plus);
+
+        if (left_segment_plus != nullptr && right_segment_plus != nullptr)
+        {
+            Float start_t_plus = left_segment->get_time_at_y(current_vert.y);
+            Float end_t_plus = right_segment->get_time_at_y(current_vert.y);
+
+            subtrajectory_start = (start_t_plus < start_t) ? start_t_plus : start_t;
+            subtrajectory_end = (end_t_plus < end_t) ? end_t_plus : end_t;
+        }
+    }
 }
 
 //Find the smallest hotspot that contains a subtrajectory with at least the given length inside of it
