@@ -34,7 +34,7 @@ int32_t Float::ulps_distance(const float a, const float b) const
 
 
 //Check for nearly equal float values
-bool Float::nearly_equal(const float a, const float b const int ulpsEpsilon) const
+bool Float::nearly_equal(const float a, const float b, const int ulpsEpsilon) const
 {
     // Handle the near-zero case.
     const float difference = fabs(a - b);
