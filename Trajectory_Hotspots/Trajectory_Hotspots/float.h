@@ -8,7 +8,7 @@ public:
     Float(const Float& other) : value(other.value) {};
     ~Float() {};
 
-    static float fixed_epsilon = 0.0000001f;
+    static inline float fixed_epsilon = 0.0000001f;
 
     float get_value() const { return value; }
     float set_value(const float value) { this->value = value; }
