@@ -51,7 +51,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
     Float longest_valid_subtrajectory(0.f);
     AABB optimal_hotspot;
 
-    //Setup trapezoidal maps representing the graphs with the x or y coördinates on the y-axis and time on the x-axis
+    //Setup trapezoidal maps representing the graphs with the x or y coï¿½rdinates on the y-axis and time on the x-axis
     std::vector<Segment> x_segments;
     std::vector<Segment> y_segments;
 
@@ -88,7 +88,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
 
         //Test horizontal lines
         //Test below
-        Vec2 vert_at_radius(current_y_vert.x, current_y_vert.y - radius);
+        vert_at_radius = Vec2(current_y_vert.x, current_y_vert.y - radius);
         frc_test_between_lines(trapezoidal_map_y, current_y_vert, vert_at_radius, false, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
 
         //Test above

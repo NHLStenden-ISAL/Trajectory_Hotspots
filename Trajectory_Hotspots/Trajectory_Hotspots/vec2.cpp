@@ -37,7 +37,11 @@ Vec2 Vec2::normalized() const
 }
 
 Vec2 Vec2::operator+(const Vec2& other) const { return Vec2(x + other.x, y + other.y); }
+Vec2 Vec2::operator+(const Float& n) const { return Vec2(x + n, y + n); }
+
 Vec2 Vec2::operator-(const Vec2& other) const { return Vec2(x - other.x, y - other.y); }
+Vec2 Vec2::operator-(const Float& n) const { return Vec2(x - n, y - n); }
+
 Vec2 Vec2::operator*(const Float& scalar) const { return Vec2(x * scalar, y * scalar); }
 Vec2 Vec2::operator/(const Float& scalar) const { return Vec2(x / scalar, y / scalar); }
 

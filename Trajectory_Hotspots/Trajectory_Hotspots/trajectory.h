@@ -5,7 +5,7 @@
 class Trajectory
 {
 public:
-
+    Trajectory(){}
     Trajectory(std::vector<Segment>& ordered_segments);
     Trajectory(const std::vector<Vec2>& ordered_points);
 
