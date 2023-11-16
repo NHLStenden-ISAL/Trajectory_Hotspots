@@ -24,7 +24,11 @@ public:
     Vec2 normalized() const;
 
     Vec2 operator+(const Vec2& other) const;
+    Vec2 operator+(const Float& n) const;
+    
     Vec2 operator-(const Vec2& other) const;
+    Vec2 operator-(const Float& n) const;
+
     Vec2 operator*(const Float& scalar) const;
     Vec2 operator/(const Float& scalar) const;
 

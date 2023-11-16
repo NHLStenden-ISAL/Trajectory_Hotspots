@@ -8,6 +8,8 @@ public:
     Float(const Float& other) : value(other.value) {};
     ~Float() {};
 
+    static inline float fixed_epsilon = 0.0000001f;
+
     float get_value() const { return value; }
     float set_value(const float value) { this->value = value; }
 
@@ -69,7 +71,7 @@ private:
     int32_t ulps_distance(const float a, const float b) const;
 
     //Check for nearly equal float values
-    bool nearly_equal(const float a, const float b, const float fixedEpsilon = 0.0000001f, const int ulpsEpsilon = 3) const;
+    bool nearly_equal(const float a, const float b, const int ulpsEpsilon = 3) const;
 
     bool nearly_less(const float a, const float b) const;
 
