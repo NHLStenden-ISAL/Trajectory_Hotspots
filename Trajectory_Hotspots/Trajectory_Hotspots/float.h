@@ -11,7 +11,7 @@ public:
     static inline float fixed_epsilon = 0.0000001f;
 
     float get_value() const { return value; }
-    float set_value(const float value) { this->value = value; }
+    void set_value(const float value) { this->value = value; }
 
     Float& operator=(const Float& other);
     Float& operator=(float value);
