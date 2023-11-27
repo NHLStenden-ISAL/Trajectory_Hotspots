@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "trajectory.h"
 
-Trajectory::Trajectory(std::vector<Segment>& ordered_segments) : trajectory_segments(ordered_segments)
+Trajectory::Trajectory(const std::vector<Segment>& ordered_segments) : trajectory_segments(ordered_segments)
 {
     trajectory_start = ordered_segments.front().start_t;
     trajectory_end = ordered_segments.back().end_t;
 
-    for (Segment& i : ordered_segments)
+    for (const Segment& i : ordered_segments)
     {
         trajectory_length += i.length();
     }
