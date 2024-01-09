@@ -5,7 +5,7 @@
 class Trajectory
 {
 public:
-    Trajectory(){}
+    Trajectory() {}
     Trajectory(const std::vector<Segment>& ordered_segments);
     Trajectory(const std::vector<Vec2>& ordered_points);
 
@@ -28,9 +28,9 @@ private:
 
     //Helper functions for fixed_radius_contiguous
 
-    void frc_test_between_lines(Trapezoidal_Map & trapezoidal_map, Vec2 & current_vert, Vec2& vert_at_radius, bool above, Segment_Search_Tree& segment_tree, Float& radius, Float& longest_valid_subtrajectory, AABB& optimal_hotspot) const;
-    void frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trapezoidal_map, const Vec2& current_vert, const Vec2& vert_at_radius, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const;
-
+    void frc_test_between_lines(Trapezoidal_Map& trapezoidal_map, Vec2& current_vert, Vec2& vert_at_radius, bool above, Segment_Search_Tree& segment_tree, Float& radius, Float& longest_valid_subtrajectory, AABB& optimal_hotspot) const;
+    void frc_get_subtrajectory_within_boundary(const Trapezoidal_Map& trapezoidal_map, const Vec2& current_vert, const Vec2& vert_at_radius, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const;
+    void frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trapezoidal_map, const Vec2& query_vert, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const;
     //Helper functions for fixed_length_contiguous
 
     bool flc_breakpoint_III_x(const Float length, const Segment& start_segment, const Segment& end_segment, const Float vertical_line_x, const AABB& uv_bounding_box, AABB& potential_hotspot) const;

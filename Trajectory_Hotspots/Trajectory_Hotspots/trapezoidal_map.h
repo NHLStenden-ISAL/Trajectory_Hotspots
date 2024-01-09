@@ -51,6 +51,13 @@ public:
     void replace_bottom_neighbour(Trapezoidal_Leaf_Node* old_bottom_neighbour, Trapezoidal_Leaf_Node* new_bottom_neighbour);
     void replace_top_neighbour(Trapezoidal_Leaf_Node* old_top_neighbour, Trapezoidal_Leaf_Node* new_top_neighbour);
 
+    /// <summary>
+    /// Trace a horizontal ray to the left and right finding the first segments that intersect it to the left and right of the query point.
+    /// </summary>
+    /// <param name="point">The queried point.</param>
+    /// <param name="prefer_top">When the query point lies on an endpoint within the trapezoidal map, we trace either above or below based on this parameter. This prevents unwanted self intersections.</param>
+    /// <param name="left_segment">The first segment to the left of the queried point.</param>
+    /// <param name="right_segment">The first segment to the right of the queried point.</param>
     void trace_left_right(const Vec2& point, const bool prefer_top, const Segment*& left_segment, const Segment*& right_segment) const;
 
     Trapezoidal_Leaf_Node* bottom_left;
