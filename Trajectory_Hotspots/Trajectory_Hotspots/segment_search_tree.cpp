@@ -77,6 +77,9 @@ AABB Segment_Search_Tree_Node::query(const Float start_t, const Float end_t) con
     {
         const Segment& segment = segment_list.at(segment_index);
 
+        assert(segment.start_t <= start_t && segment.end_t >= start_t);
+        assert(segment.start_t <= end_t && segment.end_t >= end_t);
+
         const Vec2 start_point = segment.get_point_at_time(start_t);
         const Vec2 end_point = segment.get_point_at_time(end_t);
 
@@ -118,6 +121,8 @@ AABB Segment_Search_Tree_Node::query_left(const Float start_t) const
     {
         const Segment& segment = segment_list.at(segment_index);
 
+        assert(segment.start_t <= start_t && segment.end_t >= start_t);
+
         //Calculate boundingbox from point at start_t to the endpoint of the segment
         const Vec2 point_on_segment = segment.get_point_at_time(start_t);
 
@@ -151,7 +156,7 @@ AABB Segment_Search_Tree_Node::query_right(const Float end_t) const
         else
         {
             //Query range start in left side, ignore right side
-            return right->query_right(end_t);
+            return left->query_right(end_t);
         }
     }
 
@@ -159,6 +164,8 @@ AABB Segment_Search_Tree_Node::query_right(const Float end_t) const
     if (segment_index != -1)
     {
         const Segment& segment = segment_list.at(segment_index);
+
+        assert(segment.start_t <= end_t && segment.end_t >= end_t);
 
         //Calculate boundingbox from the startpoint of the segment to the point at end_t
         const Vec2 point_on_segment = segment.get_point_at_time(end_t);

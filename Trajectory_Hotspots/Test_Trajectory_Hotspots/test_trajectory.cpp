@@ -166,11 +166,30 @@ namespace TestTrajectoryHotspots
                 { 115.59,296.758 },
                 { 115.29,296.771 } };
 
-               Trajectory trajectory(test_points);
+            Trajectory trajectory(test_points);
 
-               AABB aabb = trajectory.get_hotspot_fixed_radius_contiguous(5.f);
+            AABB aabb = trajectory.get_hotspot_fixed_radius_contiguous(5.f);
 
-               Assert::IsTrue(aabb.max_size() > 0.f);
+            Assert::IsTrue(aabb.max_size() > 0.f);
+        }
+
+        TEST_METHOD(get_hotspot_fixed_radius_contiguous_cross)
+        {
+            std::vector<Vec2> test_points = {
+                { 2.f, 2.f },
+                { 6.f, 10.f},
+                { 10.f, 6.f},
+                { 11.f, 9.f },
+                { 7.f, 12.f},
+                { 4.f, 4.f},
+                { 9.f, 11.f }
+            };
+
+            Trajectory trajectory(test_points);
+
+            AABB aabb = trajectory.get_hotspot_fixed_radius_contiguous(5.f);
+
+            Assert::IsTrue(aabb.max_size() > 0.f);
         }
 
         //2B

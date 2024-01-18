@@ -67,7 +67,7 @@ namespace TestTrajectoryHotspots
             Float total_time_t = 0.0f;
             for (size_t i = 0; i < ordered_points.size() - 1; i++)
             {
-                ordered_segments.push_back(Segment(ordered_points.at(i), ordered_points.at(i + 1), total_time_t));
+                ordered_segments.emplace_back(ordered_points.at(i), ordered_points.at(i + 1), total_time_t);
                 total_time_t = ordered_segments.at(ordered_segments.size() - 1).end_t;
             }
 
@@ -77,6 +77,34 @@ namespace TestTrajectoryHotspots
 
             AABB queried_bb2 = ss_tree.query(16.7157536f, 37.3452644f);
 
+        }
+
+        TEST_METHOD(tree_query_end_on_segment)
+        {
+            std::vector<Vec2> ordered_points = {
+                { 2.f, 2.f },
+                { 6.f, 10.f},
+                { 10.f, 6.f},
+                { 11.f, 9.f },
+                { 7.f, 12.f},
+                { 4.f, 4.f},
+                { 9.f, 11.f } };
+
+            //Convert points to segments
+            std::vector<Segment> ordered_segments;
+            Float total_time_t = 0.0f;
+            for (size_t i = 0; i < ordered_points.size() - 1; i++)
+            {
+                ordered_segments.emplace_back(ordered_points.at(i), ordered_points.at(i + 1), total_time_t);
+                total_time_t = ordered_segments.at(ordered_segments.size() - 1).end_t;
+            }
+
+            Segment_Search_Tree ss_tree(ordered_segments);
+
+            AABB queried_bb = ss_tree.query(8.94427204f, 25.6114044f);
+
+            Assert::IsTrue(queried_bb.min == Vec2(6.f, 6.f));
+            Assert::IsTrue(queried_bb.max == Vec2(11.f, 12.f));
         }
 
         TEST_METHOD(tree_destruction)

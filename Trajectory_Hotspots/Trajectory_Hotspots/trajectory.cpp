@@ -61,6 +61,7 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
         y_segments.emplace_back(Vec2(trajectory_segment.start_t, trajectory_segment.start.y), Vec2(trajectory_segment.end_t, trajectory_segment.end.y), trajectory_segment.start_t, trajectory_segment.end_t);
     }
 
+    //Create a trapezoidal map that represents the graph with the x or y-axis values of the trajectory on the y-axis and time on its x-axis
     Trapezoidal_Map trapezoidal_map_x(x_segments);
     Trapezoidal_Map trapezoidal_map_y(y_segments);
 
@@ -78,20 +79,20 @@ AABB Trajectory::get_hotspot_fixed_radius_contiguous(Float radius) const
         //This gives the same answer and we remove a number of checks.
 
         //Test vertical lines
-        //Test left, current vert is at top
+        //Test left, current vert is at top edge of bounding box
         Vec2 vert_at_radius(current_x_vert.x, current_x_vert.y - radius); //TODO: Remove, can calc in function..
         frc_test_between_lines(trapezoidal_map_x, current_x_vert, vert_at_radius, true, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
 
-        //Test right, current vert is at bottom
+        //Test right, current vert is at bottom edge of bounding box
         vert_at_radius = Vec2(current_x_vert.x, current_x_vert.y + radius);
         frc_test_between_lines(trapezoidal_map_x, current_x_vert, vert_at_radius, false, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
 
         //Test horizontal lines
-        //Test below, current vert is at top
+        //Test below, current vert is at top edge of bounding box
         vert_at_radius = Vec2(current_y_vert.x, current_y_vert.y - radius);
         frc_test_between_lines(trapezoidal_map_y, current_y_vert, vert_at_radius, true, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
 
-        //Test above, current vert is at bottom
+        //Test above, current vert is at bottom edge of bounding box
         vert_at_radius = Vec2(current_y_vert.x, current_y_vert.y + radius);
         frc_test_between_lines(trapezoidal_map_y, current_y_vert, vert_at_radius, false, segment_tree, radius, longest_valid_subtrajectory, optimal_hotspot);
     }
@@ -112,6 +113,7 @@ void Trajectory::frc_test_between_lines(Trapezoidal_Map& trapezoidal_map, Vec2& 
 
     if ((subtrajectory_end - subtrajectory_start) > longest_valid_subtrajectory)
     {
+        //THIS RETURNS FUCKED SHIT....
         AABB subtrajectory_bounding_box = segment_tree.query(subtrajectory_start, subtrajectory_end);
 
         if (subtrajectory_bounding_box.max_size() <= radius)
@@ -134,9 +136,30 @@ void Trajectory::frc_get_subtrajectory_within_boundary(const Trapezoidal_Map& tr
     frc_get_subtrajectory_start_and_end(trapezoidal_map, current_vert, above_point, start_at_vert, end_at_vert);
     frc_get_subtrajectory_start_and_end(trapezoidal_map, vert_at_radius, !above_point, start_at_radius, end_at_radius);
 
+
     //Keep the shortest start and end, the trajectory leaves the boundary at that point so the subtrajectory towards the longer intersection will leave the boundary.
-    subtrajectory_start = (start_at_vert < start_at_radius) ? start_at_vert : start_at_radius;
-    subtrajectory_end = (end_at_vert < end_at_radius) ? end_at_vert : end_at_radius;
+    //If both the at_vert and at_radius are infinite the whole subtrajectory from the query point to the start or end fits within the lines. 
+    //In this case we set start and end to the trajectory start and end respectively.
+
+    if (start_at_vert.is_inf() && start_at_radius.is_inf())
+    {
+        subtrajectory_start = this->trajectory_start;
+    }
+    else
+    {
+        //The subtrajectory_start with the highest value is closest to the current vertex, so it is the start of the shortest subtrajectory.
+        subtrajectory_start = (start_at_vert > start_at_radius) ? start_at_vert : start_at_radius;
+    }
+
+    if (end_at_vert.is_inf() && end_at_radius.is_inf())
+    {
+        subtrajectory_end = this->trajectory_end;
+    }
+    else
+    {
+        subtrajectory_end = (end_at_vert < end_at_radius) ? end_at_vert : end_at_radius;
+    }
+
 }
 
 void Trajectory::frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trapezoidal_map, const Vec2& query_vert, const bool above_point, Float& subtrajectory_start, Float& subtrajectory_end) const
@@ -147,20 +170,20 @@ void Trajectory::frc_get_subtrajectory_start_and_end(const Trapezoidal_Map& trap
 
     if (left_segment != nullptr && right_segment != nullptr)
     {
-        //If the left_segment is at infinity there is no trajectory on the left, set start_t to the start of the trajectory
+        //If the left_segment is at infinity there is no trajectory on the left, set start_t to -inifinity
         if (left_segment->start.x.is_inf())
         {
-            subtrajectory_start = this->trajectory_start;
+            subtrajectory_start = -std::numeric_limits<float>::infinity();
         }
         else
         {
             subtrajectory_start = left_segment->get_time_at_y(query_vert.y);
         }
 
-        //If the right_segment is at infinity there is no trajectory on the right, set end_t to the end of the trajectory
+        //If the right_segment is at infinity there is no trajectory on the right, set end_t to inifinity
         if (right_segment->start.x.is_inf())
         {
-            subtrajectory_end = this->trajectory_end;
+            subtrajectory_end = std::numeric_limits<float>::infinity();
         }
         else
         {
