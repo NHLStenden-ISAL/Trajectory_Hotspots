@@ -187,9 +187,13 @@ namespace TestTrajectoryHotspots
 
             Trajectory trajectory(test_points);
 
-            AABB aabb = trajectory.get_hotspot_fixed_radius_contiguous(5.f);
+            AABB hotspot = trajectory.get_hotspot_fixed_radius_contiguous(5.f);
 
-            Assert::IsTrue(aabb.max_size() > 0.f);
+            Assert::IsTrue(hotspot.max_size() > 0.f);
+
+
+            Assert::IsTrue(hotspot.min == Vec2(6.f, 6.f));
+            Assert::IsTrue(hotspot.max == Vec2(11.f, 11.f));
         }
 
         //2B
