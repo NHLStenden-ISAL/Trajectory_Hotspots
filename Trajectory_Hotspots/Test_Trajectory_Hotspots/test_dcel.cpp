@@ -72,7 +72,7 @@ namespace TestTrajectoryHotspots
 
 
             //Both segments get split into two, so there should be four incident half-edges around the vertex at the intersection point
-            const DCEL::DCEL_Vertex* intersection_vertex = test_dcel.get_vertex_at_position(intersection_point);
+            DCEL::DCEL_Vertex* intersection_vertex = test_dcel.get_vertex_at_position(intersection_point);
 
             std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges = intersection_vertex->get_incident_half_edges();
 
@@ -85,7 +85,7 @@ namespace TestTrajectoryHotspots
                 incident_targets.push_back(incident_half_edge->target()->position);
             }
 
-            std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start, new_segment.end, new_segment_2.end};
+            std::vector<Vec2> endpoints{ new_segment.start, new_segment_2.start, new_segment.end, new_segment_2.end };
 
             Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()), L"Incorrect endpoints around vertex.");
         }
@@ -104,7 +104,7 @@ namespace TestTrajectoryHotspots
 
             //The targets of the incident half-edge of the middle vertex should be the other two endpoints
 
-            const DCEL::DCEL_Vertex* middle_vert = nullptr;
+            DCEL::DCEL_Vertex* middle_vert = nullptr;
             for (const auto& vert : test_dcel.vertices)
             {
                 if (vert->position == new_segment.end)
@@ -123,7 +123,7 @@ namespace TestTrajectoryHotspots
                     incident_targets.push_back(incident_half_edge->target()->position);
                 }
 
-                std::vector<Vec2> endpoints {new_segment.start, new_segment_2.start};
+                std::vector<Vec2> endpoints{ new_segment.start, new_segment_2.start };
 
                 Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), endpoints.begin()), L"Incorrect endpoints around vertex.");
             }
@@ -197,7 +197,7 @@ namespace TestTrajectoryHotspots
 
             Assert::AreEqual((size_t)4, vertex_count, L"Incorrect amount of total DCEL vertices.");
 
-            const DCEL::DCEL_Vertex* middle_vertex = nullptr;
+            DCEL::DCEL_Vertex* middle_vertex = nullptr;
 
             //Check around the middle vertex:
             for (const auto& v : test_dcel.vertices)
@@ -211,7 +211,7 @@ namespace TestTrajectoryHotspots
 
             if (middle_vertex != nullptr)
             {
-                std::vector<Vec2> correct_endpoints {new_segment.start, segment_1.end, segment_2.start};
+                std::vector<Vec2> correct_endpoints{ new_segment.start, segment_1.end, segment_2.start };
 
                 //The target vertices of the adjacent half edges should include all other vertices
                 std::vector<DCEL::DCEL_Half_Edge*> incident_half_edges_middle = middle_vertex->get_incident_half_edges();
@@ -257,8 +257,8 @@ namespace TestTrajectoryHotspots
             Vec2 south(10.f, 6.f);
             Vec2 east(12.f, 10.f);
 
-            std::vector west_edges{Segment(north, west), Segment(west, south)};
-            std::vector east_edges{Segment(north, east), Segment(east, south)};
+            std::vector west_edges{ Segment(north, west), Segment(west, south) };
+            std::vector east_edges{ Segment(north, east), Segment(east, south) };
 
             DCEL west_side;
             west_side.insert_segment(west_edges[0]);
@@ -270,7 +270,44 @@ namespace TestTrajectoryHotspots
 
             west_side.overlay_dcel(east_side);
 
+            Assert::AreEqual(static_cast<size_t>(8), west_side.half_edge_count(), L"Incorrect amount of half-edges.");
+            Assert::AreEqual(static_cast<size_t>(4), west_side.vertex_count(), L"Incorrect amount of vertices.");
 
+            const DCEL::DCEL_Vertex* north_vertex = west_side.get_vertex_at_position(north);
+            const DCEL::DCEL_Vertex* east_vertex = west_side.get_vertex_at_position(east);
+
+            Assert::IsNotNull(north_vertex);
+
+            std::vector<const DCEL::DCEL_Half_Edge*> adjacent_half_edges_north = north_vertex->get_incident_half_edges();
+            std::vector<const DCEL::DCEL_Half_Edge*> outer_half_edge_cycle;
+
+            //Half-edges travel around a hole in clockwise order, so the half-edge pointing from north to east is on the outer cycle
+            for (const DCEL::DCEL_Half_Edge*& adjacent_half_edge : adjacent_half_edges_north)
+            {
+                if (adjacent_half_edge->target() == east_vertex)
+                {
+                    outer_half_edge_cycle = adjacent_half_edge->get_cycle();
+                    break;
+                }
+            }
+
+            Assert::IsFalse(outer_half_edge_cycle.empty(), L"No outer half-edge cycle");
+
+            const DCEL::DCEL_Half_Edge* inner_half_edge = outer_half_edge_cycle.at(0)->twin;
+            std::vector<const DCEL::DCEL_Half_Edge*> inner_half_edge_cycle = inner_half_edge->get_cycle();
+
+            Assert::AreEqual(static_cast<size_t>(4), outer_half_edge_cycle.size(), L"Outer cycle has the incorrect size.");
+            Assert::AreEqual(static_cast<size_t>(4), inner_half_edge_cycle.size(), L"Inner cycle has the incorrect size.");
+
+            for (auto& inner_he : inner_half_edge_cycle)
+            {
+                Assert::IsFalse(contains(outer_half_edge_cycle, inner_he));
+            }
+
+            for (auto& outer_he : outer_half_edge_cycle)
+            {
+                Assert::IsFalse(contains(inner_half_edge_cycle, outer_he));
+            }
         }
     };
 }

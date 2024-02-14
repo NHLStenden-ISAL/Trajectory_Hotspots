@@ -50,29 +50,6 @@ void DCEL::insert_segment(const Segment& segment)
         create_free_segment_records(segment);
         return;
     }
-    //else if (half_edges.size() == 2)
-    //{
-    //    DCEL::DCEL_Half_Edge* new_half_edge = create_new_segment_records(segment);
-    //
-    //    Segment other_segment(half_edges[0]->origin->position, half_edges[1]->origin->position);
-    //
-    //    Vec2 intersection_point;
-    //    Segment::Intersection_Type segment_intersection_type = segment.intersects(other_segment, intersection_point);
-    //
-    //    switch (segment_intersection_type)
-    //    {
-    //    case Segment::Intersection_Type::point:
-    //        handle_point_intersection(intersection_point, half_edges[0].get(), new_half_edge);
-    //        break;
-    //    case Segment::Intersection_Type::collinear:
-    //        break;
-    //    case Segment::Intersection_Type::parallel:
-    //    case Segment::Intersection_Type::none:
-    //        return;
-    //    }
-    //
-    //    return;
-    //}
     else
     {
         DCEL dcel_with_single_segment;
@@ -276,7 +253,7 @@ DCEL::DCEL_Vertex* DCEL::overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_
     return new_dcel_vertex.get();
 }
 
-void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* vertex_2) const
+void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2) const
 {
     //Gather half-edges around second vertex
     //For each: Set origins to first vertex
@@ -328,7 +305,24 @@ std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
     return boundary_vertices;
 }
 
-std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+std::vector<const DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+{
+    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
+
+    std::vector<const DCEL_Half_Edge*> incident_half_edges;
+
+    do
+    {
+        incident_half_edges.emplace_back(current_half_edge);
+        current_half_edge = current_half_edge->twin->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return incident_half_edges;
+}
+
+std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges()
 {
     const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
     DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
@@ -399,6 +393,44 @@ void DCEL::DCEL_Vertex::set_all_origins_to_this()
 bool DCEL::DCEL_Half_Edge::is_orientated_top_left() const
 {
     return orientation_top_left(origin->position, twin->origin->position);
+}
+
+//Returns the cycle of half-edges pointing each other, starting with this
+std::vector<const DCEL::DCEL_Half_Edge*> DCEL::DCEL_Half_Edge::get_cycle() const
+{
+    std::vector<const DCEL_Half_Edge*> half_edge_cycle;
+
+    const DCEL_Half_Edge* current_half_edge = this;
+    do
+    {
+        assert(current_half_edge->next != nullptr); //Half-edge cycle is broken
+
+        half_edge_cycle.push_back(current_half_edge);
+        current_half_edge = current_half_edge->next;
+
+    } while (current_half_edge != this);
+
+
+    return half_edge_cycle;
+}
+
+//Returns the cycle of half-edges pointing each other, starting with this
+std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Half_Edge::get_cycle()
+{
+    std::vector<DCEL_Half_Edge*> half_edge_cycle;
+
+    DCEL_Half_Edge* current_half_edge = this;
+    do
+    {
+        assert(current_half_edge->next != nullptr); //Half-edge cycle is broken
+
+        half_edge_cycle.push_back(current_half_edge);
+        current_half_edge = current_half_edge->next;
+
+    } while (current_half_edge != this);
+
+
+    return half_edge_cycle;
 }
 
 Float DCEL::DCEL_Overlay_Edge_Wrapper::y_intersect(Float y) const
@@ -553,7 +585,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         {
             dcel_vertex_at_event_point = DCEL_edges[intersection_results.bottom_segments[0]].get_bottom_dcel_vertex();
         }
-        else if (!intersection_results.top_segments.empty())
+        else //top_segments filled
         {
             dcel_vertex_at_event_point = DCEL_edges[intersection_results.top_segments[0]].get_top_dcel_vertex();
         }
@@ -609,7 +641,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     //Hence the return statement.
     for (int bottom_segment_index : intersection_results.bottom_segments)
     {
-        const DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();
+        DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();
 
         if (dcel_vertex_at_event_point != next_dcel_vertex)
         {
@@ -621,7 +653,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
     for (int top_segment_index : intersection_results.top_segments)
     {
-        const DCEL_Vertex* next_dcel_vertex = DCEL_edges[top_segment_index].get_top_dcel_vertex();
+        DCEL_Vertex* next_dcel_vertex = DCEL_edges[top_segment_index].get_top_dcel_vertex();
 
         if (dcel_vertex_at_event_point != next_dcel_vertex)
         {

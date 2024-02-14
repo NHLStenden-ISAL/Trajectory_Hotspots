@@ -29,7 +29,10 @@ public:
         }
 
         //Returns the incident (outgoing) half-edges in clockwise order
-        std::vector<DCEL_Half_Edge*> get_incident_half_edges() const;
+        std::vector<const DCEL_Half_Edge*> get_incident_half_edges() const;
+
+        //Returns the incident (outgoing) half-edges in clockwise order
+        std::vector<DCEL_Half_Edge*> get_incident_half_edges();
 
         //Search around the given vertex in counter-clockwise order for the first clockwise and counter-clockwise half-edges adjacent to the given half-edge (pointing outwards)
         void find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
@@ -72,7 +75,15 @@ public:
         DCEL_Half_Edge* next = nullptr;
         DCEL_Half_Edge* prev = nullptr;
 
+        //Returns if the half-edges origin lies to the right of its destination, 
+        //if they share an x axis it returns true if its origin is below its destination.
         bool is_orientated_top_left() const;
+
+        //Returns the cycle of half-edges pointing each other, starting with this
+        std::vector<DCEL_Half_Edge*> get_cycle();
+
+        //Returns the cycle of half-edges pointing each other, starting with this
+        std::vector<const DCEL_Half_Edge*> get_cycle() const;
     };
 
     //Wrapper class used for the overlay of two DCELs. Each instance represents an edge that overlaps with two twin half-edges.
@@ -157,7 +168,7 @@ private:
 
     void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
-    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, const DCEL_Vertex* vertex_2)  const;
+    void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2)  const;
 
 };
 

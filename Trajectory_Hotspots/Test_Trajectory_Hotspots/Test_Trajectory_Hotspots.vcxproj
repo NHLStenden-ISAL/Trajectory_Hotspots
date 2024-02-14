@@ -147,9 +147,11 @@
     <ClCompile Include="test_trajectory_hotspots.cpp" />
     <ClCompile Include="test_trapezoidal_map.cpp" />
     <ClCompile Include="test_vec2.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Trajectory_Hotspots\Trajectory_Hotspots.vcxproj">
