@@ -309,5 +309,56 @@ namespace TestTrajectoryHotspots
                 Assert::IsFalse(contains(inner_half_edge_cycle, outer_he));
             }
         }
+
+        TEST_METHOD(DCEL_colinear)
+        {
+            Vec2 pA(2.f, 6.f);
+            Vec2 pB(6.f, 6.f);
+            Vec2 pC(4.f, 6.f);
+            Vec2 pD(9.f, 6.f);
+            Vec2 pE(6.f, 10.f);
+            Vec2 pF(8.f, 6.f);
+            Vec2 pG(12.f, 6.f);
+            Vec2 pH(1.f, 6.f);
+            Vec2 pI(13.f, 6.f);
+
+
+            Segment f(pA, pB);
+            Segment g(pC, pD);
+            Segment h(pB, pE);
+            Segment i(pF, pG);
+            Segment j(pH, pI);
+
+            DCEL dcel;
+
+            dcel.insert_segment(f);
+            dcel.insert_segment(g);
+            dcel.insert_segment(h);
+            dcel.insert_segment(i);
+            dcel.insert_segment(j);
+
+        }
+
+        TEST_METHOD(DCEL_Overlap_Same_DCELs)
+        {
+            //Implement test that overlaps the same DCEL layouts
+        }
+
+        TEST_METHOD(DCEL_large_test)
+        {
+            Vec2 pA(16.f, 16.f);
+            Vec2 pB(20.f, 28.f);
+            Vec2 pC(36.f, 28.f);
+            Vec2 pD(34.f, 32.f);
+            Vec2 pE(28.f, 22.f);
+            Vec2 pF(28.f, 32.f);
+            Vec2 pG(38.f, 30.f);
+            Vec2 pH(32.f, 12.f);
+            Vec2 pI(14.f, 28.f);
+            Vec2 pJ(42.f, 26.f);
+
+
+
+        }
     };
 }

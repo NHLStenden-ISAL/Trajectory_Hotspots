@@ -61,7 +61,6 @@ public:
         {
         }
 
-
         DCEL_Half_Edge() = default;
 
         //The origin of this half-edges twin
@@ -79,10 +78,10 @@ public:
         //if they share an x axis it returns true if its origin is below its destination.
         bool is_orientated_top_left() const;
 
-        //Returns the cycle of half-edges pointing each other, starting with this
+        //Returns the cycle of half-edges pointing to each other, starting with this
         std::vector<DCEL_Half_Edge*> get_cycle();
 
-        //Returns the cycle of half-edges pointing each other, starting with this
+        //Returns the cycle of half-edges pointing to each other, starting with this
         std::vector<const DCEL_Half_Edge*> get_cycle() const;
     };
 

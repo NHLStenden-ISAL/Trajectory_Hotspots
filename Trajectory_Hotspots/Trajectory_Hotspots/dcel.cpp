@@ -8,10 +8,7 @@
 //Warning: This overlay function destroys the given DCEL.
 void DCEL::overlay_dcel(DCEL& other_dcel)
 {
-    //TODO:
-    //-Call sweep line algorithm
-    //For each intersection call appropriate overlay helper function
-    //Not sure if we want to just make a new DCEL..
+
 
     size_t original_half_edge_count = this->half_edge_count();
 
@@ -35,7 +32,6 @@ void DCEL::overlay_dcel(DCEL& other_dcel)
     }
 
     //Call the sweep line algorithm handling overlay cases from top to bottom.
-    //Segment_Intersection_Sweep_Line::find_segment_intersections(DCEL_edges);
 
     resolve_edge_intersections(DCEL_edges);
 
@@ -501,6 +497,8 @@ bool collinear_overlap(const DCEL::DCEL_Overlay_Edge_Wrapper& segment1, const DC
 
 void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges)
 {
+    //Find all edge intersections and for each intersection call appropriate overlay helper function
+
     namespace Sweep = Segment_Intersection_Sweep_Line;
 
     Sweep::map event_queue;
