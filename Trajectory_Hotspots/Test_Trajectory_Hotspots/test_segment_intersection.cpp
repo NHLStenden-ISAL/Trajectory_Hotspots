@@ -140,7 +140,7 @@ namespace TestTrajectoryHotspots
         {
             namespace Sweep = Segment_Intersection_Sweep_Line;
 
-            Sweep::map event_queue;
+            Sweep::Event_Queue event_queue;
 
             //All segments intersect on a point with one segment horizontal
             std::vector<Segment> test_segments;
@@ -161,24 +161,25 @@ namespace TestTrajectoryHotspots
             Sweep::Sweep_Line_Status_structure<Segment> status_structure(event_queue.begin()->first.y);
 
             int event_count = 0;
-            std::unordered_set<int> test;
+            std::vector<int> test;
             while (!event_queue.empty())
             {
-                Sweep::Intersection_Info intersection_results = Sweep::Handle_Event(status_structure, event_queue, test_segments, event_queue.begin()->first, event_queue.begin()->second);
+                Sweep::Handle_Event(status_structure, event_queue, test_segments, event_queue.begin()->first, event_queue.begin()->second, [&event_count, &test](const std::vector<int>& intersecting_segments)
+                    {
+                        ++event_count;
 
-                ++event_count;
+                        if (event_count == 5)
+                        {
+                            test = intersecting_segments;
 
-                if (event_count == 5)
-                {
-                    test = intersection_results.interior_segments;
-
-                }
+                        }
+                    });
 
                 event_queue.erase(event_queue.begin());
             }
 
-            std::unordered_set<int> correct { 0, 1, 2, 3 };
-            
+            std::vector<int> correct{ 0, 1, 2, 3 };
+
             Assert::IsTrue(test == correct);
         }
     };
