@@ -2,7 +2,9 @@
 
 namespace Segment_Intersection_Sweep_Line
 {
-    struct Intersection_Info;
+    template<typename SegmentT>
+    class Sweep_Line_Status_structure;
+    struct Event_Point_Comparer;
 }
 
 class DCEL
@@ -151,6 +153,29 @@ public:
 
 private:
 
+    struct Intersection_Info
+    {
+        Intersection_Info() = default;
+        Intersection_Info(Intersection_Info&& other) noexcept = default;
+
+        std::vector<int> top_segments; //Segments that intersect at the top point.
+        std::vector<int> bottom_segments; //Segments that intersect at the bottom point.
+        std::unordered_set<int> interior_segments; //Segments that have an internal intersection with the event point.
+        std::vector<int> collinear_segments; //List of collinear segments at this point, every two indices are a pair that overlap.
+
+        //TODO: Add reference to segment vector here.. prevent all the passing in the DCEL functions..
+
+        size_t segment_count() const { return interior_segments.size() + top_segments.size() + bottom_segments.size() + collinear_segments.size(); };
+
+        int get_first_segment() const
+        {
+            if (!top_segments.empty()) { return top_segments[0]; }
+            else if (!bottom_segments.empty()) { return bottom_segments[0]; }
+            else if (!interior_segments.empty()) { return *interior_segments.begin(); }
+            else if (!collinear_segments.empty()) { return collinear_segments[0]; }
+        };
+    };
+
     void intersection_on_endpoint(const Vec2& intersection_point,
         const DCEL::DCEL_Half_Edge* old_half_edge,
         const DCEL::DCEL_Half_Edge* new_half_edge,
@@ -161,14 +186,16 @@ private:
 
     void resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges);
 
-    void handle_overlay_event(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results, const Vec2& event_point);
+    void handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
+        Segment_Intersection_Sweep_Line::Sweep_Line_Status_structure<DCEL_Overlay_Edge_Wrapper>& status_structure,
+        std::map<const Vec2, std::vector<int>, 
+        Segment_Intersection_Sweep_Line::Event_Point_Comparer>& event_queue);
 
-    bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const;
+    bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Intersection_Info& intersection_results) const;
 
     void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
     void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2)  const;
-
 };
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.

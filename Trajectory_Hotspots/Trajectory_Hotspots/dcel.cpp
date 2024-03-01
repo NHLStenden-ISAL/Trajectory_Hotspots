@@ -501,7 +501,7 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
     namespace Sweep = Segment_Intersection_Sweep_Line;
 
-    Sweep::map event_queue;
+    Sweep::Event_Queue event_queue;
 
     for (int i = 0; i < DCEL_edges.size(); i++)
     {
@@ -516,16 +516,28 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
     while (!event_queue.empty())
     {
-        Sweep::Intersection_Info intersection_results = Handle_Event(status_structure, event_queue, DCEL_edges, event_queue.begin()->first, event_queue.begin()->second);
+        const Vec2 event_point = event_queue.begin()->first;
 
-        handle_overlay_event(DCEL_edges, intersection_results, event_queue.begin()->first);
+        auto overlay_event_handler = [this, &DCEL_edges, &status_structure, &event_queue](std::vector<int>& intersecting_segments)
+            {
+                handle_overlay_event(DCEL_edges, status_structure, event_queue);
+            };
+
+
+        Handle_Event(status_structure, event_queue, DCEL_edges, event_point, event_queue.begin()->second, overlay_event_handler);
+
+
 
         event_queue.erase(event_queue.begin());
     }
 }
 
-void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results, const Vec2& event_point)
+void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
+    Segment_Intersection_Sweep_Line::Sweep_Line_Status_structure<DCEL_Overlay_Edge_Wrapper>& status_structure,
+    Segment_Intersection_Sweep_Line::Event_Queue& event_queue)
 {
+
+
 
     if (!overlay_event_contains_both_dcels(DCEL_edges, intersection_results))
     {
@@ -602,9 +614,9 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
         //Define lambda function that checks for the given element if it belongs to a different DCEL
         auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
-        {
-            return  DCEL_edges[segment_index].original_dcel != first_dcel;
-        };
+            {
+                return  DCEL_edges[segment_index].original_dcel != first_dcel;
+            };
 
         bool both_dcels = false;
         if (std::any_of(intersection_results.top_segments.begin(), intersection_results.top_segments.end(), different_dcels))
@@ -665,7 +677,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 }
 
 //Checks if the given event contains elements from multiple DCELs
-bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Segment_Intersection_Sweep_Line::Intersection_Info& intersection_results) const
+bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Intersection_Info& intersection_results) const
 {
     //TODO: Add this function to intersection_info? Template classes complicate it but check it anyway.
     bool first_dcel;
@@ -694,9 +706,9 @@ bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge
 
     //Define lambda function that checks for the given element if it belongs to a different DCEL
     auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
-    {
-        return  DCEL_edges[segment_index].original_dcel != first_dcel;
-    };
+        {
+            return  DCEL_edges[segment_index].original_dcel != first_dcel;
+        };
 
     //Check for each type of overlapping segment if it contains a segment from a different DCEL
 
