@@ -110,6 +110,8 @@ public:
 
         Segment::Intersection_Type intersects(const DCEL_Overlay_Edge_Wrapper& other, Vec2& intersection_point) const;
 
+        DCEL_Vertex* get_vertex_on_point(const Vec2& point);
+
         DCEL_Half_Edge* underlying_half_edge;
         Segment edge_segment;
         bool original_dcel;
@@ -188,10 +190,15 @@ private:
 
     void handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
         Segment_Intersection_Sweep_Line::Sweep_Line_Status_structure<DCEL_Overlay_Edge_Wrapper>& status_structure,
-        std::map<const Vec2, std::vector<int>, 
-        Segment_Intersection_Sweep_Line::Event_Point_Comparer>& event_queue);
+        std::map<const Vec2, std::vector<int>, Segment_Intersection_Sweep_Line::Event_Point_Comparer>& event_queue,
+        const Vec2& event_point,
+        std::vector<int>& intersecting_segments);
 
     bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Intersection_Info& intersection_results) const;
+
+    bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const std::vector<int>& intersecting_segments) const;
+
+    void overlay_copy_vertex_into_dcel(const DCEL_Vertex*  old_vertex);
 
     void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);

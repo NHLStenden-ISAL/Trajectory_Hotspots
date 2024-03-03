@@ -489,6 +489,18 @@ Segment::Intersection_Type DCEL::DCEL_Overlay_Edge_Wrapper::intersects(const DCE
     return edge_segment.intersects(other.edge_segment, intersection_point);
 }
 
+DCEL::DCEL_Vertex* DCEL::DCEL_Overlay_Edge_Wrapper::get_vertex_on_point(const Vec2& point)
+{
+    if (underlying_half_edge->origin->position == point)
+    {
+        return underlying_half_edge->origin;
+    }
+    else
+    {
+        return underlying_half_edge->target();
+    }
+}
+
 bool collinear_overlap(const DCEL::DCEL_Overlay_Edge_Wrapper& segment1, const DCEL::DCEL_Overlay_Edge_Wrapper& segment2, Vec2& overlap_start, Vec2& overlap_end)
 {
     return collinear_overlap(segment1.edge_segment, segment2.edge_segment, overlap_start, overlap_end);
@@ -518,9 +530,9 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
     {
         const Vec2 event_point = event_queue.begin()->first;
 
-        auto overlay_event_handler = [this, &DCEL_edges, &status_structure, &event_queue](std::vector<int>& intersecting_segments)
+        auto overlay_event_handler = [this, &DCEL_edges, &status_structure, &event_queue, &event_point](std::vector<int>& intersecting_segments)
             {
-                handle_overlay_event(DCEL_edges, status_structure, event_queue);
+                handle_overlay_event(DCEL_edges, status_structure, event_queue, event_point);
             };
 
 
@@ -534,41 +546,39 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
 void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
     Segment_Intersection_Sweep_Line::Sweep_Line_Status_structure<DCEL_Overlay_Edge_Wrapper>& status_structure,
-    Segment_Intersection_Sweep_Line::Event_Queue& event_queue)
+    Segment_Intersection_Sweep_Line::Event_Queue& event_queue,
+    const Vec2& event_point,
+    std::vector<int>& intersecting_segments)
 {
 
-
-
-    if (!overlay_event_contains_both_dcels(DCEL_edges, intersection_results))
+    if (intersecting_segments.empty())
     {
-        if (int first_event_segment = intersection_results.get_first_segment(); !DCEL_edges[first_event_segment].original_dcel)
-        {
-            //If this event point is unique to the overlayed DCEL and doesnt intersect the original DCEL
-            //we still need to copy it over into the original DCEL and re-assign its incident edges.
-
-            DCEL_Vertex* old_vertex = nullptr;
-            if (DCEL_edges[first_event_segment].underlying_half_edge->origin->position == event_point)
-            {
-                old_vertex = DCEL_edges[first_event_segment].underlying_half_edge->origin;
-            }
-            else
-            {
-                old_vertex = DCEL_edges[first_event_segment].underlying_half_edge->target();
-            }
-
-            assert(old_vertex->position == event_point);
-
-            const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*old_vertex));
-            new_vertex->set_all_origins_to_this();
-
-            return;
-        }
-
-        //Only one dcel contributes, no records need to be updated.
         return;
     }
 
-    if (intersection_results.segment_count() < 2)
+
+    if (!overlay_event_contains_both_dcels(DCEL_edges, intersecting_segments))
+    {
+        if (int first_event_segment = intersecting_segments.front(); !DCEL_edges[first_event_segment].original_dcel)
+        {
+            //If this event point is unique to the overlayed DCEL and doesnt intersect the original DCEL
+            //we still need to copy it over into the original DCEL and re-assign its incident edges.
+            DCEL_Vertex* old_vertex = DCEL_edges[first_event_segment].get_vertex_on_point(event_point);
+
+            assert(old_vertex->position == event_point);
+
+            overlay_copy_vertex_into_dcel(old_vertex);
+
+            return;
+        }
+        else
+        {
+            //Only the original dcel contributes, no records need to be updated.
+            return;
+        }
+    }
+
+    if (intersecting_segments.size() < 2)
     {
         return;
     }
@@ -674,6 +684,29 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
 
     //TODO: Handle collinear
+}
+
+//Checks if the given event contains elements from multiple DCELs
+bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const std::vector<int>& intersecting_segments) const
+{
+    if (intersecting_segments.size() > 1)
+    {
+        return !std::equal(intersecting_segments.begin() + 1, intersecting_segments.end(), intersecting_segments.begin(),
+            [&DCEL_edges](int l, int r)
+            {
+                return DCEL_edges[l].original_dcel == DCEL_edges[r].original_dcel;
+            });
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void DCEL::overlay_copy_vertex_into_dcel(const DCEL_Vertex* vertex)
+{
+    const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*vertex));
+    new_vertex->set_all_origins_to_this();
 }
 
 //Checks if the given event contains elements from multiple DCELs
