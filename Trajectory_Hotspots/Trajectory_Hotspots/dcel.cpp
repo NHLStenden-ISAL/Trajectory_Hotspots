@@ -530,9 +530,9 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
     {
         const Vec2 event_point = event_queue.begin()->first;
 
-        auto overlay_event_handler = [this, &DCEL_edges, &event_point](std::vector<int>& intersecting_segments)
+        auto overlay_event_handler = [this, &DCEL_edges, &event_point](std::vector<int>& intersecting_segments, std::vector<int> top_segments)
             {
-                handle_overlay_event(DCEL_edges, event_point, intersecting_segments);
+                handle_overlay_event(DCEL_edges, event_point, intersecting_segments, top_segments);
             };
 
 
@@ -546,7 +546,8 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 
 void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
     const Vec2& event_point,
-    std::vector<int>& intersecting_segments)
+    std::vector<int>& intersecting_segments,
+    std::vector<int>& top_segments)
 {
 
     if (intersecting_segments.empty())
@@ -579,7 +580,7 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     DCEL_Vertex* vertex_at_event_point = nullptr;
     DCEL_Vertex* overlay_vertex_at_event_point = nullptr;
 
-    Intersection_Info intersection_info = overlay_get_intersection_info(DCEL_edges, intersecting_segments, event_point);
+    Intersection_Info intersection_info = overlay_get_intersection_info(DCEL_edges, intersecting_segments, top_segments, event_point);
 
     auto inner_it = intersection_info.inner_segments.begin();
 
@@ -650,17 +651,16 @@ bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge
 DCEL::Intersection_Info DCEL::overlay_get_intersection_info(
     std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
     const std::vector<int>& intersecting_segments,
+    const std::vector<int>& top_segments,
     const Vec2& event_point) const
 {
     Intersection_Info intersection_info(DCEL_edges);
 
+    intersection_info.top_segments = top_segments;
+
     for (const int& i : intersecting_segments)
     {
-        if (*(DCEL_edges[i].get_top_point()) == event_point)
-        {
-            intersection_info.top_segments.push_back(i);
-        }
-        else if (*(DCEL_edges[i].get_bottom_point()) == event_point)
+        if (*(DCEL_edges[i].get_bottom_point()) == event_point)
         {
             intersection_info.bottom_segments.push_back(i);
         }
@@ -669,6 +669,7 @@ DCEL::Intersection_Info DCEL::overlay_get_intersection_info(
             intersection_info.inner_segments.push_back(i);
         }
     }
+
     return intersection_info;
 }
 

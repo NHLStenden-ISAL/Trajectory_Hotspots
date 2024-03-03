@@ -74,7 +74,7 @@ namespace Segment_Intersection_Sweep_Line
         }
 
         //Process the segments at this point with the given event handler
-        event_handler(ordered_intersecting_segments);
+        event_handler(ordered_intersecting_segments, top_segments);
 
         //Reinsert the segments that still intersect the sweepline
         for (int segment : inner_segments)
@@ -111,7 +111,7 @@ namespace Segment_Intersection_Sweep_Line
 
             //If the neighbour of this inserted segment does not intersect the event point, this segment is the new outer segment.
             //TODO: right side of these checks are useless?
-            if (new_left_neighbour == left_neighbour || left_neighbour == -1) 
+            if (new_left_neighbour == left_neighbour || left_neighbour == -1)
             {
                 most_left_segment = segment;
             }
@@ -226,10 +226,10 @@ namespace Segment_Intersection_Sweep_Line
         //Sweep through the segments in order and report intersection points
         while (!event_queue.empty())
         {
-            Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second, [&intersections, &event_queue](const std::vector<int>& intersecting_segments) {
+            Handle_Event(status_structure, event_queue, segments, event_queue.begin()->first, event_queue.begin()->second, [&intersections, &event_queue](const std::vector<int>& intersecting_segments, const std::vector<int>& top_segments) {
 
 
-                if (intersecting_segments.size() > 1)
+                if (intersecting_segments.size() + top_segments.size() > 1)
                 {
                     intersections.push_back(event_queue.begin()->first);
                 }

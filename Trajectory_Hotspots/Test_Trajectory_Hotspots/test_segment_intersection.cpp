@@ -164,7 +164,7 @@ namespace TestTrajectoryHotspots
             std::vector<int> test;
             while (!event_queue.empty())
             {
-                Sweep::Handle_Event(status_structure, event_queue, test_segments, event_queue.begin()->first, event_queue.begin()->second, [&event_count, &test](const std::vector<int>& intersecting_segments)
+                Sweep::Handle_Event(status_structure, event_queue, test_segments, event_queue.begin()->first, event_queue.begin()->second, [&event_count, &test](const std::vector<int>& intersecting_segments, const std::vector<int>& top_segments)
                     {
                         ++event_count;
 
@@ -172,13 +172,14 @@ namespace TestTrajectoryHotspots
                         {
                             test = intersecting_segments;
 
+                            Assert::IsTrue(top_segments.empty());
                         }
                     });
 
                 event_queue.erase(event_queue.begin());
             }
 
-            std::vector<int> correct{ 0, 1, 2, 3 };
+            std::vector<int> correct{ 2, 0, 1, 3 };
 
             Assert::IsTrue(test == correct);
         }
