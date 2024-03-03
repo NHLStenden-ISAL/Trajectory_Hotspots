@@ -378,9 +378,9 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
 void DCEL::DCEL_Vertex::set_all_origins_to_this()
 {
     std::vector<DCEL_Half_Edge*> incident_half_edges = get_incident_half_edges();
-    for (auto& incident_half_edge : incident_half_edges)
+    for (auto& incident_he : incident_half_edges)
     {
-        incident_half_edge->origin = this;
+        incident_he->origin = this;
     }
 }
 
@@ -530,9 +530,9 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
     {
         const Vec2 event_point = event_queue.begin()->first;
 
-        auto overlay_event_handler = [this, &DCEL_edges, &status_structure, &event_queue, &event_point](std::vector<int>& intersecting_segments)
+        auto overlay_event_handler = [this, &DCEL_edges, &event_point](std::vector<int>& intersecting_segments)
             {
-                handle_overlay_event(DCEL_edges, status_structure, event_queue, event_point);
+                handle_overlay_event(DCEL_edges, event_point, intersecting_segments);
             };
 
 
@@ -545,8 +545,6 @@ void DCEL::resolve_edge_intersections(std::vector<DCEL_Overlay_Edge_Wrapper>& DC
 }
 
 void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
-    Segment_Intersection_Sweep_Line::Sweep_Line_Status_structure<DCEL_Overlay_Edge_Wrapper>& status_structure,
-    Segment_Intersection_Sweep_Line::Event_Queue& event_queue,
     const Vec2& event_point,
     std::vector<int>& intersecting_segments)
 {
@@ -578,110 +576,55 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         }
     }
 
-    if (intersecting_segments.size() < 2)
-    {
-        return;
-    }
+    DCEL_Vertex* vertex_at_event_point = nullptr;
+    DCEL_Vertex* overlay_vertex_at_event_point = nullptr;
 
-    auto interior_it = intersection_results.interior_segments.begin();
-    DCEL_Vertex* dcel_vertex_at_event_point = nullptr;
+    Intersection_Info intersection_info = overlay_get_intersection_info(DCEL_edges, intersecting_segments, event_point);
+
+    auto inner_it = intersection_info.inner_segments.begin();
 
     //Get or create the DCEL_Vertex at this event point so we can correct the records around it.
-    if (intersection_results.bottom_segments.empty() && intersection_results.top_segments.empty())
+    if (intersection_info.bottom_segments.empty() && intersection_info.top_segments.empty())
     {
         //No bottom or top points at this event means we have to create a new DCEL_vertex using the first two segments.
-        DCEL_Half_Edge* first_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
-        ++interior_it;
-        DCEL_Half_Edge* second_intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
-        ++interior_it;
+        DCEL_Half_Edge* first_intersecting_half_edge = DCEL_edges[*inner_it].underlying_half_edge;
+        ++inner_it;
+        DCEL_Half_Edge* second_intersecting_half_edge = DCEL_edges[*inner_it].underlying_half_edge;
+        ++inner_it;
 
-        dcel_vertex_at_event_point = overlay_edge_on_edge(first_intersecting_half_edge, second_intersecting_half_edge, event_point);
+        vertex_at_event_point = overlay_edge_on_edge(first_intersecting_half_edge, second_intersecting_half_edge, event_point);
     }
     else
     {
         //If this event contains a top or bottom point, just retrieve the DCEL_vertex at these points.
+        intersection_info.get_vertices_from_top_segments(vertex_at_event_point, overlay_vertex_at_event_point);
 
-        if (!intersection_results.bottom_segments.empty())
+        if (!vertex_at_event_point && !overlay_vertex_at_event_point)
         {
-            dcel_vertex_at_event_point = DCEL_edges[intersection_results.bottom_segments[0]].get_bottom_dcel_vertex();
-        }
-        else //top_segments filled
-        {
-            dcel_vertex_at_event_point = DCEL_edges[intersection_results.top_segments[0]].get_top_dcel_vertex();
+            intersection_info.get_vertices_from_bottom_segments(vertex_at_event_point, overlay_vertex_at_event_point);
         }
 
-        bool first_dcel;
-        if (!intersection_results.top_segments.empty())
+        //If this overlay only has a dcel_vertex from the overlaying dcel we need to copy it over
+        if (!vertex_at_event_point && overlay_vertex_at_event_point)
         {
-            first_dcel = DCEL_edges[*intersection_results.top_segments.begin()].original_dcel;
-        }
-        else if (!intersection_results.bottom_segments.empty())
-        {
-            first_dcel = DCEL_edges[*intersection_results.bottom_segments.begin()].original_dcel;
-        }
-
-        //TODO:Clean this abomination up..
-
-        //Define lambda function that checks for the given element if it belongs to a different DCEL
-        auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
-            {
-                return  DCEL_edges[segment_index].original_dcel != first_dcel;
-            };
-
-        bool both_dcels = false;
-        if (std::any_of(intersection_results.top_segments.begin(), intersection_results.top_segments.end(), different_dcels))
-        {
-            both_dcels = true;
-        }
-
-        if (std::any_of(intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), different_dcels))
-        {
-            both_dcels = true;
-        }
-
-        if (!both_dcels)
-        {
-            const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*dcel_vertex_at_event_point));
-            new_vertex->set_all_origins_to_this();
-
-            dcel_vertex_at_event_point = new_vertex.get();
+            vertex_at_event_point = overlay_copy_vertex_into_dcel(overlay_vertex_at_event_point);
         }
     }
 
-    assert(dcel_vertex_at_event_point != nullptr);
+    assert(vertex_at_event_point != nullptr);
 
     //If there are more internal intersecting segments we can add them one by one with overlay_edge_on_vertex.
-    for (; interior_it != intersection_results.interior_segments.end(); ++interior_it)
+    for (; inner_it != intersection_info.inner_segments.end(); ++inner_it)
     {
-        DCEL_Half_Edge* intersecting_half_edge = DCEL_edges[*interior_it].underlying_half_edge;
-        overlay_edge_on_vertex(intersecting_half_edge, dcel_vertex_at_event_point);
+        DCEL_Half_Edge* intersecting_half_edge = DCEL_edges[*inner_it].underlying_half_edge;
+        overlay_edge_on_vertex(intersecting_half_edge, vertex_at_event_point);
     }
 
     //The overlay_vertex_on_vertex function fuses the records of both dcel_vertices so we just need to call it once with the two different vertices,
-    //Hence the return statement.
-    for (int bottom_segment_index : intersection_results.bottom_segments)
+    if (vertex_at_event_point && overlay_vertex_at_event_point)
     {
-        DCEL_Vertex* next_dcel_vertex = DCEL_edges[bottom_segment_index].get_bottom_dcel_vertex();
-
-        if (dcel_vertex_at_event_point != next_dcel_vertex)
-        {
-            overlay_vertex_on_vertex(dcel_vertex_at_event_point, next_dcel_vertex);
-            return;
-        }
+        overlay_vertex_on_vertex(vertex_at_event_point, overlay_vertex_at_event_point);
     }
-
-
-    for (int top_segment_index : intersection_results.top_segments)
-    {
-        DCEL_Vertex* next_dcel_vertex = DCEL_edges[top_segment_index].get_top_dcel_vertex();
-
-        if (dcel_vertex_at_event_point != next_dcel_vertex)
-        {
-            overlay_vertex_on_vertex(dcel_vertex_at_event_point, next_dcel_vertex);
-            return;
-        }
-    }
-
 
     //TODO: Handle collinear
 }
@@ -703,67 +646,76 @@ bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge
     }
 }
 
-void DCEL::overlay_copy_vertex_into_dcel(const DCEL_Vertex* vertex)
+//Splits the overlaying_segments based on the location of the intersection point on each segment
+DCEL::Intersection_Info DCEL::overlay_get_intersection_info(
+    std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
+    const std::vector<int>& intersecting_segments,
+    const Vec2& event_point) const
+{
+    Intersection_Info intersection_info(DCEL_edges);
+
+    for (const int& i : intersecting_segments)
+    {
+        if (*(DCEL_edges[i].get_top_point()) == event_point)
+        {
+            intersection_info.top_segments.push_back(i);
+        }
+        else if (*(DCEL_edges[i].get_bottom_point()) == event_point)
+        {
+            intersection_info.bottom_segments.push_back(i);
+        }
+        else
+        {
+            intersection_info.inner_segments.push_back(i);
+        }
+    }
+    return intersection_info;
+}
+
+DCEL::DCEL_Vertex* DCEL::overlay_copy_vertex_into_dcel(const DCEL_Vertex* vertex)
 {
     const std::unique_ptr<DCEL_Vertex>& new_vertex = this->vertices.emplace_back(std::make_unique<DCEL_Vertex>(*vertex));
     new_vertex->set_all_origins_to_this();
+
+    return new_vertex.get();
 }
 
-//Checks if the given event contains elements from multiple DCELs
-bool DCEL::overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const Intersection_Info& intersection_results) const
+void DCEL::Intersection_Info::get_vertices_from_top_segments(DCEL_Vertex*& original_vertex, DCEL_Vertex*& overlay_vertex)
 {
-    //TODO: Add this function to intersection_info? Template classes complicate it but check it anyway.
-    bool first_dcel;
-
-    if (!intersection_results.interior_segments.empty())
+    for (auto const& i : top_segments)
     {
-        first_dcel = DCEL_edges[*intersection_results.interior_segments.begin()].original_dcel;
-    }
-    else if (!intersection_results.top_segments.empty())
-    {
-        first_dcel = DCEL_edges[*intersection_results.top_segments.begin()].original_dcel;
-    }
-    else if (!intersection_results.bottom_segments.empty())
-    {
-        first_dcel = DCEL_edges[*intersection_results.bottom_segments.begin()].original_dcel;
-    }
-    else if (!intersection_results.collinear_segments.empty())
-    {
-        first_dcel = DCEL_edges[*intersection_results.collinear_segments.begin()].original_dcel;
-    }
-    else
-    {
-        //Empty event?
-        return false;
-    }
-
-    //Define lambda function that checks for the given element if it belongs to a different DCEL
-    auto different_dcels = [&DCEL_edges, &first_dcel](int segment_index)
+        if (DCEL_edges[i].original_dcel)
         {
-            return  DCEL_edges[segment_index].original_dcel != first_dcel;
-        };
+            original_vertex = DCEL_edges[i].get_top_dcel_vertex();
+        }
+        else
+        {
+            overlay_vertex = DCEL_edges[i].get_top_dcel_vertex();
+        }
 
-    //Check for each type of overlapping segment if it contains a segment from a different DCEL
-
-    if (std::any_of(intersection_results.interior_segments.begin(), intersection_results.interior_segments.end(), different_dcels))
-    {
-        return true;
+        if (original_vertex && overlay_vertex)
+        {
+            break;
+        }
     }
+}
 
-    if (std::any_of(intersection_results.top_segments.begin(), intersection_results.top_segments.end(), different_dcels))
+void DCEL::Intersection_Info::get_vertices_from_bottom_segments(DCEL_Vertex*& original_vertex, DCEL_Vertex*& overlay_vertex)
+{
+    for (auto const& i : bottom_segments)
     {
-        return true;
-    }
+        if (DCEL_edges[i].original_dcel)
+        {
+            original_vertex = DCEL_edges[i].get_bottom_dcel_vertex();
+        }
+        else
+        {
+            overlay_vertex = DCEL_edges[i].get_bottom_dcel_vertex();
+        }
 
-    if (std::any_of(intersection_results.bottom_segments.begin(), intersection_results.bottom_segments.end(), different_dcels))
-    {
-        return true;
+        if (original_vertex && overlay_vertex)
+        {
+            break;
+        }
     }
-
-    if (std::any_of(intersection_results.collinear_segments.begin(), intersection_results.collinear_segments.end(), different_dcels))
-    {
-        return true;
-    }
-
-    return false;
 }

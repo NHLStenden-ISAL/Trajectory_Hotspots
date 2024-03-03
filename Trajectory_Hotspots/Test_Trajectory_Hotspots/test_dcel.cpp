@@ -232,7 +232,6 @@ namespace TestTrajectoryHotspots
 
                 Assert::IsTrue(std::is_permutation(incident_targets.begin(), incident_targets.end(), correct_endpoints.begin()), L"Incorrect endpoints around vertex.");
 
-                ;
                 //The origin vertex of the adjacent half edges should be the middle
                 for (auto& incident_half_edge : incident_half_edges_middle)
                 {
