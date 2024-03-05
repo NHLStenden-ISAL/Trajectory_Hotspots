@@ -197,7 +197,7 @@ private:
         std::vector<int>& intersecting_segments,
         std::vector<int>& top_segments);
 
-    bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const std::vector<int>& intersecting_segments) const;
+    bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const std::vector<int>& intersecting_segments, const std::vector<int>& top_segments) const;
 
     Intersection_Info overlay_get_intersection_info(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
         const std::vector<int>& intersecting_segments,
