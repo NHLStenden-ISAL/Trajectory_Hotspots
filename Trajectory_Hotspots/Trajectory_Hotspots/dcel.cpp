@@ -558,36 +558,11 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
     if (!overlay_event_contains_both_dcels(DCEL_edges, intersecting_segments, top_segments))
     {
-        //If this event point is unique to the overlayed DCEL and doesnt intersect the original DCEL
+        //If this event point is unique to the overlayed DCEL and doesn't intersect the original DCEL
         //we still need to copy it over into the original DCEL and re-assign its incident edges.
         //Note that this can never be an inner intersection point.
 
-        const DCEL_Vertex* old_vertex = nullptr;
-        if (!top_segments.empty())
-        {
-            if (DCEL_edges[top_segments.front()].original_dcel)
-            {
-                //Only the original dcel contributes, no records need to be updated.
-                return;
-            }
-
-            old_vertex = DCEL_edges[top_segments.front()].get_top_dcel_vertex();
-        }
-        else
-        {
-            if (DCEL_edges[intersecting_segments.front()].original_dcel)
-            {
-                //Only the original dcel contributes, no records need to be updated.
-                return;
-            }
-
-            old_vertex = DCEL_edges[intersecting_segments.front()].get_vertex_on_point(event_point);
-
-        }
-
-        assert(old_vertex->position == event_point);
-
-        overlay_copy_vertex_into_dcel(old_vertex);
+        overlay_handle_unique_vertex(DCEL_edges, intersecting_segments, top_segments, event_point);
 
         return;
     }
@@ -645,6 +620,38 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     }
 
     //TODO: Handle collinear - Compare tops with inners only if both dcels - do before other overlays - slope?
+}
+
+void DCEL::overlay_handle_unique_vertex(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, std::vector<int>& intersecting_segments, std::vector<int>& top_segments, const Vec2& event_point)
+{
+    //If the vertex is unique to the overlaying DCEL, copy it over, otherwise, do nothing
+
+    const DCEL_Vertex* old_vertex = nullptr;
+    if (!top_segments.empty())
+    {
+        if (DCEL_edges[top_segments.front()].original_dcel)
+        {
+            //Only the original dcel contributes, no records need to be updated.
+            return;
+        }
+
+        old_vertex = DCEL_edges[top_segments.front()].get_top_dcel_vertex();
+    }
+    else
+    {
+        if (DCEL_edges[intersecting_segments.front()].original_dcel)
+        {
+            //Only the original dcel contributes, no records need to be updated.
+            return;
+        }
+
+        old_vertex = DCEL_edges[intersecting_segments.front()].get_vertex_on_point(event_point);
+
+    }
+
+    assert(old_vertex->position == event_point);
+
+    overlay_copy_vertex_into_dcel(old_vertex);
 }
 
 //Checks if the given event contains elements from multiple DCELs

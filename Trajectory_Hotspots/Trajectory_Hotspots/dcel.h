@@ -197,6 +197,8 @@ private:
         std::vector<int>& intersecting_segments,
         std::vector<int>& top_segments);
 
+    void overlay_handle_unique_vertex(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, std::vector<int>& intersecting_segments, std::vector<int>& top_segments, const Vec2& event_point);
+
     bool overlay_event_contains_both_dcels(const std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges, const std::vector<int>& intersecting_segments, const std::vector<int>& top_segments) const;
 
     Intersection_Info overlay_get_intersection_info(std::vector<DCEL_Overlay_Edge_Wrapper>& DCEL_edges,
