@@ -561,7 +561,6 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         //If this event point is unique to the overlayed DCEL and doesn't intersect the original DCEL
         //we still need to copy it over into the original DCEL and re-assign its incident edges.
         //Note that this can never be an inner intersection point.
-
         overlay_handle_unique_vertex(DCEL_edges, intersecting_segments, top_segments, event_point);
 
         return;
@@ -573,6 +572,72 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
     DCEL_Vertex* overlay_vertex_at_event_point = nullptr;
 
     Intersection_Info intersection_info = overlay_get_intersection_info(DCEL_edges, intersecting_segments, top_segments, event_point);
+
+
+
+    //TODO: Handle collinear - Compare tops with inners only if both dcels - do before other overlays - slope (use pseudo angle)?
+
+    //Before we handle the other overlay cases we need to handle potential collinear segments.
+    // ----
+    //We only need to consider (parts of) segments below (or directly right of) the event point
+    //because we handled the (parts of) segments above the event earlier.
+    //Note: Each segment can be part of at most one collinear overlap per event point.
+
+    //Test for collinear overlaps
+    //Orientation of DCEL_Edges is top and left
+
+    //Test if both top points or top point and inner segment.
+    //Both top:
+    //          Fuse both tops (don't forget to update top event, which is current, move one to later?)
+    //          If: same bottoms - fuse
+    //          Else: Split at first bottom
+    //
+    //Top and inner:
+    //          (DONT CUT OVER THE LOWER EVENT POINT YET, IF OF OVERLAYING DCEL)
+    //          Create middle point (if from overlaying, DONT CUT OVERLAYING /\)
+    //          
+
+
+    for (size_t top_segment = 0; top_segment < top_segments.size(); top_segment++)
+    {
+        Float top_angle = Vec2::pseudo_angle(event_point, *DCEL_edges[top_segment].get_bottom_point());
+
+        for (size_t other_top_segment = 0; other_top_segment < top_segments.size(); other_top_segment++)
+        {
+            if (top_segment == other_top_segment)
+            {
+                continue;
+            }
+
+            Float other_top_angle = Vec2::pseudo_angle(event_point, *DCEL_edges[other_top_segment].get_bottom_point());
+
+            if (top_angle == other_top_angle)
+            {
+                //Handle collinear overlap
+
+                //Return here
+            }
+        }
+
+        for (size_t inner_segment = 0; inner_segment < intersection_info.inner_segments.size(); inner_segment++)
+        {
+            Float inner_angle = Vec2::pseudo_angle(event_point, *DCEL_edges[inner_segment].get_bottom_point());
+
+            if (top_angle == inner_angle)
+            {
+                //Handle collinear overlap
+
+                //Return here
+            }
+        }
+    }
+
+
+    //----
+
+
+
+
 
     auto inner_it = intersection_info.inner_segments.begin();
 
@@ -619,7 +684,6 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         overlay_vertex_on_vertex(vertex_at_event_point, overlay_vertex_at_event_point);
     }
 
-    //TODO: Handle collinear - Compare tops with inners only if both dcels - do before other overlays - slope?
 }
 
 void DCEL::overlay_handle_unique_vertex(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, std::vector<int>& intersecting_segments, std::vector<int>& top_segments, const Vec2& event_point)
