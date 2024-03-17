@@ -88,7 +88,7 @@ public:
         std::vector<const DCEL_Half_Edge*> get_cycle() const;
         
         //Removes this half-edge from its sources cycle
-        void remove_from_cycle()
+        void remove_from_cycle();
     };
 
     //Wrapper class used for the overlay of two DCELs. Each instance represents an edge that overlaps with two twin half-edges.
