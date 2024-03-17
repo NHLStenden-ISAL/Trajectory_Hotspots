@@ -278,137 +278,6 @@ void DCEL::add_edge_to_vertex(DCEL::DCEL_Half_Edge& incident_half_edge, DCEL::DC
     CCW_half_edge->twin->next = &incident_half_edge;
 }
 
-void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge, const Vec2& intersection_point)
-{
-    //Orientation of DCEL_Edges is top and left
-
-    //Test if both top points or top point and inner segment.
-    //Both top:
-    //          Fuse both tops (don't forget to update top event, which is current, move one to later?)
-    //          If: same bottoms - fuse
-    //          Else: Split at first bottom
-    //
-    //Top and inner:
-    //          (DONT CUT OVER THE LOWER EVENT POINT YET, IF OF OVERLAYING DCEL)
-    //          Create middle point (if from overlaying, DONT CUT OVERLAYING /\)
-    //          
-
-    //Handle partial overlay (no endpoints overlap)
-    DCEL_Half_Edge* top_edge = nullptr;
-    DCEL_Half_Edge* bottom_edge = nullptr;
-
-
-    if (original_edge->target()->position.y >= overlay_edge->target()->position.y && original_edge->target()->position.x < overlay_edge->target()->position.x)
-    {
-        top_edge = original_edge;
-        bottom_edge = overlay_edge;
-    }
-    else
-    {
-        top_edge = overlay_edge;
-        bottom_edge = original_edge;
-    }
-
-    //This operation creates two new half edges (we split and combine the two edges into three)
-    half_edges.reserve(half_edges.size() + 2);
-
-    const std::unique_ptr<DCEL_Half_Edge>& new_top_edge = half_edges.emplace_back(
-        bottom_edge->target(), //Origin
-        nullptr,               //Face
-        top_edge->twin,        //Twin
-        top_edge->next,        //Next
-        nullptr); //Prev is on the cycle of the bottom edge, top endpoint
-
-    const std::unique_ptr<DCEL_Half_Edge>& new_bottom_twin_edge = half_edges.emplace_back(
-        top_edge->origin,        //Origin
-        nullptr,                 //Face
-        bottom_edge,             //Twin
-        bottom_edge->twin->next, //Next
-        nullptr); //Prev is on the cycle of the top edge, bottom endpoint
-
-    //Shorten top twin to the top endpoint of the bottom edge
-    top_edge->twin->twin = new_top_edge.get();
-
-    //Shorten top to the top endpoint of the bottom edge
-    top_edge->twin = bottom_edge->twin;
-
-    //Shorten bottom twin to the bottom endpoint of the top edge
-    bottom_edge->twin->twin = top_edge;
-
-    //Shorten bottom to the bottom endpoint of the top edge
-    bottom_edge->twin = new_bottom_twin_edge.get();
-
-    //Add the new top half-edge to the cycle around top vertex of the bottom edge
-    add_edge_to_vertex(*new_top_edge.get(), *new_top_edge->origin);
-
-    //Add the new twin of the bottom half-edge to the bottom vertex of the top edge
-    add_edge_to_vertex(*new_bottom_twin_edge.get(), *top_edge->origin);
-
-
-
-    //if (edge_1->target()->position != edge_2->target()->position)
-    //{
-    //    //Split top
-    //}
-    //
-    //
-    //if (edge_1->origin->position != edge_2->origin->position)
-    //{
-    //    //Split bottom?
-    //}
-}
-
-std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
-{
-    const DCEL_Half_Edge* starting_half_edge = outer_component;
-    const DCEL_Half_Edge* current_half_edge = starting_half_edge;
-
-    std::vector<Vec2> boundary_vertices;
-    do
-    {
-        //Report vertex and move to the next half-edge in the chain
-        boundary_vertices.push_back(current_half_edge->origin->position);
-        current_half_edge = current_half_edge->next;
-
-    } while (current_half_edge != starting_half_edge);
-
-    return boundary_vertices;
-}
-
-std::vector<const DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
-{
-    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
-    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
-
-    std::vector<const DCEL_Half_Edge*> incident_half_edges;
-
-    do
-    {
-        incident_half_edges.emplace_back(current_half_edge);
-        current_half_edge = current_half_edge->twin->next;
-
-    } while (current_half_edge != starting_half_edge);
-
-    return incident_half_edges;
-}
-
-std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges()
-{
-    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
-    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
-
-    std::vector<DCEL_Half_Edge*> incident_half_edges;
-
-    do
-    {
-        incident_half_edges.emplace_back(current_half_edge);
-        current_half_edge = current_half_edge->twin->next;
-
-    } while (current_half_edge != starting_half_edge);
-
-    return incident_half_edges;
-}
-
 void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge& query_edge, DCEL::DCEL_Half_Edge& starting_half_edge) const
 {
     DCEL_Half_Edge* CW_half_edge = nullptr; //Clockwise half-edge
@@ -471,6 +340,14 @@ void DCEL::DCEL_Vertex::set_all_origins_to_this()
 bool DCEL::DCEL_Half_Edge::is_orientated_top_left() const
 {
     return orientation_top_left(origin->position, twin->origin->position);
+}
+
+void DCEL::DCEL_Half_Edge::remove_from_cycle()
+{
+    twin->next->prev = prev;
+    prev->next = twin->next;
+
+    origin = nullptr;
 }
 
 //Returns the cycle of half-edges pointing each other, starting with this
@@ -714,6 +591,9 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
             {
                 //Handle collinear overlap
 
+                //Remove inner_segment from inner_segments
+                //If new top, add new top (middle lower endpoint)
+
                 //Return here
             }
         }
@@ -721,10 +601,6 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
 
     //----
-
-
-
-
 
     auto inner_it = intersection_info.inner_segments.begin();
 
@@ -771,6 +647,182 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
         overlay_vertex_on_vertex(vertex_at_event_point, overlay_vertex_at_event_point);
     }
 
+}
+
+void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge, const Vec2& intersection_point)
+{
+    //Orientation of DCEL_Edges is top and left
+
+    //Test if both top points or top point and inner segment.
+    //Both top:
+    //          Fuse both tops (don't forget to update top event, which is current, move one to later?)
+    //          If: same bottoms - fuse
+    //          Else: Split at first bottom
+    //
+    //Top and inner:
+    //          (DONT CUT OVER THE LOWER EVENT POINT YET, IF OF OVERLAYING DCEL)
+    //          Create middle point (if from overlaying, DONT CUT OVERLAYING /\)
+    //          
+
+    if (original_edge->target() == overlay_edge->target())
+    {
+        if (original_edge->origin == overlay_edge->origin)
+        {
+            //Perfect overlap, fuse
+        }
+        else
+        {
+            //Same top points
+        }
+    }
+    else
+    {
+        if (original_edge->origin == overlay_edge->origin)
+        {
+            //Same bottom points
+        }
+        else
+        {
+            //No endpoints equal
+            overlay_collinear_overlap_partial_or_embedded(original_edge, overlay_edge);
+
+            //Note:
+            //New edge above sweepline is already handled
+            //Vertices get copied or fused later.
+        }
+    }
+}
+
+void DCEL::overlay_collinear_overlap_partial_or_embedded(DCEL::DCEL_Half_Edge* original_edge, DCEL::DCEL_Half_Edge* overlay_edge)
+{
+    //Handle partial overlay (no endpoints overlap)
+    DCEL_Half_Edge* top_edge = nullptr;
+    DCEL_Half_Edge* lower_edge = nullptr;
+
+    //Which edge lies higher based on the ordering of the top endpoints
+    if (original_edge->target()->position.y >= overlay_edge->target()->position.y && original_edge->target()->position.x < overlay_edge->target()->position.x)
+    {
+        top_edge = original_edge;
+        lower_edge = overlay_edge;
+    }
+    else
+    {
+        //Should never reach if called with (top, internal)?
+        top_edge = overlay_edge;
+        lower_edge = original_edge;
+    }
+
+    DCEL_Vertex* middle_top_vertex = lower_edge->target();
+    DCEL_Vertex* middle_bottom_vertex = nullptr;
+
+    DCEL_Half_Edge* bottom_edge = nullptr;
+
+    //Determine the new middle and bottom half-edges based on the ordering of the bottom endpoints
+    if (lower_edge->origin->position.y >= top_edge->origin->position.y && lower_edge->origin->position.x < top_edge->origin->position.x)
+    {
+        //bottom is fully embedded
+        //middle_edge = lower_edge;
+        bottom_edge = top_edge;
+        middle_bottom_vertex = bottom_edge->origin;
+    }
+    else
+    {
+        //Both segments partially overlap
+        DCEL_Half_Edge* middle_edge = top_edge;
+        bottom_edge = lower_edge;
+        middle_bottom_vertex = top_edge->origin;
+
+        //If partial, shorten top to the top endpoint of the bottom edge
+        middle_edge->twin = bottom_edge->twin;
+
+        //If partial, Shorten bottom twin to the bottom endpoint of the top edge
+        bottom_edge->twin->twin = middle_edge;
+
+    }
+
+    //This operation creates two new half edges (we split and combine the two edges into three)
+    half_edges.reserve(half_edges.size() + 2);
+
+    const std::unique_ptr<DCEL_Half_Edge>& new_top_edge = half_edges.emplace_back(
+        middle_top_vertex,     //Origin
+        nullptr,               //Face
+        top_edge->twin,        //Twin
+        top_edge->next,        //Next
+        nullptr); //Prev is on the cycle of the bottom edge, top endpoint
+
+    top_edge->next->prev = new_top_edge.get();
+
+    const std::unique_ptr<DCEL_Half_Edge>& new_bottom_twin_edge = half_edges.emplace_back(
+        middle_bottom_vertex,    //Origin
+        nullptr,                 //Face
+        bottom_edge,             //Twin
+        bottom_edge->twin->next, //Next
+        nullptr); //Prev is on the cycle of the top edge, bottom endpoint
+
+    bottom_edge->twin->next->prev = new_bottom_twin_edge.get();
+
+    //Shorten top twin to the upper middle endpoint
+    top_edge->twin->twin = new_top_edge.get();
+
+    //Shorten bottom to the lower middle endpoint
+    bottom_edge->twin = new_bottom_twin_edge.get();
+
+    //Add the new top half-edge to the cycle around top vertex of the bottom edge
+    add_edge_to_vertex(*new_top_edge.get(), *new_top_edge->origin);
+
+    //Add the new twin of the bottom half-edge to the bottom vertex of the top edge
+    add_edge_to_vertex(*new_bottom_twin_edge.get(), *new_bottom_twin_edge->origin);
+}
+
+std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
+{
+    const DCEL_Half_Edge* starting_half_edge = outer_component;
+    const DCEL_Half_Edge* current_half_edge = starting_half_edge;
+
+    std::vector<Vec2> boundary_vertices;
+    do
+    {
+        //Report vertex and move to the next half-edge in the chain
+        boundary_vertices.push_back(current_half_edge->origin->position);
+        current_half_edge = current_half_edge->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return boundary_vertices;
+}
+
+std::vector<const DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges() const
+{
+    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
+
+    std::vector<const DCEL_Half_Edge*> incident_half_edges;
+
+    do
+    {
+        incident_half_edges.emplace_back(current_half_edge);
+        current_half_edge = current_half_edge->twin->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return incident_half_edges;
+}
+
+std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges()
+{
+    const DCEL::DCEL_Half_Edge* starting_half_edge = incident_half_edge;
+    DCEL::DCEL_Half_Edge* current_half_edge = incident_half_edge;
+
+    std::vector<DCEL_Half_Edge*> incident_half_edges;
+
+    do
+    {
+        incident_half_edges.emplace_back(current_half_edge);
+        current_half_edge = current_half_edge->twin->next;
+
+    } while (current_half_edge != starting_half_edge);
+
+    return incident_half_edges;
 }
 
 void DCEL::overlay_handle_unique_vertex(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DCEL_edges, std::vector<int>& intersecting_segments, std::vector<int>& top_segments, const Vec2& event_point)
