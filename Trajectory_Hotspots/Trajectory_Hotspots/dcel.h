@@ -211,6 +211,7 @@ private:
     void overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex);
     DCEL_Vertex* overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point);
     void overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2)  const;
+    void add_edge_to_vertex(DCEL::DCEL_Half_Edge*& incident_half_edge, DCEL::DCEL_Vertex* vertex, DCEL::DCEL_Half_Edge* current_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
 };
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.

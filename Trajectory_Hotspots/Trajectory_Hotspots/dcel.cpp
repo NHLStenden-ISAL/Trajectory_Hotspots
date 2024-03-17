@@ -185,24 +185,11 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
 
     DCEL_Half_Edge* current_half_edge = vertex->incident_half_edge->twin->next;
 
-    vertex->find_adjacent_half_edges(edge, current_half_edge, CW_half_edge, CCW_half_edge);
-
-    //face is left of half-edge, so half-edge with vertex as origin has CCW half-edge as prev 
-    new_half_edge_1->prev = CCW_half_edge->twin;
-    CCW_half_edge->twin->next = new_half_edge_1.get();
-
-    //and half-edge with vertex as target has CW half-edge as next
-    edge->next = CW_half_edge;
-    CW_half_edge->prev = edge;
+    add_edge_to_vertex(edge->twin, vertex, current_half_edge, CW_half_edge, CCW_half_edge);
 
     //Find the other side, start from the end of the previous rotation (it is impossible for it to lie between the just added and CW half-edge)
-    vertex->find_adjacent_half_edges(twin, CCW_half_edge, CW_half_edge, CCW_half_edge);
+    add_edge_to_vertex(twin->twin, vertex, CCW_half_edge, CW_half_edge, CCW_half_edge);
 
-    new_half_edge_2->prev = CCW_half_edge->twin;
-    CCW_half_edge->twin->next = new_half_edge_2.get();
-
-    twin->next = CW_half_edge;
-    CW_half_edge->prev = twin;
 }
 
 DCEL::DCEL_Vertex* DCEL::overlay_edge_on_edge(DCEL_Half_Edge* edge_1, DCEL_Half_Edge* edge_2, const Vec2& intersection_point)
@@ -265,9 +252,15 @@ void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2
 
     for (auto& incident_half_edge_v2 : incident_half_edges_v2)
     {
-        incident_half_edge_v2->origin = vertex_1;
+        add_edge_to_vertex(incident_half_edge_v2, vertex_1, current_half_edge, CW_half_edge, CCW_half_edge);
+    }
+}
 
-        vertex_1->find_adjacent_half_edges(incident_half_edge_v2->twin, current_half_edge, CW_half_edge, CCW_half_edge);
+void DCEL::add_edge_to_vertex(DCEL::DCEL_Half_Edge*& incident_half_edge, DCEL::DCEL_Vertex* vertex, DCEL::DCEL_Half_Edge* current_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+{
+    incident_half_edge->origin = vertex;
+
+    vertex->find_adjacent_half_edges(incident_half_edge, current_half_edge, CW_half_edge, CCW_half_edge);
 
         //half-edges chain counter clockwise and adjacent half-edges point outward
         //so: CW half-edge is just the CW adjacent
@@ -276,12 +269,11 @@ void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2
         //(We can prevent the two twin writes by checking if the CCW is the previous added half-edge
         //but adding branching is probably slower)
 
-        incident_half_edge_v2->twin->next = CW_half_edge;
-        CW_half_edge->prev = incident_half_edge_v2->twin;
+    incident_half_edge->twin->next = CW_half_edge;
+    CW_half_edge->prev = incident_half_edge->twin;
 
-        incident_half_edge_v2->prev = CCW_half_edge->twin;
-        CCW_half_edge->twin->next = incident_half_edge_v2;
-    }
+    incident_half_edge->prev = CCW_half_edge->twin;
+    CCW_half_edge->twin->next = incident_half_edge;
 }
 
 std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
@@ -342,11 +334,11 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
 
     //Keep rotating counterclockwise until we find the first half-edges clock and counterclockwise from the queried half-edge
 
-    Float prev_angle = Vec2::order_around_center(this->position, query_edge->origin->position, prev_half_edge->target()->position);
+    Float prev_angle = Vec2::order_around_center(this->position, query_edge->target()->position, prev_half_edge->target()->position);
 
     do
     {
-        Float new_angle = Vec2::order_around_center(this->position, query_edge->origin->position, current_half_edge->target()->position);
+        Float new_angle = Vec2::order_around_center(this->position, query_edge->target()->position, current_half_edge->target()->position);
 
         //Keep rotating until the current half-edge has a lower counterclockwise angle than the previous, relative to the queried half-edge
         //(this means we passed the queried half-edges angle)
