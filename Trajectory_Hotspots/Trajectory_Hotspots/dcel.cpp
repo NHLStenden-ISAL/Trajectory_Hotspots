@@ -185,10 +185,10 @@ void DCEL::overlay_edge_on_vertex(DCEL_Half_Edge* edge, DCEL_Vertex* vertex)
 
     DCEL_Half_Edge* current_half_edge = vertex->incident_half_edge->twin->next;
 
-    add_edge_to_vertex(edge->twin, vertex, current_half_edge, CW_half_edge, CCW_half_edge);
+    add_edge_to_vertex(*edge->twin, *vertex, *current_half_edge, CW_half_edge, CCW_half_edge);
 
     //Find the other side, start from the end of the previous rotation (it is impossible for it to lie between the just added and CW half-edge)
-    add_edge_to_vertex(twin->twin, vertex, CCW_half_edge, CW_half_edge, CCW_half_edge);
+    add_edge_to_vertex(*twin->twin, *vertex, *CCW_half_edge, CW_half_edge, CCW_half_edge);
 
 }
 
@@ -245,35 +245,117 @@ void DCEL::overlay_vertex_on_vertex(DCEL_Vertex* vertex_1, DCEL_Vertex* vertex_2
 
     std::vector<DCEL_Half_Edge*> incident_half_edges_v2 = vertex_2->get_incident_half_edges();
 
-    DCEL_Half_Edge* CW_half_edge = nullptr;
-    DCEL_Half_Edge* CCW_half_edge = nullptr;
-
-    DCEL_Half_Edge* current_half_edge = vertex_1->incident_half_edge;
-
-    for (auto& incident_half_edge_v2 : incident_half_edges_v2)
+    for (DCEL_Half_Edge* incident_half_edge_v2 : incident_half_edges_v2)
     {
-        add_edge_to_vertex(incident_half_edge_v2, vertex_1, current_half_edge, CW_half_edge, CCW_half_edge);
+        add_edge_to_vertex(*incident_half_edge_v2, *vertex_1);
     }
 }
 
-void DCEL::add_edge_to_vertex(DCEL::DCEL_Half_Edge*& incident_half_edge, DCEL::DCEL_Vertex* vertex, DCEL::DCEL_Half_Edge* current_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+void DCEL::add_edge_to_vertex(DCEL::DCEL_Half_Edge& incident_half_edge, DCEL::DCEL_Vertex& vertex) const
 {
-    incident_half_edge->origin = vertex;
+    DCEL_Half_Edge* CW_half_edge = nullptr; //Clockwise half-edge
+    DCEL_Half_Edge* CCW_half_edge = nullptr; //Counter clockwise half-edge
+    add_edge_to_vertex(incident_half_edge, vertex, *vertex.incident_half_edge, CW_half_edge, CCW_half_edge);
+}
 
-    vertex->find_adjacent_half_edges(incident_half_edge, current_half_edge, CW_half_edge, CCW_half_edge);
+void DCEL::add_edge_to_vertex(DCEL::DCEL_Half_Edge& incident_half_edge, DCEL::DCEL_Vertex& vertex, DCEL::DCEL_Half_Edge& current_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+{
+    incident_half_edge.origin = &vertex;
 
-        //half-edges chain counter clockwise and adjacent half-edges point outward
-        //so: CW half-edge is just the CW adjacent
-        //    and CCW half-edge is the twin of CCW adjacent
+    vertex.find_adjacent_half_edges(incident_half_edge, current_half_edge, CW_half_edge, CCW_half_edge);
 
-        //(We can prevent the two twin writes by checking if the CCW is the previous added half-edge
-        //but adding branching is probably slower)
+    //half-edges chain counter clockwise and adjacent half-edges point outward
+    //so: CW half-edge is just the CW adjacent
+    //    and CCW half-edge is the twin of CCW adjacent
 
-    incident_half_edge->twin->next = CW_half_edge;
-    CW_half_edge->prev = incident_half_edge->twin;
+    //(We can prevent the two twin writes by checking if the CCW is the previous added half-edge
+    //but adding branching is probably slower)
 
-    incident_half_edge->prev = CCW_half_edge->twin;
-    CCW_half_edge->twin->next = incident_half_edge;
+    incident_half_edge.twin->next = CW_half_edge;
+    CW_half_edge->prev = incident_half_edge.twin;
+
+    incident_half_edge.prev = CCW_half_edge->twin;
+    CCW_half_edge->twin->next = &incident_half_edge;
+}
+
+void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge, const Vec2& intersection_point)
+{
+    //Orientation of DCEL_Edges is top and left
+
+    //Test if both top points or top point and inner segment.
+    //Both top:
+    //          Fuse both tops (don't forget to update top event, which is current, move one to later?)
+    //          If: same bottoms - fuse
+    //          Else: Split at first bottom
+    //
+    //Top and inner:
+    //          (DONT CUT OVER THE LOWER EVENT POINT YET, IF OF OVERLAYING DCEL)
+    //          Create middle point (if from overlaying, DONT CUT OVERLAYING /\)
+    //          
+
+    //Handle partial overlay (no endpoints overlap)
+    DCEL_Half_Edge* top_edge = nullptr;
+    DCEL_Half_Edge* bottom_edge = nullptr;
+
+
+    if (original_edge->target()->position.y >= overlay_edge->target()->position.y && original_edge->target()->position.x < overlay_edge->target()->position.x)
+    {
+        top_edge = original_edge;
+        bottom_edge = overlay_edge;
+    }
+    else
+    {
+        top_edge = overlay_edge;
+        bottom_edge = original_edge;
+    }
+
+    //This operation creates two new half edges (we split and combine the two edges into three)
+    half_edges.reserve(half_edges.size() + 2);
+
+    const std::unique_ptr<DCEL_Half_Edge>& new_top_edge = half_edges.emplace_back(
+        bottom_edge->target(), //Origin
+        nullptr,               //Face
+        top_edge->twin,        //Twin
+        top_edge->next,        //Next
+        nullptr); //Prev is on the cycle of the bottom edge, top endpoint
+
+    const std::unique_ptr<DCEL_Half_Edge>& new_bottom_twin_edge = half_edges.emplace_back(
+        top_edge->origin,        //Origin
+        nullptr,                 //Face
+        bottom_edge,             //Twin
+        bottom_edge->twin->next, //Next
+        nullptr); //Prev is on the cycle of the top edge, bottom endpoint
+
+    //Shorten top twin to the top endpoint of the bottom edge
+    top_edge->twin->twin = new_top_edge.get();
+
+    //Shorten top to the top endpoint of the bottom edge
+    top_edge->twin = bottom_edge->twin;
+
+    //Shorten bottom twin to the bottom endpoint of the top edge
+    bottom_edge->twin->twin = top_edge;
+
+    //Shorten bottom to the bottom endpoint of the top edge
+    bottom_edge->twin = new_bottom_twin_edge.get();
+
+    //Add the new top half-edge to the cycle around top vertex of the bottom edge
+    add_edge_to_vertex(*new_top_edge.get(), *new_top_edge->origin);
+
+    //Add the new twin of the bottom half-edge to the bottom vertex of the top edge
+    add_edge_to_vertex(*new_bottom_twin_edge.get(), *top_edge->origin);
+
+
+
+    //if (edge_1->target()->position != edge_2->target()->position)
+    //{
+    //    //Split top
+    //}
+    //
+    //
+    //if (edge_1->origin->position != edge_2->origin->position)
+    //{
+    //    //Split bottom?
+    //}
 }
 
 std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
@@ -327,18 +409,26 @@ std::vector<DCEL::DCEL_Half_Edge*> DCEL::DCEL_Vertex::get_incident_half_edges()
     return incident_half_edges;
 }
 
-void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* query_edge, DCEL::DCEL_Half_Edge* starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge& query_edge, DCEL::DCEL_Half_Edge& starting_half_edge) const
 {
-    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge->twin->next;
-    DCEL::DCEL_Half_Edge* current_half_edge = starting_half_edge;
+    DCEL_Half_Edge* CW_half_edge = nullptr; //Clockwise half-edge
+    DCEL_Half_Edge* CCW_half_edge = nullptr; //Counter clockwise half-edge
+
+    find_adjacent_half_edges(query_edge, starting_half_edge, CW_half_edge, CCW_half_edge);
+}
+
+void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge& query_edge, DCEL::DCEL_Half_Edge& starting_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const
+{
+    DCEL::DCEL_Half_Edge* prev_half_edge = starting_half_edge.twin->next;
+    DCEL::DCEL_Half_Edge* current_half_edge = &starting_half_edge;
 
     //Keep rotating counterclockwise until we find the first half-edges clock and counterclockwise from the queried half-edge
 
-    Float prev_angle = Vec2::order_around_center(this->position, query_edge->target()->position, prev_half_edge->target()->position);
+    Float prev_angle = Vec2::order_around_center(this->position, query_edge.target()->position, prev_half_edge->target()->position);
 
     do
     {
-        Float new_angle = Vec2::order_around_center(this->position, query_edge->target()->position, current_half_edge->target()->position);
+        Float new_angle = Vec2::order_around_center(this->position, query_edge.target()->position, current_half_edge->target()->position);
 
         //Keep rotating until the current half-edge has a lower counterclockwise angle than the previous, relative to the queried half-edge
         //(this means we passed the queried half-edges angle)
@@ -354,7 +444,7 @@ void DCEL::DCEL_Vertex::find_adjacent_half_edges(const DCEL::DCEL_Half_Edge* que
             prev_angle = new_angle;
             current_half_edge = current_half_edge->prev->twin;
         }
-    } while (current_half_edge != starting_half_edge);
+    } while (current_half_edge != &starting_half_edge);
 
     //If there is only one edge the above loop fails, assign to both CW and CCW
     if (current_half_edge == prev_half_edge)
@@ -606,6 +696,11 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
             if (top_angle == other_top_angle)
             {
                 //Handle collinear overlap
+
+                //Both top equal
+                //If both bottom equal, fuse data, remove?
+                //Else split at midpoint.
+
 
                 //Return here
             }
