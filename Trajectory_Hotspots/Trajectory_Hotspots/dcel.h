@@ -86,6 +86,9 @@ public:
 
         //Returns the cycle of half-edges pointing to each other, starting with this
         std::vector<const DCEL_Half_Edge*> get_cycle() const;
+        
+        //Removes this half-edge from its sources cycle
+        void remove_from_cycle()
     };
 
     //Wrapper class used for the overlay of two DCELs. Each instance represents an edge that overlaps with two twin half-edges.
@@ -215,6 +218,7 @@ private:
     void add_edge_to_vertex(DCEL::DCEL_Half_Edge& incident_half_edge, DCEL::DCEL_Vertex& vertex) const;
     void add_edge_to_vertex(DCEL::DCEL_Half_Edge& incident_half_edge, DCEL::DCEL_Vertex& vertex, DCEL::DCEL_Half_Edge& current_half_edge, DCEL::DCEL_Half_Edge*& CW_half_edge, DCEL::DCEL_Half_Edge*& CCW_half_edge) const;
     void overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge, const Vec2& intersection_point);
+    void overlay_collinear_overlap_partial_or_embedded(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge);
 };
 
 //Given two collinear segments, returns if they overlap and if true also provides the start and end points of the overlap.
