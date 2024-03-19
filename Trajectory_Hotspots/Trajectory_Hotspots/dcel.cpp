@@ -347,6 +347,20 @@ void DCEL::DCEL_Half_Edge::remove_from_cycle()
     twin->next->prev = prev;
     prev->next = twin->next;
 
+    //If this half-edge was the first incident half-edge we need to assign it to an arbitrary one in the cycle
+    if (origin->incident_half_edge == this)
+    {
+        if (next == this)
+        {
+            //If this half-edge was the only half-edge in the cycle, make this vertex a free vertex
+            origin->incident_half_edge = nullptr;
+        }
+        else
+        {
+            origin->incident_half_edge = next;
+        }
+    }
+
     origin = nullptr;
 }
 
@@ -649,8 +663,11 @@ void DCEL::handle_overlay_event(std::vector<DCEL::DCEL_Overlay_Edge_Wrapper>& DC
 
 }
 
-void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge, const Vec2& intersection_point)
+void DCEL::overlay_collinear_overlap(const int original_edge_index, const int overlay_edge_index, const Vec2& intersection_point, std::vector<int>& to_delete)
 {
+    DCEL_Half_Edge* original_edge = half_edges[original_edge_index].get();
+    DCEL_Half_Edge* overlay_edge = half_edges[overlay_edge_index].get();
+
     //Orientation of DCEL_Edges is top and left
 
     //Test if both top points or top point and inner segment.
@@ -663,16 +680,45 @@ void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Ed
     //          (DONT CUT OVER THE LOWER EVENT POINT YET, IF OF OVERLAYING DCEL)
     //          Create middle point (if from overlaying, DONT CUT OVERLAYING /\)
     //          
-
     if (original_edge->target() == overlay_edge->target())
     {
         if (original_edge->origin == overlay_edge->origin)
         {
             //Perfect overlap, fuse
+
+            //We can reuse the twins of both half-edges to form the new edge
+            //This works because of the assumption that both dcels were properly formed and had no overlaps
+            // If this is the case both edges have no other edges intersecting them so we never need the indices again.
+            // If one of the edges would have an intersecting edge it would've been split at an earlier overlap and we wouldn't detect a perfect overlap now.
+            //We can also already handle the bottom vertex. 
+            //Because the original half-edges won't be involved in any future intersections we can safely mark them for deletion.
+
+
+            //Remove the overlay_edge from the vertices in the overlaying dcel so we dont try to add them again at another event type
+            overlay_edge->remove_from_cycle();
+            overlay_edge->twin->remove_from_cycle();
+
+            //Make the overlayed edges twin the new main edge (it points up left after this)
+            DCEL_Half_Edge* new_original_half_edge = overlay_edge->twin;
+            *new_original_half_edge = *original_edge;
+
+            //Set the adjacent pointers
+            original_edge->twin->twin = new_original_half_edge;
+            original_edge->next->prev = new_original_half_edge;
+            original_edge->prev->next = new_original_half_edge;
+
+            //Delete both half-edges, we re-use the twins of each edge to form the new edge
+            to_delete.push_back(original_edge_index);
+            to_delete.push_back(overlay_edge_index);
+
+            //Remove both from top list
         }
         else
         {
             //Same top points
+            overlay_collinear_overlap_same_endpoint(original_edge, overlay_edge);
+
+            //Remove longer from top list and add to event point at new top (shorters bottom)
         }
     }
     else
@@ -680,6 +726,9 @@ void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Ed
         if (original_edge->origin == overlay_edge->origin)
         {
             //Same bottom points
+            overlay_collinear_overlap_same_endpoint(original_edge, overlay_edge);
+
+            //Remove longer from inner list
         }
         else
         {
@@ -689,6 +738,9 @@ void DCEL::overlay_collinear_overlap(DCEL_Half_Edge* original_edge, DCEL_Half_Ed
             //Note:
             //New edge above sweepline is already handled
             //Vertices get copied or fused later.
+
+            //Remove Top from top list and add to top event point at bottom of embedded
+            //Embedded can stay in top list.
         }
     }
 }
@@ -743,21 +795,22 @@ void DCEL::overlay_collinear_overlap_partial_or_embedded(DCEL::DCEL_Half_Edge* o
     //This operation creates two new half edges (we split and combine the two edges into three)
     half_edges.reserve(half_edges.size() + 2);
 
-    const std::unique_ptr<DCEL_Half_Edge>& new_top_edge = half_edges.emplace_back(
+
+    const std::unique_ptr<DCEL_Half_Edge>& new_top_edge = half_edges.emplace_back(std::make_unique<DCEL_Half_Edge>(
         middle_top_vertex,     //Origin
         nullptr,               //Face
         top_edge->twin,        //Twin
         top_edge->next,        //Next
-        nullptr); //Prev is on the cycle of the bottom edge, top endpoint
+        nullptr)); //Prev is on the cycle of the bottom edge, top endpoint
 
     top_edge->next->prev = new_top_edge.get();
 
-    const std::unique_ptr<DCEL_Half_Edge>& new_bottom_twin_edge = half_edges.emplace_back(
+    const std::unique_ptr<DCEL_Half_Edge>& new_bottom_twin_edge = half_edges.emplace_back(std::make_unique<DCEL_Half_Edge>(
         middle_bottom_vertex,    //Origin
         nullptr,                 //Face
         bottom_edge,             //Twin
         bottom_edge->twin->next, //Next
-        nullptr); //Prev is on the cycle of the top edge, bottom endpoint
+        nullptr)); //Prev is on the cycle of the top edge, bottom endpoint
 
     bottom_edge->twin->next->prev = new_bottom_twin_edge.get();
 
@@ -772,6 +825,47 @@ void DCEL::overlay_collinear_overlap_partial_or_embedded(DCEL::DCEL_Half_Edge* o
 
     //Add the new twin of the bottom half-edge to the bottom vertex of the top edge
     add_edge_to_vertex(*new_bottom_twin_edge.get(), *new_bottom_twin_edge->origin);
+}
+
+void DCEL::overlay_collinear_overlap_same_endpoint(DCEL_Half_Edge* original_edge, DCEL_Half_Edge* overlay_edge)
+{
+    Float original_edge_sqrd_length = (original_edge->target()->position - original_edge->origin->position).squared_length();
+    Float overlay_edge_sqrd_length = (overlay_edge->target()->position - overlay_edge->origin->position).squared_length();
+
+    //First check if the same endpoint is at the top or bottom
+    //(We assume the given half edges are pointing up, or to the left is horizontal)
+    if (original_edge->target() == overlay_edge->target())
+    {
+        //Top vertices overlap
+        if (original_edge_sqrd_length > overlay_edge_sqrd_length)
+        {
+            //Original is longer, remove originals twin from top vertex and add to middle vertex (shortens original_edge)
+            original_edge->twin->remove_from_cycle();
+            add_edge_to_vertex(*original_edge->twin, *overlay_edge->origin);
+        }
+        else
+        {
+            //Overlay is longer, remove overlays twin from top vertex and add to middle vertex (shortens overlay_edge)
+            overlay_edge->twin->remove_from_cycle();
+            add_edge_to_vertex(*overlay_edge->twin, *original_edge->origin);
+        }
+    }
+    else
+    {
+        //Bottom vertices overlap
+        if (original_edge_sqrd_length > overlay_edge_sqrd_length)
+        {
+            //Original is longer, remove original from bottom vertex and add to middle vertex (shortens original_edge)
+            original_edge->remove_from_cycle();
+            add_edge_to_vertex(*original_edge, *overlay_edge->origin);
+        }
+        else
+        {
+            //Overlay is longer, remove overlay from bottom vertex and add to middle vertex (shortens overlay_edge)
+            overlay_edge->remove_from_cycle();
+            add_edge_to_vertex(*overlay_edge, *original_edge->origin);
+        }
+    }
 }
 
 std::vector<Vec2> DCEL::DCEL_Face::get_vertices() const
